@@ -3,38 +3,231 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css">
     <title>Game Design</title>
 </head>
 <body>
-    <p>
-        INTRODUCTION
-    </p>
-    <p>
-        TECHNOLOGY
-    </p>
-    <p>
-        BACK STORY
-    </p>
-    <p>
-        OBJECTIVE
-    </p>
-    <p>
-        GAMEPLAY
-    </p>
-    <p>
-        CONTROLS
-    </p>
-    <p>
-        GRAPHICAL USER INTERFACE
-    </p>
-    <p>
-        ARTWORK
-    </p>
-    <p>
-        SOUND EFFECTS
-    </p>
-    <p>
-        MUSIC
-    </p>
+    <div>
+        <h1>
+            DoodleFinn
+            <br>
+            Game Design Document
+        </h1>
+        <h3 style="text-align:center;">
+            By: Kevin Cai, Eric Chiu, Anna Noonan
+        </h3>
+    </div>
+    <div>
+        <h3>
+            INTRODUCTION
+        </h3>
+        <p>
+            This document describes the 2D-platformer called “DoodleFinn.” 
+            The game implements sprite-based animation, physics, collision 
+            detection, AI, and other 2D game programming techniques. 
+            The game also uses A* to perform pathfinding.
+        </p>
+    </div>
+    <div>
+        <h3>
+            TECHNOLOGY
+        </h3>
+        <p>
+            DoodleFinn will be developed on the Wolfie2D game engine 
+            (https://github.com/TheMcKillaGorilla/Wolfie2D) by Richard McKenna. 
+            The UI will be designed on Figma. And the web app will be deployed on Firebase. 
+            The sprites and logo will be drawn with the Procreate app.
+        </p>
+    </div>
+    <div>
+        <h3>
+            BACK STORY
+        </h3>
+        <p>
+            DoodleFinn takes pride in keeping this notebook clean. 
+            But one day, they wake up to find the pages a mess! 
+            Pages are torn and messy Scribbles are destroying things left and right. 
+            With a pencil in hand, it’s their job to protect this notebook from being destroyed.
+        </p>
+    </div>
+    <div>
+        <h3>
+            OBJECTIVE
+        </h3>
+        <p>
+            In order to clean the notebook, DoodleFinn needs to collect all the scraps of paper 
+            to reform the page and defeat all the Scribbles. Luckily, DoodleFinn has their trusty 
+            pencil by their side to make it easier to jump around the page by forming paths and 
+            erasing any Scribbles in their way.
+        </p>
+    </div>
+    <div>
+        <h3>
+            GAME PLAY
+        </h3>
+        <p>
+            DoodleFinn can jump on top of any words that are on the paper, 
+            but sometimes the text is too far apart to make the jump. 
+            Good thing DoodleFinn has their pencil with them. 
+            They can draw a path between platforms. 
+            They can also use their pencil to erase any Scribbles in front of them 
+            while collecting the scraps of paper that have been torn from the page. 
+            Once the page is cleaned up, it’s onto the next page!
+        </p>
+    </div>
+    <div>
+        <h3>
+            CONTROLS
+        </h3>
+        <ul>
+            <li>WASD to move player in top-down levels</li>
+            <li>AD to move left/right, W to jump in platformer levels.</li>
+            <li>E to interact with objects.</li>
+            <li>Right click to draw.</li>
+            <li>Left click to erase.</li>
+            <li>Space to attack.</li>
+        </ul>
+    </div>
+    <div>
+        <h3>
+            GRAPHICAL USER INTERFACE
+        </h3>
+        <div>
+            <h4>
+                Logo
+            </h4>
+            <div>
+                <img src="logo.png" alt="logo" style="height:50%;">
+            </div>
+        </div>
+        <div>
+            <h4>
+                Splash Screen
+            </h4>
+            <div>
+                <img src="splash_screen.png" alt="splash screen" style="height:50%;">
+            </div>
+        </div>
+        <div>
+            <h4>
+                Main Menu
+            </h4>
+            <div>
+                <img src="main_menu.png" alt="main menu" style="height:50%;">
+            </div>
+        </div>
+        <div>
+            <h4>
+                Level Select
+            </h4>
+            <div>
+                <img src="scene_select.png" alt="scene select" style="height:50%;">
+            </div>
+        </div>
+        <div>
+            <h4>
+                Help Screen
+            </h4>
+            <div>
+                <img src="help.png" alt="help" style="height:50%;">
+            </div>
+        </div>
+        <div>
+            <h4>
+                Controls
+            </h4>
+            <div>
+                <img src="controls.png" alt="controls" style="height:50%;">
+            </div>
+        </div>
+        <div>
+            <h4>
+                In-Game Screens
+            </h4>
+            <div>
+                <img src="in_game.png" alt="scene select" style="height:50%;">
+            </div>
+        </div>
+        <div>
+            <h4>
+                Paused
+            </h4>
+            <div>
+                <img src="paused.png" alt="scene select" style="height:50%;">
+            </div>
+        </div>
+    </div>
+    <div>
+        <h3>
+            ARTWORK
+        </h3>
+        <ol>
+            <li>
+                DoodleFinn
+                <ol>
+                    <li>Idle</li>
+                    <li>Walking Right</li>
+                    <li>Walking Left</li>
+                    <li>Jumping Right</li>
+                    <li>Jumping Left</li>
+                    <li>Jumping Up</li>
+                    <li>Falling Left</li>
+                    <li>Falling Right</li>
+                    <li>Attack Left</li>
+                    <li>Attack Right</li>
+                    <li>Taking Damage</li>
+                    <li>Dying</li>
+                </ol>
+            </li>
+            <li>
+                Paper Tiles
+                <ol>
+                    <li>Blue Lines</li>
+                    <li>Red and Blue Lines</li>
+                    <li>Text (at least 3 different versions)</li>
+                    <li>Scratch work (3 different versions)</li>
+                    <li>Scrap Paper (3 different versions)</li>
+                    <li>Pink Scrap Paper</li>
+                    <li>Drawn Tiles (animation needed for when the player draws a tile)</li>
+                </ol>
+            </li>
+            <li>
+                Scribbles
+                <ol>
+                    <li>Walking Left</li>
+                    <li>Walking Right</li>
+                    <li>Idle</li>
+                    <li>Attack Left</li>
+                    <li>Attack Right</li>
+                    <li>Taking Damage</li>
+                    <li>Dying</li>
+                </ol>
+            </li>
+        </ol>
+    </div>
+    <div>
+        <h3>
+            SOUND EFFECTS
+        </h3>
+        <ol>
+            <li>Jumping</li>
+            <li>Attacking</li>
+            <li>Landing on a platform</li>
+            <li>Taking damage (player and enemy)</li>
+            <li>Drawing a tile</li>
+            <li>Erasing a tile</li>
+            <li>End of level</li>
+        </ol>
+    </div>
+    <div>
+        <h3>
+            MUSIC
+        </h3>
+        <ol>
+            <li>Main Menu music</li>
+            <li>Level music for all levels</li>
+            <li>End credits music</li>
+        </ol>
+    </div>
 </body>
 </html>
