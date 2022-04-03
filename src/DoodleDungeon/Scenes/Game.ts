@@ -95,7 +95,7 @@ export default class GameLevel extends Scene {
 
     updateScene(deltaT: number) {
         if (Input.isMousePressed()) {
-            this.dynamicMap.badAddTile(Input.getMousePosition());
+            this.dynamicMap.badAddTile(Input.getGlobalMousePosition());
         }
 
         // Handle events and update the UI if needed
@@ -262,10 +262,8 @@ export default class GameLevel extends Scene {
 
     protected initLevelGeometry(level_id:string): void {
         let tilemapLayers = this.add.tilemap(level_id, GameLevel.DEFAULT_LEVEL_SCALING);
-        // let tmp = <DynamicTilemap>tilemapLayers[1].getItems()[0]
-        // tmp.scale=GameLevel.DEFAULT_LEVEL_SCALING;
+        //We want just the walls!
         this.dynamicMap = <DynamicTilemap>tilemapLayers[1].getItems()[0];
-        // this.dynamicMap.scale=GameLevel.DEFAULT_LEVEL_SCALING.clone().scaleTo(2);
         this.dynamicMap.badNavMesh();
         
         // Add a layer to display the graph

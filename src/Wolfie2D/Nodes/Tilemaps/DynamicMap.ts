@@ -119,10 +119,13 @@ export default class DynamicTilemap extends OrthogonalTilemap {
 
     badAddTile(location: Vec2){
         let colRow = this.getColRowAt(location);
+        this.setTileAtRowCol(colRow,14);
         //add the tile, update navmesh accordingly.
+        
     }
     badRemoveTile(location: Vec2){
         let colRow = this.getColRowAt(location);
+        this.setTileAtRowCol(colRow,0);
         //remove the tile, update navmesh accordingly.
     }
     //better implmentation not done yet.
