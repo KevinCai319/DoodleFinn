@@ -3,6 +3,6 @@ node_modules
 
 # Exclude the compiled project
 dist/bundle.js
-dist/index.js
+dist/index.html
 dist/*/bundle.js
-dist/*/index.js
+dist/*/index.html
