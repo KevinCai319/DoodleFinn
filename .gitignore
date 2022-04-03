@@ -107,6 +107,9 @@ node_modules
 
 # Exclude the compiled project
 dist/bundle.js
+dist/index.js
+dist/*/bundle.js
+dist/*/index.js
 
 ### IF YOU ARE MAKING A PROJECT, YOU MAY WANT TO UNCOMMENT THIS LINE ###
 # !dist/assets/
