@@ -117,16 +117,19 @@ export default class DynamicTilemap extends OrthogonalTilemap {
         return this.canAABBgo(entity, entity.center.vecTo(point));
     }
 
+    // Inefficient implementation of adding a tile.
     badAddTile(location: Vec2){
         let colRow = this.getColRowAt(location);
         this.setTileAtRowCol(colRow,14);
         //add the tile, update navmesh accordingly.
+        this.badNavMesh()
         
     }
     badRemoveTile(location: Vec2){
         let colRow = this.getColRowAt(location);
         this.setTileAtRowCol(colRow,0);
         //remove the tile, update navmesh accordingly.
+        this.badNavMesh()
     }
     //better implmentation not done yet.
     initializeNavMesh(): void {

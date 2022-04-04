@@ -33,7 +33,7 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
 
 
     /** A reference to the player object */
-    player1: GameNode;
+    player: GameNode;
 
 
     // The current known position of the player
@@ -60,7 +60,7 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
 
         this.health = options.health;
 
-        this.player1 = options.player1;
+        this.player = options.player1;
 
         this.inRange = options.inRange;
 
@@ -79,13 +79,25 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
 
         this.getPlayerPosition();
 
+        this.owner.debugRender = ()=>{
+            if(this.path != null){
+                this.path.renderPath(this.owner)
+            }
+        }
+
     }
 
     activate(options: Record<string, any>): void { }
+
     updatePlayerPath(){
+        // Run A* to get general path.
         this.path = this.owner.getScene().getNavigationManager().getApproximatePath(Game_Names.NAVMESH, this.owner.position, this.lastPlayerPos);
-        this.path = NavigationPath.AABBOptimization(this.path, (this.owner.getScene() as GameLevel).dynamicMap, this.owner.boundary);
+        if(this.path != null){
+            // Remove Excess nodes in path for smoother paths.
+            this.path = NavigationPath.AABBOptimization(this.path, (this.owner.getScene() as GameLevel).dynamicMap, this.owner.boundary);
+        }
     }
+
     damage(damage: number): void {
         this.health -= damage;
 
@@ -94,13 +106,12 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
             this.owner.setAIActive(false, {});
             this.owner.isCollidable = false;
             this.owner.visible = false;
-
         }
     }
 
     getPlayerPosition(): Vec2 {
         //always follow player.
-        return this.player1.position;
+        return this.player.position;
     }
 
     update(deltaT: number){

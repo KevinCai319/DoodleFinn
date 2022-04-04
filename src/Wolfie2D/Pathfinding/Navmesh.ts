@@ -53,6 +53,7 @@ export default class Navmesh implements Navigable {
 		pathStack.push(this.graph.positions[end]);
 		// Add all parents along the path
 		let i = end;
+		if(parent == null)return null
 		while(parent[i] !== -1){
 			pathStack.push(this.graph.positions[parent[i]]);
 			i = parent[i];

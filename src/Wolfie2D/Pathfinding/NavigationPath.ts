@@ -1,15 +1,16 @@
 import AABB from "../DataTypes/Shapes/AABB";
 import Stack from "../DataTypes/Stack";
 import Vec2 from "../DataTypes/Vec2";
+import Debug from "../Debug/Debug";
 import GameNode from "../Nodes/GameNode";
 import { GraphicType } from "../Nodes/Graphics/GraphicTypes";
 import DynamicTilemap from "../Nodes/Tilemaps/DynamicMap";
 import Scene from "../Scene/Scene";
-
+import Color from "../Utils/Color";
 /**
  * A path that AIs can follow. Uses finishMove() in Physical to determine progress on the route
  */
-export default class NavigationPath {
+export default class NavigationPath{
 	/** The navigation path, stored as a stack of next positions */
 	protected path: Stack<Vec2>;
 	/** The current direction of movement */
@@ -17,7 +18,7 @@ export default class NavigationPath {
 	protected lastPos: Vec2;
 	/** The distance a node must be to a point to consider it as having arrived */
 	protected distanceThreshold: number;
-	protected distanceTraveled: number;
+	protected distanceTraveled: number = 0.0;
 	protected startSize: number;
 	/**
 	 * Constructs a new NavigationPath
@@ -26,9 +27,9 @@ export default class NavigationPath {
 	constructor(path: Stack<Vec2>){
 		this.path = path;
 		this.currentMoveDirection = Vec2.ZERO;
-		this.distanceThreshold = 8;
+		this.distanceThreshold = 2;
 		this.startSize = path.size();
-		this.distanceTraveled=0;
+		this.distanceTraveled = 0;
 	}
 
 	/**
@@ -38,7 +39,9 @@ export default class NavigationPath {
 	isDone(): boolean {
 		return this.path.isEmpty();
 	}
+
 	getDistanceTraveled(): number{
+		console.log(this.distanceTraveled);
 		return this.distanceTraveled;
 	}
 	/**
@@ -70,7 +73,7 @@ export default class NavigationPath {
 			}else{
 				end = item.clone();
 			}
-			//dumby is right before end.
+			//dummy is right before end.
 		    if(start !== null && end !== null && dummy !== null){
 				//On this line, check if end is visible to the start box.
 				if(!map.canAABBgoToPoint(dummyBox,end)){
@@ -82,7 +85,9 @@ export default class NavigationPath {
 				}
 		    }
 		});
-		return new NavigationPath(stack);
+		let result = new NavigationPath(stack)
+		
+		return result;
 	}
 
 	/**
@@ -91,8 +96,10 @@ export default class NavigationPath {
 	 */
 	handlePathProgress(node: GameNode): void {
 		if(this.lastPos != null){
+			console.log("correct")
 			this.distanceTraveled+= node.position.distanceTo(this.lastPos);
 		}
+		console.log(this.distanceTraveled)
 		this.lastPos = node.position;
 		if(node.position.distanceSqTo(this.path.peek()) < this.distanceThreshold*this.distanceThreshold){
 			// We've reached our node, move on to the next destination
@@ -116,6 +123,21 @@ export default class NavigationPath {
 		return this.path.toString()
 	}
 
+	// To be called by some AI debugRender()
+    renderPath(offset:GameNode){
+		let start:Vec2 = null;
+		let end:Vec2 = null;
+		this.path.forEach((item: Vec2, index: number) => {
+			if(index < this.path.size()){
+				if(start !== null)end = start.clone();
+				start = item.clone();
+			}
+			if(start !== null && end !== null){
+				Debug.drawRay((offset.inRelativeCoordinates(start)),(offset.inRelativeCoordinates(end)),Color.GREEN)
+			}
+		});
+    }
+	
 	drawPath(Scene: Scene){
 		let test = this.path;
 		let t_destroy = Scene.getLayer("graph_debug").getItems();

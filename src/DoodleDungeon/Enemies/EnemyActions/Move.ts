@@ -12,7 +12,6 @@ export default class Move extends GoapAction {
 
     private path: NavigationPath;
     protected emitter: Emitter;
-    private usingPath :boolean = false;
     constructor(cost: number, preconditions: Array<string>, effects: Array<string>, options?: Record<string, any>) {
         super();
         this.cost = cost;
@@ -33,25 +32,22 @@ export default class Move extends GoapAction {
             if (distance <= this.inRange){
                 return this.effects;
             }
-            //Check if the player is directly visible, and can run straight to the player.
-            //distance to player.
-            if((enemy.owner.getScene() as GameLevel).dynamicMap.canAABBgo(enemy.owner.boundary,enemy.owner.boundary.center.vecTo(enemy.playerPos))){
-                //if it is, then move directly to the player.
-                this.usingPath = false;
+            //Check if the player is directly visible.
+            if((enemy.owner.getScene() as GameLevel).dynamicMap.canAABBgoToPoint(enemy.owner.boundary,enemy.playerPos)){
+                //If it is, then move directly to the player.
                 enemy.owner.pathfinding = false;
                 let dir = enemy.owner.position.dirTo(enemy.playerPos);
                 enemy.owner.rotation = Vec2.UP.angleToCCW(dir);
                 enemy.owner.moving = true;
                 enemy.owner._velocity = dir.scale(enemy.speed * deltaT);
             }else{
-                //Otherwise move on path. Update path if the distance traveled is greater than a certain amount.
-                if(!this.usingPath || enemy.path == null|| enemy.path.getDistanceTraveled() > 8 || enemy.path.getStackSize() == 0){
-                    this.usingPath = true;
-                    enemy.lastPlayerPos = enemy.playerPos;		
-                    enemy.updatePlayerPath();
+                //Update 
+                enemy.lastPlayerPos = enemy.playerPos;	
+                enemy.updatePlayerPath();
+                if(enemy.path != null){
+                    this.path = enemy.path;
+                    enemy.owner.moveOnPath(enemy.speed * deltaT, this.path);
                 }
-                this.path = enemy.path;
-                enemy.owner.moveOnPath(enemy.speed * deltaT, this.path);
                 enemy.owner.rotation = Vec2.UP.angleToCCW(this.path.getMoveDirection(enemy.owner));
             }
             return null;

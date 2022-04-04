@@ -26,7 +26,6 @@ import GoapAction from "../../Wolfie2D/DataTypes/Interfaces/GoapAction";
 import GoapActionPlanner from "../../Wolfie2D/AI/GoapActionPlanner";
 import Move from "../Enemies/EnemyActions/Move";
 import AttackAction from "../Enemies/EnemyActions/AttackAction";
-import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 
 
@@ -46,6 +45,7 @@ export default class GameLevel extends Scene {
     private enemies: Array<AnimatedSprite>;
 
     dynamicMap: DynamicMap;
+    level: string
 
     // Stuff to end the level and go to the next level
     protected levelEndArea: Rect;
@@ -95,7 +95,7 @@ export default class GameLevel extends Scene {
 
     updateScene(deltaT: number) {
         if (Input.isMousePressed()) {
-            this.dynamicMap.badAddTile(Input.getGlobalMousePosition());
+            this.updateLevelGeometry(Input.getGlobalMousePosition(),0)
         }
 
         // Handle events and update the UI if needed
@@ -259,19 +259,21 @@ export default class GameLevel extends Scene {
 
         this.viewport.follow(this.player);
     }
-
+    
     protected initLevelGeometry(level_id:string): void {
+        this.level = level_id
         let tilemapLayers = this.add.tilemap(level_id, GameLevel.DEFAULT_LEVEL_SCALING);
         //We want just the walls!
         this.dynamicMap = <DynamicTilemap>tilemapLayers[1].getItems()[0];
         this.dynamicMap.badNavMesh();
         
+        // NOTE: This code isn't useful if tiles constantly change.
         // Add a layer to display the graph
         let gLayer = this.addLayer("graph");
         this.addLayer("graph_debug");
         gLayer.setHidden(true);
 
-        // Create the graphwd
+        // Create the graph to be overlayed.
         let graph = this.dynamicMap.graph;
 
         // Add all nodes to our graph
@@ -289,6 +291,20 @@ export default class GameLevel extends Scene {
         }
         this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
     }
+
+    // Replace the level geometry.
+    protected updateLevelGeometry(position:Vec2,mode:number = 0):void {
+        if(mode == 0){
+            let colrow_toAdd = this.dynamicMap.getColRowAt(this.player.position)
+            let colrow_player = this.dynamicMap.getColRowAt(position)
+            if((colrow_player.distanceTo(colrow_toAdd)>=1) && !this.dynamicMap.isTileCollidable(colrow_player.x,colrow_player.y)){
+                this.dynamicMap.badAddTile(position);
+            }
+        }
+        this.navManager = new NavigationManager()
+        this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
+    }
+
     initializeEnemies() {
         // Get the enemy data
         const enemyData = this.load.getObject("enemyData");
