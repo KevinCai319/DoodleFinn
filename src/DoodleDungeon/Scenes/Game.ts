@@ -18,7 +18,7 @@ import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import { AI_Statuses, Game_Events } from "../Events";
 
-import PlayerController from "../Player/PlayerController";
+import PlayerController, { PlayerType } from "../Player/PlayerController";
 import DynamicMap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import MainMenu from "./Title";
 import EnemyAI from "../Enemies/EnemyAI";
@@ -256,7 +256,7 @@ export default class GameLevel extends Scene {
         this.player.position.copy(this.playerSpawn);
         this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(14, 14)));
         this.player.colliderOffset.set(0, 2);
-        this.player.addAI(PlayerController, { playerType: "platformer", tilemap: "Main" });
+        this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
 
         this.player.setGroup("player");
 

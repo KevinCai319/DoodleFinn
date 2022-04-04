@@ -1,6 +1,6 @@
 import Input from "../../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
-import { PlayerStates } from "../PlayerController";
+import PlayerController, { PlayerStates, PlayerType } from "../PlayerController";
 import OnGround from "./OnGround";
 
 export default class Run extends OnGround {
@@ -8,7 +8,6 @@ export default class Run extends OnGround {
 
 	onEnter(options: Record<string, any>): void {
 		this.parent.speed = this.parent.MAX_SPEED;
-		this.owner.animation.playIfNotAlready("RUN", true);
 	}
 
 
@@ -23,7 +22,13 @@ export default class Run extends OnGround {
 				this.finished(PlayerStates.WALK);
 			}
 		}
-		this.parent.velocity = dir.scale(this.parent.speed);
+		if(this.parent.playerType == PlayerType.TOPDOWN){
+			this.parent.velocity = dir.scale(this.parent.speed);
+		}else if(this.parent.playerType == PlayerType.PLATFORMER){
+			this.parent.velocity.x = dir.x * this.parent.speed
+		}else{
+
+		}
 
 
 		this.owner.move(this.parent.velocity.scaled(deltaT));
