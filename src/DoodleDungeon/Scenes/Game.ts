@@ -94,8 +94,11 @@ export default class GameLevel extends Scene {
 
 
     updateScene(deltaT: number) {
-        if (Input.isMousePressed()) {
+        if (Input.isMouseJustPressed(0)) {
             this.updateLevelGeometry(Input.getGlobalMousePosition(),0)
+        }
+        if (Input.isMouseJustPressed(2)) {
+            this.updateLevelGeometry(Input.getGlobalMousePosition(),2)
         }
 
         // Handle events and update the UI if needed
@@ -300,6 +303,8 @@ export default class GameLevel extends Scene {
             if((colrow_player.distanceTo(colrow_toAdd)>=1) && !this.dynamicMap.isTileCollidable(colrow_player.x,colrow_player.y)){
                 this.dynamicMap.badAddTile(position);
             }
+        }else{
+            this.dynamicMap.badRemoveTile(position);
         }
         this.navManager = new NavigationManager()
         this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
@@ -316,6 +321,7 @@ export default class GameLevel extends Scene {
             new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
             new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 30 })
         ];
+
 
         // Initialize the enemies
         for (let i = 0; i < enemyData.numEnemies; i++) {
