@@ -103,7 +103,7 @@
               }],
        "nextlayerid":5,
        "nextobjectid":1,
-       "orientation":"dynamic",
+       "orientation":"orthogonal",
        "renderorder":"right-down",
        "tiledversion":"1.8.2",
        "tileheight":512,

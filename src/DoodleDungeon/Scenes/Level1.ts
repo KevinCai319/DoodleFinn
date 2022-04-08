@@ -13,8 +13,8 @@ export default class Level1 extends GameLevel {
      */
     loadScene(): void {
         // Load resources
-        this.load.tilemap("level1", "game_assets/tilemaps/level1.json");
-        //this.load.tilemap("level1", "game_assets/tilemaps/DF-Level1.json");
+        // this.load.tilemap("level1", "game_assets/tilemaps/level1.json");
+        this.load.tilemap("level1", "game_assets/tilemaps/DF-Level1.json");
         this.load.spritesheet("player", "game_assets/spritesheets/spike.json");
         this.load.spritesheet("red", "game_assets/spritesheets/redBalloon.json");
         this.load.spritesheet("blue", "game_assets/spritesheets/blueBalloon.json");

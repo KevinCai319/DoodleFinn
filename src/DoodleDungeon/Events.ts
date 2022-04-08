@@ -1,5 +1,6 @@
 export enum Game_Events {
     PLAYER_ENTERED_LEVEL_END = "PlayerEnteredLevelEnd",
+    PLAYER_OUT_OF_BOUNDS = "PlayerOutOfBounds",
     LEVEL_START = "LevelStart",
     LEVEL_END = "LevelEnd",
     PLAYER_KILLED = "PlayerKilled",

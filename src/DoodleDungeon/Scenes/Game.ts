@@ -27,11 +27,12 @@ import GoapActionPlanner from "../../Wolfie2D/AI/GoapActionPlanner";
 import Move from "../Enemies/EnemyActions/Move";
 import AttackAction from "../Enemies/EnemyActions/AttackAction";
 import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
+import Game from "../../Wolfie2D/Loop/Game";
 
 
 export default class GameLevel extends Scene {
     //Level defaults.
-    static DEFAULT_LEVEL_SCALING: Vec2 = new Vec2(2,2);
+    static DEFAULT_LEVEL_SCALING: Vec2 = new Vec2(32/512,32/512);
     
     protected playerSpawn: Vec2;
     protected player: AnimatedSprite;
@@ -111,7 +112,24 @@ export default class GameLevel extends Scene {
 
                     }
                     break;
-
+                case Game_Events.PLAYER_OUT_OF_BOUNDS:
+                    {
+                        if(this.respawnTimer.isStopped()) {
+                            this.incPlayerLife(-1)
+                            this.respawnTimer.start();
+                        }
+                        // console.log("out of bounds");
+                        // if(this.respawnTimer.isPaused()) {
+                        //     this.incPlayerLife(-1)
+    
+                        //     this.respawnPlayer()
+                        //     // console.log("Player out of bounds")
+       
+                        //     this.respawnTimer.start();
+                        // }
+                        // this.respawnTimer.start();
+                        
+                    }
                 case Game_Events.LEVEL_START:
                     {
                         // Re-enable controls
@@ -140,6 +158,7 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.PLAYER_KILLED:
                     {
+                        console.log("Player killed")
                         this.respawnPlayer();
                     }
 
@@ -171,6 +190,7 @@ export default class GameLevel extends Scene {
     protected subscribeToEvents() {
         this.receiver.subscribe([
             Game_Events.PLAYER_ENTERED_LEVEL_END,
+            Game_Events.PLAYER_OUT_OF_BOUNDS,
             Game_Events.LEVEL_START,
             Game_Events.LEVEL_END,
             Game_Events.PLAYER_KILLED
@@ -248,14 +268,16 @@ export default class GameLevel extends Scene {
     protected initPlayer(): void {
         // Add the player
         this.player = this.add.animatedSprite("player", "primary");
-        this.player.scale.set(2, 2);
+        // Scale player to the appropriate size.
+        let playerScale = 1
+        this.player.scale.set(playerScale, playerScale);
         if (!this.playerSpawn) {
             console.warn("Player spawn was never set - setting spawn to (0, 0)");
             this.playerSpawn = Vec2.ZERO;
         }
         this.player.position.copy(this.playerSpawn);
-        this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(14, 14)));
-        this.player.colliderOffset.set(0, 2);
+        this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(7*playerScale, 7*playerScale)));
+        // this.player.colliderOffset.set(0, 2);
         this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
 
         this.player.setGroup("player");
@@ -266,8 +288,8 @@ export default class GameLevel extends Scene {
     protected initLevelGeometry(level_id:string): void {
         this.level = level_id
         let tilemapLayers = this.add.tilemap(level_id, GameLevel.DEFAULT_LEVEL_SCALING);
-        //We want just the walls!
-        this.dynamicMap = <DynamicTilemap>tilemapLayers[1].getItems()[0];
+        //Get only solid layer.
+        this.dynamicMap = <DynamicTilemap>tilemapLayers[2].getItems()[0];
         this.dynamicMap.badNavMesh();
         
         // NOTE: This code isn't useful if tiles constantly change.
@@ -392,12 +414,15 @@ export default class GameLevel extends Scene {
     }
 
     /**
-     * Returns the player to spawn
+     * Returns the player to start of level.
      */
     protected respawnPlayer(): void {
-        GameLevel.livesCount = 3;
         this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: "level_music" });
-        this.sceneManager.changeToScene(MainMenu, {});
+        this.player.position.copy(this.playerSpawn);
         Input.enableInput();
+    }
+
+    protected goToMenu(): void{
+
     }
 }

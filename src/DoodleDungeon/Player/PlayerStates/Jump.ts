@@ -15,15 +15,19 @@ export default class Jump extends InAir {
 
 	update(deltaT: number): void {
 		super.update(deltaT);
-
+		console.log("jumping");
 		if(this.owner.onCeiling){
-			this.parent.velocity.y = 0;
+
+			console.log(this.owner.onCeiling);
+			console.log("on ceiling");
+			this.parent.velocity.y *=-1;
+			this.finished(PlayerStates.FALL);
 		}
 
 		// If we're falling, go to the fall state
-		if(this.parent.velocity.y >= 0){
-			this.finished(PlayerStates.FALL);
-		}
+		// if(this.parent.velocity.y >= 0){
+		// 	this.finished(PlayerStates.FALL);
+		// }
 	}
 
 	onExit(): Record<string, any> {

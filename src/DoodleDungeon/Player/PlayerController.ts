@@ -4,7 +4,9 @@ import Debug from "../../Wolfie2D/Debug/Debug";
 import GameNode, { TweenableProperties } from "../../Wolfie2D/Nodes/GameNode";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
+import { Game_Events } from "../Events";
 import Fall from "./PlayerStates/Fall";
 import Idle from "./PlayerStates/Idle";
 import InAir from "./PlayerStates/InAir";
@@ -23,14 +25,14 @@ export enum PlayerStates {
 	RUN = "run",
 	JUMP = "jump",
     FALL = "fall",
-	PREVIOUS = "previous"
+	PREVIOUS = "previous",
+    SPAWN = "spawn"
 }
 
 export default class PlayerController extends StateMachineAI {
     protected owner: GameNode;
-
     playerType: PlayerType = PlayerType.PLATFORMER
-    velocity: Vec2 = Vec2.ZERO;
+    velocity: Vec2 = Vec2.ZERO
 	speed: number = 200;
 	MIN_SPEED: number = 200;
     MAX_SPEED: number = 300;
@@ -39,7 +41,6 @@ export default class PlayerController extends StateMachineAI {
     initializeAI(owner: GameNode, options: Record<string, any>){
         this.owner = owner;
         this.playerType = options.playerType
-
         this.initializeStates();
         (<AnimatedSprite>this.owner).animation.playIfNotAlready("IDLE", true);
     }
@@ -52,6 +53,8 @@ export default class PlayerController extends StateMachineAI {
 		this.addState(PlayerStates.WALK, walk);
 		let run = new Run(this, this.owner);
 		this.addState(PlayerStates.RUN, run);
+        let spawn = new Run(this, this.owner);
+		this.addState(PlayerStates.SPAWN, spawn);
         if(this.playerType == PlayerType.PLATFORMER){
             let jump = new Jump(this, this.owner);
             this.addState(PlayerStates.JUMP, jump);
@@ -73,6 +76,7 @@ export default class PlayerController extends StateMachineAI {
     }
 
     update(deltaT: number): void {
+        
         if(this.owner.onGround){
             // let rc =  this.tilemap.getColRowAt(this.owner.position);
             // rc.y+=1;
@@ -84,4 +88,8 @@ export default class PlayerController extends StateMachineAI {
         }
 		super.update(deltaT);
 	}
+
+    respawn(): void {
+        this.owner._velocity.y = 0;
+    }
 }

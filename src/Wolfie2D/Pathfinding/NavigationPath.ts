@@ -41,7 +41,6 @@ export default class NavigationPath{
 	}
 
 	getDistanceTraveled(): number{
-		console.log(this.distanceTraveled);
 		return this.distanceTraveled;
 	}
 	/**
@@ -96,10 +95,8 @@ export default class NavigationPath{
 	 */
 	handlePathProgress(node: GameNode): void {
 		if(this.lastPos != null){
-			console.log("correct")
 			this.distanceTraveled+= node.position.distanceTo(this.lastPos);
 		}
-		console.log(this.distanceTraveled)
 		this.lastPos = node.position;
 		if(node.position.distanceSqTo(this.path.peek()) < this.distanceThreshold*this.distanceThreshold){
 			// We've reached our node, move on to the next destination

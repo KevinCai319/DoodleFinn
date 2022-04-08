@@ -67,7 +67,6 @@ export default abstract class Tilemap extends CanvasNode {
     */
     getTileSizeWithZoom(): Vec2 {
         let zoom = this.scene.getViewScale();
-
         return this.getTileSize().scale(zoom);
     }
 

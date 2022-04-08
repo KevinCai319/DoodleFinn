@@ -83,7 +83,6 @@ export default class TilemapFactory {
             let sceneLayer;
             let isParallaxLayer = false;
             let depth = 0;
-            
             if(layer.properties){
                 for(let prop of layer.properties){
                     if(prop.name === "Parallax"){
