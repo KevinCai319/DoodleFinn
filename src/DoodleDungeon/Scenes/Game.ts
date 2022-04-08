@@ -320,9 +320,14 @@ export default class GameLevel extends Scene {
     // Replace the level geometry.
     protected updateLevelGeometry(position:Vec2,mode:number = 0):void {
         if(mode == 0){
-            let colrow_toAdd = this.dynamicMap.getColRowAt(this.player.position)
-            let colrow_player = this.dynamicMap.getColRowAt(position)
-            if((colrow_player.distanceTo(colrow_toAdd)>=1) && !this.dynamicMap.isTileCollidable(colrow_player.x,colrow_player.y)){
+            let colrow_player = this.dynamicMap.getColRowAt(this.player.position)
+            let colrow_toAdd = this.dynamicMap.getColRowAt(position)
+            // Check if the block is not overalapping with the current enemies.
+            for(let i = 0;i<this.enemies.length;i++){
+                let colrow_enemy = this.dynamicMap.getColRowAt(this.enemies[i].position)
+                if(colrow_enemy.distanceTo(colrow_toAdd) < 1 )return
+            }
+            if((colrow_player.distanceTo(colrow_toAdd)>=1) && !this.dynamicMap.isTileCollidable(colrow_toAdd.x,colrow_toAdd.y)){
                 this.dynamicMap.badAddTile(position);
             }
         }else{
@@ -426,3 +431,4 @@ export default class GameLevel extends Scene {
 
     }
 }
+

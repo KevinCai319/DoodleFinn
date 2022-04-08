@@ -80,6 +80,7 @@ export default class GraphUtils {
 		g_cost[start]=0;
 		toConsider.enqueue(start,0);
 		currentNode = start;
+		if(currentNode == null)return null
 		// Go through all the nodes that can be considered.
 		while(!toConsider.isEmpty()){
 			parent_f = toConsider.front_priority();
@@ -91,6 +92,7 @@ export default class GraphUtils {
 					// build up the path.
 					return parents;
 				}
+				if(p == null || p.y == null)return null
 				//raw distance in path so far.
 				let g_value = g_cost[currentNode] + g.getNodePosition(p.y).distanceTo(g.getNodePosition(currentNode));
 				let h_value  = g.getNodePosition(p.y).distanceTo(goalPos);

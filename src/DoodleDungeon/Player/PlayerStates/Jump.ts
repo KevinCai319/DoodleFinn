@@ -15,12 +15,8 @@ export default class Jump extends InAir {
 
 	update(deltaT: number): void {
 		super.update(deltaT);
-		console.log("jumping");
 		if(this.owner.onCeiling){
-
-			console.log(this.owner.onCeiling);
-			console.log("on ceiling");
-			this.parent.velocity.y *=-1;
+			this.parent.velocity.y *=-0.5;
 			this.finished(PlayerStates.FALL);
 		}
 
