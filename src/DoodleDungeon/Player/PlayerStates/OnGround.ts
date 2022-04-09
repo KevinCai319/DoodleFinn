@@ -24,14 +24,14 @@ export default class OnGround extends PlayerState {
 			(<Sprite>this.owner).invertX = MathUtils.sign(direction.x) < 0;
 		}
 		if(this.parent.playerType == PlayerType.PLATFORMER){
-			if(Input.isPressed("jump")){
-				this.finished(PlayerStates.JUMP);
+			if(Input.isJustPressed("jump")){
 				this.parent.velocity.y = -this.jumpBoost;
+				this.finished(PlayerStates.JUMP);
 				// if(this.parent.velocity.x !== 0){
 				// 	this.owner.tweens.play("flip");
 				// }
 			} else if(!this.owner.onGround){
-				this.finished("fall");
+				this.finished(PlayerStates.FALL);
 			}
 		}
 	}

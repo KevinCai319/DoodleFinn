@@ -7,18 +7,18 @@ import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import Timer from "../../../Wolfie2D/Timing/Timer";
 import PlayerController, { PlayerStates, PlayerType } from "../PlayerController";
 import { Game_Events } from "../../Events";
+import GameLevel from "../../Scenes/Game";
 
 export default abstract class PlayerState extends State {
 	owner: GameNode;
 	parent: PlayerController;
 	positionTimer: Timer;
-	invincibleTimer: Timer
 	gravity: number = 1000
+	LEVEL_LOWER_BOUND_CUTOFF: number = 300;
 	constructor(parent: StateMachine, owner: GameNode){
 		super(parent);
 		this.owner = owner;
 		this.positionTimer = new Timer(100)
-		this.invincibleTimer = new Timer(1000)
 		this.positionTimer.start();
 	}
 
@@ -45,7 +45,6 @@ export default abstract class PlayerState extends State {
 		return direction;
 	}
 
-
 	update(deltaT: number): void {
 		if (this.positionTimer.isStopped()){
 			this.emitter.fireEvent(Game_Events.PLAYER_MOVE, {position: this.owner.position.clone()});
@@ -56,8 +55,9 @@ export default abstract class PlayerState extends State {
 				this.parent.velocity.y += this.gravity*deltaT;
 			}
 
-			if(this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-300){
+			if(this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF){
 				this.owner.freeze()
+				this.owner.disablePhysics()
 				this.emitter.fireEvent(Game_Events.PLAYER_OUT_OF_BOUNDS);
 				this.finished(PlayerStates.SPAWN);
 			}

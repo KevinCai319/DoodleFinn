@@ -12,6 +12,7 @@ import Idle from "./PlayerStates/Idle";
 import InAir from "./PlayerStates/InAir";
 import Jump from "./PlayerStates/Jump";
 import Run from "./PlayerStates/Run";
+import Spawn from "./PlayerStates/Spawning";
 import Walk from "./PlayerStates/Walk";
 
 export enum PlayerType {
@@ -34,6 +35,8 @@ export default class PlayerController extends StateMachineAI {
     playerType: PlayerType = PlayerType.PLATFORMER
     velocity: Vec2 = Vec2.ZERO
 	speed: number = 200;
+    invincibleTimer: Timer
+    invicible: boolean = false;
 	MIN_SPEED: number = 200;
     MAX_SPEED: number = 300;
     
@@ -41,10 +44,56 @@ export default class PlayerController extends StateMachineAI {
     initializeAI(owner: GameNode, options: Record<string, any>){
         this.owner = owner;
         this.playerType = options.playerType
-        this.initializeStates();
-        (<AnimatedSprite>this.owner).animation.playIfNotAlready("IDLE", true);
-    }
+        this.invincibleTimer = new Timer(1000);
+        this.invicible = false
+        // I-frame animation(blinking)
+        owner.tweens.add("iframe",
+        {
+            startDelay: 0,
+            duration: 125,
+            onEnd: Game_Events.PLAYER_INVINCIBLE_END,
+            reverseOnComplete: true,
+            loop:true,
+            effects:[
+                {
+                    property: "alpha",
+                    start: 1,
+                    end: 0,
+                    ease: EaseFunctionType.IN_SINE
 
+                }
+            ]
+           
+        });
+        owner.tweens.add("death",
+        {
+            startDelay: 0,
+            duration: 1250,
+            onEnd: Game_Events.PLAYER_KILLED,
+            effects:[
+                {
+                    property: "rotation",
+                    start: 0,
+                    end: 12*Math.PI,
+                    ease: EaseFunctionType.IN_OUT_QUAD
+                },
+                {
+                    property: "alpha",
+                    start: 1,
+                    end: 0,
+                    ease: EaseFunctionType.IN_OUT_QUAD
+                }
+            ]
+        });
+        this.initializeStates();
+        (<AnimatedSprite>this.owner).animation.playIfNotAlready(PlayerStates.IDLE, true);
+    }
+    setInvincible(duration:number=500){
+        this.invincibleTimer.start(duration);
+        this.invicible = true;
+        this.emitter.fireEvent(Game_Events.PLAYER_INVINCIBLE);
+        this.owner.tweens.play("iframe");
+    }
     initializeStates(): void {
         this.speed = 400;
         let idle = new Idle(this, this.owner);
@@ -53,7 +102,7 @@ export default class PlayerController extends StateMachineAI {
 		this.addState(PlayerStates.WALK, walk);
 		let run = new Run(this, this.owner);
 		this.addState(PlayerStates.RUN, run);
-        let spawn = new Run(this, this.owner);
+        let spawn = new Spawn(this, this.owner);
 		this.addState(PlayerStates.SPAWN, spawn);
         if(this.playerType == PlayerType.PLATFORMER){
             let jump = new Jump(this, this.owner);
@@ -61,7 +110,9 @@ export default class PlayerController extends StateMachineAI {
             let fall = new Fall(this, this.owner);
             this.addState(PlayerStates.FALL, fall);
         }
+
         this.initialize(PlayerStates.IDLE);
+        
     }
 
     changeState(stateName: string): void {
@@ -76,7 +127,10 @@ export default class PlayerController extends StateMachineAI {
     }
 
     update(deltaT: number): void {
-        
+        if(this.invicible && this.invincibleTimer.isStopped()){
+            this.invicible = false
+            this.owner.tweens.stop("iframe");
+        }
         if(this.owner.onGround){
             // let rc =  this.tilemap.getColRowAt(this.owner.position);
             // rc.y+=1;
@@ -88,8 +142,4 @@ export default class PlayerController extends StateMachineAI {
         }
 		super.update(deltaT);
 	}
-
-    respawn(): void {
-        this.owner._velocity.y = 0;
-    }
 }

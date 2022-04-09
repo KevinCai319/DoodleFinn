@@ -63,6 +63,16 @@ export default class OrthogonalTilemap extends Tilemap {
     }
 
     /**
+     * Sets the data value of the tile at the specified world position
+     * @param worldCoords The coordinates in world space
+     * @param type The new data value of the tile.
+     */
+    setTileAtWorldPosition(worldCoords: Vec2, type:number): void {
+        let localCoords = this.getColRowAt(worldCoords);
+        this.setTileAtRowCol(localCoords,type);
+    }
+
+    /**
      * Get the tile at the specified row and column
      * @param rowCol The coordinates in tilemap space
      * @returns The data value of the tile

@@ -11,19 +11,16 @@ export default class Jump extends InAir {
 
 	onEnter(options: Record<string, any>): void {
 		this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "jump", loop: false, holdReference: false});
+		console.log("jumping")
 	}
 
 	update(deltaT: number): void {
 		super.update(deltaT);
 		if(this.owner.onCeiling){
+			// head bump!
 			this.parent.velocity.y *=-0.5;
 			this.finished(PlayerStates.FALL);
 		}
-
-		// If we're falling, go to the fall state
-		// if(this.parent.velocity.y >= 0){
-		// 	this.finished(PlayerStates.FALL);
-		// }
 	}
 
 	onExit(): Record<string, any> {

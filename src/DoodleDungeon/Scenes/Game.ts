@@ -4,7 +4,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Debug from "../../Wolfie2D/Debug/Debug";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Input from "../../Wolfie2D/Input/Input";
-import { TweenableProperties } from "../../Wolfie2D/Nodes/GameNode";
+import GameNode, { TweenableProperties } from "../../Wolfie2D/Nodes/GameNode";
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Point from "../../Wolfie2D/Nodes/Graphics/Point";
 import Rect from "../../Wolfie2D/Nodes/Graphics/Rect";
@@ -28,24 +28,34 @@ import Move from "../Enemies/EnemyActions/Move";
 import AttackAction from "../Enemies/EnemyActions/AttackAction";
 import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import Game from "../../Wolfie2D/Loop/Game";
+import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 
 
 export default class GameLevel extends Scene {
     //Level defaults.
-    static DEFAULT_LEVEL_SCALING: Vec2 = new Vec2(32/512,32/512);
+    // Size of tile in actual game.
+    static DEFAULT_LEVEL_TILE_SIZE = new Vec2(32, 32);
+    // Size of a tile in a tilemap.
+    static INPUT_TILE_SIZE = new Vec2(512, 512);
+    static DEFAULT_LEVEL_SCALING: Vec2 = new Vec2(this.DEFAULT_LEVEL_TILE_SIZE.x/this.INPUT_TILE_SIZE.x,this.DEFAULT_LEVEL_TILE_SIZE.y/this.INPUT_TILE_SIZE.y);
     
     protected playerSpawn: Vec2;
     protected player: AnimatedSprite;
-    protected respawnTimer: Timer;
     // Labels for the UI
-    protected static livesCount: number = 3;
+    protected livesCount: number = 3;
     protected livesCountLabel: Label;
-
+    
+    private Collectibles: Array<Rect> = []
+    protected pinkFound: number = 0;
+    protected whiteFound: number = 0;
+    protected numberPink: number = 0;
+    protected numberWhite: number = 0;
     // Enemies
     // A list of enemies
     private enemies: Array<AnimatedSprite>;
 
     dynamicMap: DynamicMap;
+    collectibleMap: OrthogonalTilemap;
     level: string
 
     // Stuff to end the level and go to the next level
@@ -61,7 +71,7 @@ export default class GameLevel extends Scene {
 
 
     startScene(): void {
-
+        this.livesCount = 3
         // Do the game level standard initializations
         this.initLayers();
         this.initViewport();
@@ -70,15 +80,6 @@ export default class GameLevel extends Scene {
         this.addUI();
         this.initializeEnemies();
         // Initialize the timers
-        this.respawnTimer = new Timer(1000, () => {
-            if (GameLevel.livesCount === 0) {
-                this.sceneManager.changeToScene(MainMenu);
-            } else {
-                this.respawnPlayer();
-                this.player.enablePhysics();
-                this.player.unfreeze();
-            }
-        });
         this.levelTransitionTimer = new Timer(500);
         this.levelEndTimer = new Timer(3000, () => {
             // After the level end timer ends, fade to black and then go to the next scene
@@ -106,7 +107,27 @@ export default class GameLevel extends Scene {
         while (this.receiver.hasNextEvent()) {
             let event = this.receiver.getNextEvent();
             switch (event.type) {
+                case Game_Events.PINK_PAPER_FOUND:
+                    {
+                        this.pinkFound++;
+                        // disable the trigger.
+                        var object = <Rect> this.sceneGraph.getNode(event.data.get("other"))
+                        object.disablePhysics()
+                        this.collectibleMap.setTileAtWorldPosition(object.position,0)
+                    }
+                    break;
+                case Game_Events.WHITE_PAPER_FOUND:
+                    {
+                        this.whiteFound++;
+                        // disable the trigger.
+                        let object =  this.sceneGraph.getNode(event.data.get("other"))
+                        // find the object given id.
 
+                        console.log(object)
+                        object.disablePhysics()
+                        this.collectibleMap.setTileAtWorldPosition(object.position,0)
+                    }
+                    break;
                 case Game_Events.PLAYER_ENTERED_LEVEL_END:
                     {
 
@@ -114,22 +135,12 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.PLAYER_OUT_OF_BOUNDS:
                     {
-                        if(this.respawnTimer.isStopped()) {
-                            this.incPlayerLife(-1)
-                            this.respawnTimer.start();
-                        }
-                        // console.log("out of bounds");
-                        // if(this.respawnTimer.isPaused()) {
-                        //     this.incPlayerLife(-1)
-    
-                        //     this.respawnPlayer()
-                        //     // console.log("Player out of bounds")
-       
-                        //     this.respawnTimer.start();
-                        // }
-                        // this.respawnTimer.start();
-                        
+                        this.incPlayerLife(-1)
+                        if (this.livesCount <= 0) {
+                            this.sceneManager.changeToScene(MainMenu);
+                        } 
                     }
+                    break;
                 case Game_Events.LEVEL_START:
                     {
                         // Re-enable controls
@@ -158,14 +169,15 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.PLAYER_KILLED:
                     {
-                        console.log("Player killed")
-                        this.respawnPlayer();
+                        this.goToMenu()
                     }
 
             }
         }
     }
-
+    get PlayerSpawn(): Vec2 {
+        return this.playerSpawn;
+    }
     /**
      * Initialzes the layers
      */
@@ -191,6 +203,8 @@ export default class GameLevel extends Scene {
         this.receiver.subscribe([
             Game_Events.PLAYER_ENTERED_LEVEL_END,
             Game_Events.PLAYER_OUT_OF_BOUNDS,
+            Game_Events.PINK_PAPER_FOUND,
+            Game_Events.WHITE_PAPER_FOUND,
             Game_Events.LEVEL_START,
             Game_Events.LEVEL_END,
             Game_Events.PLAYER_KILLED
@@ -202,7 +216,7 @@ export default class GameLevel extends Scene {
      */
     protected addUI() {
 
-        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(500, 30), text: "Lives: " + GameLevel.livesCount });
+        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(500, 30), text: "Lives: " + this.livesCount });
         this.livesCountLabel.textColor = Color.BLACK;
         this.livesCountLabel.font = "PixelSimple";
 
@@ -276,8 +290,9 @@ export default class GameLevel extends Scene {
             this.playerSpawn = Vec2.ZERO;
         }
         this.player.position.copy(this.playerSpawn);
+        // TODO: update AABB for finn.
         this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(7*playerScale, 7*playerScale)));
-        // this.player.colliderOffset.set(0, 2);
+        this.player.colliderOffset.set(0, 2);
         this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
 
         this.player.setGroup("player");
@@ -289,7 +304,52 @@ export default class GameLevel extends Scene {
         this.level = level_id
         let tilemapLayers = this.add.tilemap(level_id, GameLevel.DEFAULT_LEVEL_SCALING);
         //Get only solid layer.
-        this.dynamicMap = <DynamicTilemap>tilemapLayers[2].getItems()[0];
+        // TODO: add support for multiple solid layers.
+        let solidLayer = null
+        let collectibleLayer = null
+        for(let i =0;i< tilemapLayers.length;  i+=1) {
+            let name = tilemapLayers[i].getName()
+            if(name == "Platforms") {
+                solidLayer = tilemapLayers[i]
+            } else if (name == "Items"){
+                collectibleLayer = tilemapLayers[i]
+            }
+        }
+        if(collectibleLayer !== null){
+
+            let collectibles = <OrthogonalTilemap>collectibleLayer.getItems()[0]
+            this.collectibleMap = collectibles
+            // Comb through every single tile in the tilemap and check if it is nonzero.
+            for(let i = 0; i < collectibles.getDimensions().x; i+=1) {
+                for(let j = 0; j < collectibles.getDimensions().y; j+=1) {
+                    let startTile = new Vec2(i, j)
+                    let tile = collectibles.getTileAtRowCol(startTile)
+                    if(tile !== 0) {
+                        startTile = new Vec2(i+0.5, j+0.5)
+                        var toAdd = <Rect>this.add.graphic(GraphicType.RECT, "primary", { position: startTile.scale(GameLevel.DEFAULT_LEVEL_TILE_SIZE.x), size: GameLevel.DEFAULT_LEVEL_TILE_SIZE.clone()});
+                        toAdd.addPhysics(undefined, undefined, false, true);
+                        let trigger = null
+                        switch(tile){
+                            case 4:
+                                trigger = Game_Events.WHITE_PAPER_FOUND
+                                this.numberWhite+=1;
+                                break;
+                            case 5:
+                                trigger = Game_Events.PINK_PAPER_FOUND
+                                this.numberPink+=1;
+                                break;
+                            default:
+                                break;
+
+                        }
+                        toAdd.setTrigger("player",trigger, null);
+                        toAdd.color = new Color(0, 0, 0, 0);
+                        this.Collectibles.push(toAdd)
+                    }
+                }
+            }
+        }
+        this.dynamicMap = <DynamicTilemap>solidLayer.getItems()[0];
         this.dynamicMap.badNavMesh();
         
         // NOTE: This code isn't useful if tiles constantly change.
@@ -317,7 +377,7 @@ export default class GameLevel extends Scene {
         this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
     }
 
-    // Replace the level geometry.
+    // Replace the level geometry when a tile is added/deleted.
     protected updateLevelGeometry(position:Vec2,mode:number = 0):void {
         if(mode == 0){
             let colrow_player = this.dynamicMap.getColRowAt(this.player.position)
@@ -394,13 +454,18 @@ export default class GameLevel extends Scene {
     }
 
     /**
-     * Initializes the level end area
+     * Initializes the level end area, in terms of tile size.
+     * @param startingTile The location of the spawn point, measured in rows and columns.
+     * @param size The size of the end point, measured in rows and columns.
      */
     protected addLevelEnd(startingTile: Vec2, size: Vec2): void {
-        this.levelEndArea = <Rect>this.add.graphic(GraphicType.RECT, "primary", { position: startingTile.scale(32), size: size.scale(32) });
+        this.levelEndArea = <Rect>this.add.graphic(GraphicType.RECT, "primary", { position: startingTile.scale(GameLevel.DEFAULT_LEVEL_TILE_SIZE.x), size: size.scale(GameLevel.DEFAULT_LEVEL_TILE_SIZE.x)});
         this.levelEndArea.addPhysics(undefined, undefined, false, true);
         this.levelEndArea.setTrigger("player", Game_Events.PLAYER_ENTERED_LEVEL_END, null);
         this.levelEndArea.color = new Color(0, 0, 0, 0);
+    }
+
+    protected addPaper(startingTile: Vec2, size: Vec2): void {
     }
 
     /**
@@ -408,9 +473,9 @@ export default class GameLevel extends Scene {
      * @param amt The amount to add to the player life
      */
     protected incPlayerLife(amt: number): void {
-        GameLevel.livesCount += amt;
-        this.livesCountLabel.text = "Lives: " + GameLevel.livesCount;
-        if (GameLevel.livesCount == 0) {
+        this.livesCount += amt;
+        this.livesCountLabel.text = "Lives: " + this.livesCount;
+        if (this.livesCount <= 0) {
             Input.disableInput();
             this.player.disablePhysics();
             this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_death", loop: false, holdReference: false });
@@ -423,12 +488,10 @@ export default class GameLevel extends Scene {
      */
     protected respawnPlayer(): void {
         this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: "level_music" });
-        this.player.position.copy(this.playerSpawn);
-        Input.enableInput();
     }
 
     protected goToMenu(): void{
-
+        this.sceneManager.changeToScene(MainMenu);
     }
 }
 
