@@ -23,7 +23,7 @@ export default class MainMenu extends Scene {
 
     startScene(): void {
         this.addUILayer("Main");
-
+        console.log("ey")
         // Center the viewport
         let size = this.viewport.getHalfSize();
         this.viewport.setFocus(size);
@@ -53,7 +53,7 @@ export default class MainMenu extends Scene {
                 player:  self - 001, collisions - 100
                 balloon: self - 010, collisions - 000
             */
-
+            console.log("clicked")
             let sceneOptions = {
                 physics: {
                     groupNames: ["ground", "player","enemy"],
@@ -67,11 +67,9 @@ export default class MainMenu extends Scene {
             }
             this.sceneManager.changeToScene(Level1, {}, sceneOptions);
         }
-
         // Scene has started, so start playing music
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "menu", loop: true, holdReference: true});
     }
-
     unloadScene(): void {
     }
 }

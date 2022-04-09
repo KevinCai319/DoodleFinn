@@ -122,9 +122,8 @@ export default class GameLevel extends Scene {
                         // disable the trigger.
                         let object =  this.sceneGraph.getNode(event.data.get("other"))
                         // find the object given id.
-
-                        console.log(object)
                         object.disablePhysics()
+                        // Remove the appropriate object.
                         this.collectibleMap.setTileAtWorldPosition(object.position,0)
                     }
                     break;
@@ -137,6 +136,8 @@ export default class GameLevel extends Scene {
                     {
                         this.incPlayerLife(-1)
                         if (this.livesCount <= 0) {
+                            // Enable Controls for Menu.
+                            Input.enableInput();
                             this.sceneManager.changeToScene(MainMenu);
                         } 
                     }
@@ -215,10 +216,11 @@ export default class GameLevel extends Scene {
      * Adds in any necessary UI to the game
      */
     protected addUI() {
-
-        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(500, 30), text: "Lives: " + this.livesCount });
+        // Lives Count Label. TODO: Make this using sprites.)
+        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(100, 30), text: "Lives: " + this.livesCount });
         this.livesCountLabel.textColor = Color.BLACK;
         this.livesCountLabel.font = "PixelSimple";
+        
 
         // End of level label (start off screen)
         this.levelEndLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(-300, 200), text: "Level Complete" });

@@ -5,6 +5,7 @@ export default class Level1 extends GameLevel {
     
     loadScene(): void {
         // Load resources
+        console.log("start level1")
         // this.load.tilemap("level1", "game_assets/tilemaps/level1.json");
         this.load.tilemap("DF-Level1", "game_assets/tilemaps/DF-Level1.json");
         this.load.spritesheet("player", "game_assets/spritesheets/spike.json");
@@ -31,6 +32,7 @@ export default class Level1 extends GameLevel {
     }
 
     startScene(): void {
+        console.log("start level1")
         // Add the Demo Level.
         
         this.viewport.setBounds(0, 0, 64*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, 20*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
