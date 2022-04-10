@@ -34,7 +34,7 @@ export default class Level1 extends GameLevel {
     startScene(): void {
         console.log("start level1")
         // Add the Demo Level.
-        
+        this.nextLevel = null
         this.viewport.setBounds(0, 0, 64*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, 20*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
         this.playerSpawn = new Vec2(5*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, 14*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
 
@@ -42,7 +42,7 @@ export default class Level1 extends GameLevel {
         super.startScene();
         this.initLevelGeometry("DF-Level1");
         // TODO: Update Level End location to latest version of the level.
-        this.addLevelEnd(new Vec2(14, 1), new Vec2(2, 2));
+        this.addLevelEnd(new Vec2(14, 1), new Vec2(4, 4));
 
     }
 
