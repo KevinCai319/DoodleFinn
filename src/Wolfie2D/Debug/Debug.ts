@@ -46,6 +46,10 @@ export default class Debug {
 		this.logMessages.delete(id);
 	}
 
+	static clearLog(): void {
+		this.logMessages.clear();
+	}
+
 	/**
 	 * Sets the list of nodes to render with the debugger
 	 * @param nodes The new list of nodes

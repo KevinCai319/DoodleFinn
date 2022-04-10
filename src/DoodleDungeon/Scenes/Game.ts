@@ -81,9 +81,11 @@ export default class GameLevel extends Scene {
         this.initializeEnemies();
         // Initialize the timers
         this.levelTransitionTimer = new Timer(500);
-        this.levelEndTimer = new Timer(3000, () => {
+        this.levelEndTimer = new Timer(10, () => {
             // After the level end timer ends, fade to black and then go to the next scene
             this.levelTransitionScreen.tweens.play("fadeIn");
+            // Clear debug log.
+            Debug.clearLog();
         });
 
 
@@ -111,8 +113,9 @@ export default class GameLevel extends Scene {
                     {
                         this.pinkFound++;
                         // disable the trigger.
-                        var object = <Rect> this.sceneGraph.getNode(event.data.get("other"))
+                        let object = <Rect> this.sceneGraph.getNode(event.data.get("other"))
                         object.disablePhysics()
+                        this.remove(object)
                         this.collectibleMap.setTileAtWorldPosition(object.position,0)
                     }
                     break;
@@ -123,13 +126,19 @@ export default class GameLevel extends Scene {
                         let object =  this.sceneGraph.getNode(event.data.get("other"))
                         // find the object given id.
                         object.disablePhysics()
+                        this.remove(object)
+                        
                         // Remove the appropriate object.
                         this.collectibleMap.setTileAtWorldPosition(object.position,0)
                     }
                     break;
                 case Game_Events.PLAYER_ENTERED_LEVEL_END:
                     {
-
+                        // Check if the player has collected all the collectibles.
+                        if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite) {
+                            // If so, start the level end timer
+                            this.levelEndTimer.start();
+                        }
                     }
                     break;
                 case Game_Events.PLAYER_OUT_OF_BOUNDS:
@@ -165,6 +174,8 @@ export default class GameLevel extends Scene {
                                 }
                             }
                             this.sceneManager.changeToScene(this.nextLevel, {}, sceneOptions);
+                        }else{
+                            this.goToMenu()
                         }
                     }
                     break;
@@ -292,13 +303,11 @@ export default class GameLevel extends Scene {
             this.playerSpawn = Vec2.ZERO;
         }
         this.player.position.copy(this.playerSpawn);
-        // TODO: update AABB for finn.
+        // TODO: update AABB for Finn.
         this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(7*playerScale, 7*playerScale)));
         this.player.colliderOffset.set(0, 2);
         this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
-
         this.player.setGroup("player");
-
         this.viewport.follow(this.player);
     }
     
@@ -327,11 +336,13 @@ export default class GameLevel extends Scene {
                     let startTile = new Vec2(i, j)
                     let tile = collectibles.getTileAtRowCol(startTile)
                     if(tile !== 0) {
+                        // Find the position of the tile in the tilemap.
                         startTile = new Vec2(i+0.5, j+0.5)
-                        var toAdd = <Rect>this.add.graphic(GraphicType.RECT, "primary", { position: startTile.scale(GameLevel.DEFAULT_LEVEL_TILE_SIZE.x), size: GameLevel.DEFAULT_LEVEL_TILE_SIZE.clone()});
+                        let toAdd = <Rect>this.add.graphic(GraphicType.RECT, "primary", { position: startTile.scale(GameLevel.DEFAULT_LEVEL_TILE_SIZE.x), size: GameLevel.DEFAULT_LEVEL_TILE_SIZE.clone()});
                         toAdd.addPhysics(undefined, undefined, false, true);
                         let trigger = null
                         switch(tile){
+                            // TODO: Make a proper enum to handle this instead of hardcoding.
                             case 4:
                                 trigger = Game_Events.WHITE_PAPER_FOUND
                                 this.numberWhite+=1;
@@ -381,6 +392,10 @@ export default class GameLevel extends Scene {
 
     // Replace the level geometry when a tile is added/deleted.
     protected updateLevelGeometry(position:Vec2,mode:number = 0):void {
+        // Check if the click position if out of bounds of the level.
+        if(this.dynamicMap.getTileAtWorldPosition(position) == -1) {
+            return;
+        }
         if(mode == 0){
             let colrow_player = this.dynamicMap.getColRowAt(this.player.position)
             let colrow_toAdd = this.dynamicMap.getColRowAt(position)
@@ -467,8 +482,6 @@ export default class GameLevel extends Scene {
         this.levelEndArea.color = new Color(0, 0, 0, 0);
     }
 
-    protected addPaper(startingTile: Vec2, size: Vec2): void {
-    }
 
     /**
      * Increments the amount of life the player has
