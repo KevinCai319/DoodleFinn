@@ -306,7 +306,7 @@ export default class GameLevel extends Scene {
         // Add the player
         this.player = this.add.animatedSprite("player", "primary");
         // Scale player to the appropriate size.
-        let playerScale = 1
+        let playerScale = 1;
         this.player.scale.set(playerScale, playerScale);
         if (!this.playerSpawn) {
             console.warn("Player spawn was never set - setting spawn to (0, 0)");
