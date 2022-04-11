@@ -24,7 +24,6 @@ export default class Spawn extends PlayerState {
         this.timeElapsed += deltaT
         this.owner.position.copy(Vec2.lerp(this.startLocation,(this.owner.getScene() as GameLevel).PlayerSpawn, (this.timeElapsed*1000)/this.RESPAWN_TIME));
         if(this.parent.invincibleTimer.isStopped()){
-            this.emitter.fireEvent(Game_Events.PLAYER_OUT_OF_BOUNDS);
 		    this.finished(PlayerStates.IDLE);
         }
 	}

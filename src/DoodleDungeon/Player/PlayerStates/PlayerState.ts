@@ -55,7 +55,7 @@ export default abstract class PlayerState extends State {
 				this.parent.velocity.y += this.gravity*deltaT;
 			}
 
-			if(this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF){
+			if(this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF && !this.parent.invicible){
 				this.owner.freeze()
 				this.owner.disablePhysics()
 				this.emitter.fireEvent(Game_Events.PLAYER_OUT_OF_BOUNDS);

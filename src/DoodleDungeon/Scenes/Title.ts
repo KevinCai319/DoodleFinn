@@ -23,7 +23,6 @@ export default class MainMenu extends Scene {
 
     startScene(): void {
         this.addUILayer("Main");
-        console.log("ey")
         // Center the viewport
         let size = this.viewport.getHalfSize();
         this.viewport.setFocus(size);
@@ -53,7 +52,6 @@ export default class MainMenu extends Scene {
                 player:  self - 001, collisions - 100
                 balloon: self - 010, collisions - 000
             */
-            console.log("clicked")
             let sceneOptions = {
                 physics: {
                     groupNames: ["ground", "player","enemy"],

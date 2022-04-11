@@ -45,7 +45,7 @@ export default class PlayerController extends StateMachineAI {
         this.owner = owner;
         this.playerType = options.playerType
         this.invincibleTimer = new Timer(1000);
-        this.invicible = false
+        this.setInvincible();
         // I-frame animation(blinking)
         owner.tweens.add("iframe",
         {
@@ -110,9 +110,7 @@ export default class PlayerController extends StateMachineAI {
             let fall = new Fall(this, this.owner);
             this.addState(PlayerStates.FALL, fall);
         }
-
-        this.initialize(PlayerStates.IDLE);
-        
+        this.initialize(PlayerStates.SPAWN);
     }
 
     changeState(stateName: string): void {
