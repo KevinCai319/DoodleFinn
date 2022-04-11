@@ -17,7 +17,6 @@ export default class AttackAction extends GoapAction {
 
     performAction(statuses: Array<string>, actor: StateMachineGoapAI, deltaT: number, target?: StateMachineGoapAI): Array<string> {
         //Check if preconditions are met for this action to be performed
-        console.log("PERFORMING ATTACK")
         if (this.checkPreconditions(statuses)){
             let enemy = <EnemyAI>actor;
 
@@ -32,6 +31,7 @@ export default class AttackAction extends GoapAction {
             enemy.owner.rotation = Vec2.UP.angleToCCW(dir);
 
             // TODO: Perform attack
+            console.log("PERFORM ATTACK")
             
             return this.effects;
         }

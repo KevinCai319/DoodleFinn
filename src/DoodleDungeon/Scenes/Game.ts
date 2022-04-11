@@ -423,27 +423,6 @@ export default class GameLevel extends Scene {
         // Create an enemies array
         this.enemies = new Array(enemyData.numEnemies);
 
-        let actionMelee = [
-            new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
-            new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 30 })
-        ];
-        
-        let actionRanged = [
-            new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
-            new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 100 })
-        ];
-
-        /** MOVE => WAIT => CHARGE => ATTACK */
-        let actionCharging = [
-            // new AttackAction(4, [AI_Statuses.CAN_ATTACK], [AI_Statuses.REACHED_GOAL]),
-            
-            new Move(1, [], [AI_Statuses.IN_RANGE], { inRange: 100 }),
-            new Wait(2, [AI_Statuses.IN_RANGE], [AI_Statuses.WAIT_DONE], { waitTime: 1000 }),
-            // new Charge(3, [AI_Statuses.WAIT_DONE], [AI_Statuses.CAN_ATTACK], { chargeTime: 1000 })
-            new Charge(3, [AI_Statuses.WAIT_DONE], [AI_Statuses.REACHED_GOAL], { chargeTime: 5000 })
-        ]
-        
-
         // Initialize the enemies
         for (let i = 0; i < enemyData.numEnemies; i++) {
             let data = enemyData.enemies[i];
@@ -473,14 +452,29 @@ export default class GameLevel extends Scene {
             let range;
 
             if (data.type === "melee_enemy"){
+                let actionMelee = [
+                    new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
+                    new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 30 })
+                ];
                 actions = actionMelee;
                 range = 30;
             }
             else if (data.type === "ranged_enemy") {
+                let actionRanged = [
+                    new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
+                    new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 100 })
+                ];
                 actions = actionRanged;
                 range = 100;
             }
             else if (data.type === "charging_enemy") {
+                /** MOVE => WAIT => CHARGE => ATTACK */
+                let actionCharging = [
+                    new AttackAction(1, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
+                    new Move(2, [], [AI_Statuses.MOVE_DONE], { inRange: 100 }),
+                    new Wait(3, [AI_Statuses.MOVE_DONE], [AI_Statuses.WAIT_DONE], { waitTime: 1000 }),
+                    new Charge(4, [AI_Statuses.WAIT_DONE], [AI_Statuses.IN_RANGE], { chargeTime: 1000 })
+                ]
                 actions = actionCharging;
                 range = 30;
             }

@@ -39,8 +39,9 @@ export default class Charge extends GoapAction {
                 this.timer.start()
                 this.isTimerStarted = true;
                 this.chargeDirection = enemy.owner.position.dirTo(enemy.playerPos).normalized();
-            }        
-            if (this.timer.isStopped()) {
+            }
+            let distance = enemy.owner.position.distanceTo(enemy.lastPlayerPos);
+            if (this.timer.isStopped() || (distance < enemy.inRange)) {
                 this.isTimerStarted = false;
                 return this.effects
             }

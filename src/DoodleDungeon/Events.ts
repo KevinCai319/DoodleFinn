@@ -21,6 +21,7 @@ export enum AI_Statuses {
     CAN_BERSERK = "CAN_BERSERK",
     REACHED_GOAL = "GOAL",
 
+    MOVE_DONE = "MOVE_DONE",
     WAIT_DONE = "WAIT_DONE",
     CAN_ATTACK = "CAN_ATTACK"
 }
