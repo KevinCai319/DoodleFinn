@@ -23,6 +23,7 @@ import Move from "../Enemies/EnemyActions/Move";
 import AttackAction from "../Enemies/EnemyActions/AttackAction";
 import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
+import Layer from "../../Wolfie2D/Scene/Layer";
 
 
 
@@ -38,6 +39,7 @@ export default class GameLevel extends Scene {
     
     protected playerSpawnColRow: Vec2;
     protected playerSpawn: Vec2;
+    protected playerScale: number = 1
     protected player: AnimatedSprite;
     protected cursor: AnimatedSprite;
     protected cursorDisabled:boolean = false;
@@ -55,9 +57,10 @@ export default class GameLevel extends Scene {
     protected numberPapers: number = 0;
     protected papersCountLabel: Label;
 
+    protected backgroundSetup: Array<Function> = [];
     // Enemies
     // A list of enemies
-    private enemies: Array<AnimatedSprite>;
+    protected enemies: Array<AnimatedSprite>;
 
     // Special maps specific to the level.
     // Dynamic maps are used for handling pathfinding and collision.
@@ -83,7 +86,7 @@ export default class GameLevel extends Scene {
         this.processLevelData(this.LEVEL_NAME);
         this.viewport.setBounds(0, 0, this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
         this.playerSpawn = new Vec2(this.playerSpawnColRow.x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.playerSpawnColRow.y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
-        this.initPlayer();
+        this.initPlayer(this.playerScale);
         this.subscribeToEvents();
         this.addUI();
         this.initializeEnemies();
@@ -109,7 +112,7 @@ export default class GameLevel extends Scene {
     updateScene(deltaT: number) {
         // TODO: Add limits to how far the player can click from their body.
         if(!this.cursorDisabled){
-            this.cursor.position =  this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(1,1)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
+            this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(1,1)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
             this.cursor.alpha=0.8;
             if (Input.isMouseJustPressed(0)) {
                 // Add tile (Left Click)
@@ -301,11 +304,10 @@ export default class GameLevel extends Scene {
     /**
      * Initializes the player
      */
-    protected initPlayer(): void {
+    protected initPlayer(playerScale:number=1): void {
         // Add the player
         this.player = this.add.animatedSprite("player", "primary");
         // Scale player to the appropriate size.
-        let playerScale = 1
         this.player.scale.set(playerScale, playerScale);
         if (!this.playerSpawn) {
             console.warn("Player spawn was never set - setting spawn to (0, 0)");
@@ -361,6 +363,7 @@ export default class GameLevel extends Scene {
         let solidLayer = null
         let collectibleLayer = null
         let animatedLayer = null
+        let backgroundLayer :Layer = null
         for(let i =0;i< tilemapLayers.length;  i+=1) {
             let name = tilemapLayers[i].getName()
             if(name == "Platforms") {
@@ -369,8 +372,16 @@ export default class GameLevel extends Scene {
                 collectibleLayer = tilemapLayers[i]
             } else if (name == "Animated"){
                 animatedLayer = tilemapLayers[i]
+            } else if (name == "Background") {
+                backgroundLayer = tilemapLayers[i]
             }
         }
+
+        // Go through all background setup functions.
+        this.backgroundSetup.forEach((func) => {
+            func(backgroundLayer)
+        })
+        // backgroundLayer.addNode()
         if(animatedLayer!== null) {
             let animatedTiles = <OrthogonalTilemap>animatedLayer.getItems()[0]
             this.processTileLayer(animatedTiles, (tile:number,i:number,j:number)=>{

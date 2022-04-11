@@ -11,6 +11,7 @@ import RandUtils from "../../Wolfie2D/Utils/RandUtils";
 import SortingUtils from "../../Wolfie2D/Utils/SortingUtils";
 import Game from "./Game";
 import Level1 from "./Level1";
+import Tutorial from "./Tutorial";
 
 export default class MainMenu extends Scene {
 
@@ -63,7 +64,7 @@ export default class MainMenu extends Scene {
                     ]
                 }
             }
-            this.sceneManager.changeToScene(Level1, {}, sceneOptions);
+            this.sceneManager.changeToScene(Tutorial, {}, sceneOptions);
         }
         // Scene has started, so start playing music
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "menu", loop: true, holdReference: true});
