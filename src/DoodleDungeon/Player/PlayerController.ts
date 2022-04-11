@@ -6,6 +6,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
+import BattlerAI from "../Enemies/BattlerAI";
 import { Game_Events } from "../Events";
 import Fall from "./PlayerStates/Fall";
 import Idle from "./PlayerStates/Idle";
@@ -30,12 +31,13 @@ export enum PlayerStates {
     SPAWN = "spawn"
 }
 
-export default class PlayerController extends StateMachineAI {
-    protected owner: GameNode;
+export default class PlayerController extends StateMachineAI implements BattlerAI{
+    owner: GameNode;
     playerType: PlayerType = PlayerType.PLATFORMER
     velocity: Vec2 = Vec2.ZERO
     direction: number = 1;
     attacking: boolean = false;
+    health: number = 10;
 	speed: number = 200;
     invincibleTimer: Timer
     attackTimer: Timer
@@ -99,7 +101,15 @@ export default class PlayerController extends StateMachineAI {
         this.emitter.fireEvent(Game_Events.PLAYER_INVINCIBLE);
         this.owner.tweens.play("iframe");
     }
-
+    damage(amount: number): void {
+        if(!this.invicible){
+            this.health -= amount;
+            if(this.health <= 0){
+                this.emitter.fireEvent(Game_Events.PLAYER_KILLED);
+                this.owner.tweens.play("death");
+            }  
+        }
+    }
     attack(){
         // Prevent spamming attacks.
         if(this.attackTimer.isStopped()){
@@ -148,9 +158,9 @@ export default class PlayerController extends StateMachineAI {
             this.invicible = false
             this.owner.tweens.stop("iframe");
         }
-        if(this.attacking && this.attackTimer.isStopped()){
-            this.attacking = false
-        }
+        // if(this.attacking && this.attackTimer.isStopped()){
+        //     this.attacking = false
+        // }
         if(this.owner.onGround){
             // let rc =  this.tilemap.getColRowAt(this.owner.position);
             // rc.y+=1;
