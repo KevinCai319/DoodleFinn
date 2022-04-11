@@ -130,6 +130,24 @@ export default class GameLevel extends Scene {
         while (this.receiver.hasNextEvent()) {
             let event = this.receiver.getNextEvent();
             switch (event.type) {
+                case Game_Events.PLAYER_ATTACK:
+                    {
+                        // GO through all enemies and see if they are in range of the cursor hitbox.
+                        // If they are, then attack them.
+                        let cursorHitbox = this.cursor.boundary.clone();
+                        this.enemies.forEach(enemy => {
+                            if (cursorHitbox.overlaps(enemy.boundary)) {
+                                // Attack the enemy
+                                // TODO: finish this method.
+                                (enemy._ai as EnemyAI).damage(1);
+                                // enemy.tweens.play("attack");
+                                // enemy.tweens.on("attack", () => {
+                                //     enemy.tweens.play("idle");
+                                // });
+                            }
+                        });
+                    }
+                    break;
                 case Game_Events.PINK_PAPER_FOUND:
                     {
                         this.pinkFound++;
@@ -228,7 +246,9 @@ export default class GameLevel extends Scene {
             Game_Events.WHITE_PAPER_FOUND,
             Game_Events.LEVEL_START,
             Game_Events.LEVEL_END,
-            Game_Events.PLAYER_KILLED
+            Game_Events.PLAYER_KILLED,
+            Game_Events.PLAYER_ATTACK,
+            Game_Events.PLAYER_ATTACK_FINISHED
         ]);
     }
 
@@ -267,8 +287,8 @@ export default class GameLevel extends Scene {
                 }
             ]
         });
-
-        this.levelTransitionScreen = <Rect>this.add.graphic(GraphicType.RECT, "UI", { position: new Vec2(300, 200), size: new Vec2(600, 400) });
+        
+        this.levelTransitionScreen = <Rect>this.add.graphic(GraphicType.RECT, "UI", { position: new Vec2(2000, 2000), size: new Vec2(4000, 4000) });
         this.levelTransitionScreen.color = new Color(0, 0,0);
         this.levelTransitionScreen.alpha = 1;
 

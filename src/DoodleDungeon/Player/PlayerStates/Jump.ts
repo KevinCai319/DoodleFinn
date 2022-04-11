@@ -12,19 +12,23 @@ export default class Jump extends InAir {
 	onEnter(options: Record<string, any>): void {
 		this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "jump", loop: false, holdReference: false});
 		console.log("jumping")
-		if(this.parent.velocity.x < 0){
-			this.owner.animation.playIfNotAlready("Jumping Left", true);
-		} else {
-			this.owner.animation.playIfNotAlready("Jumping Right", true);
+		if(!this.parent.attacking){
+			if(this.parent.velocity.x < 0){
+				this.owner.animation.playIfNotAlready("Jumping Left", true);
+			} else {
+				this.owner.animation.playIfNotAlready("Jumping Right", true);
+			}
 		}
 	}
 
 	update(deltaT: number): void {
 		super.update(deltaT);
-		if(this.parent.velocity.x < 0){
-			this.owner.animation.playIfNotAlready("Jumping Left", true);
-		} else {
-			this.owner.animation.playIfNotAlready("Jumping Right", true);
+		if(!this.parent.attacking){
+			if(this.parent.velocity.x < 0){
+				this.owner.animation.playIfNotAlready("Jumping Left", true);
+			} else {
+				this.owner.animation.playIfNotAlready("Jumping Right", true);
+			}
 		}
 		if(this.owner.onCeiling){
 			// head bump!
@@ -36,8 +40,9 @@ export default class Jump extends InAir {
 	}
 
 	onExit(): Record<string, any> {
-		this.owner.animation.stop();
-		console.log("stop jumping")
+		if(!this.parent.attacking){
+			this.owner.animation.stop();
+		}
 		return {};
 	}
 }

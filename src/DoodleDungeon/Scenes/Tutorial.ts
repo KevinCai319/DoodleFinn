@@ -56,6 +56,7 @@ export default class Tutorial extends GameLevel {
         this.livesCountLabel.destroy()
         this.papersCountLabel.destroy()
         this.levelEndLabel.destroy()
+        // this.levelTransitionScreen.destroy()
         this.livesCount = 1
         
     }

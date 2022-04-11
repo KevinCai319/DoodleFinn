@@ -35,8 +35,10 @@ export default class PlayerController extends StateMachineAI {
     playerType: PlayerType = PlayerType.PLATFORMER
     velocity: Vec2 = Vec2.ZERO
     direction: number = 1;
+    attacking: boolean = false;
 	speed: number = 200;
     invincibleTimer: Timer
+    attackTimer: Timer
     invicible: boolean = false;
 	MIN_SPEED: number = 200;
     MAX_SPEED: number = 300;
@@ -46,6 +48,7 @@ export default class PlayerController extends StateMachineAI {
         this.owner = owner;
         this.playerType = options.playerType
         this.invincibleTimer = new Timer(1000);
+        this.attackTimer = new Timer(100);
         this.direction = 1
         this.setInvincible();
         // I-frame animation(blinking)
@@ -96,6 +99,20 @@ export default class PlayerController extends StateMachineAI {
         this.emitter.fireEvent(Game_Events.PLAYER_INVINCIBLE);
         this.owner.tweens.play("iframe");
     }
+
+    attack(){
+        // Prevent spamming attacks.
+        if(this.attackTimer.isStopped()){
+            this.attacking = true
+            this.attackTimer.start(500);
+            this.emitter.fireEvent(Game_Events.PLAYER_ATTACK);
+            if(this.direction == -1){
+                (<AnimatedSprite>this.owner).animation.playIfNotAlready("Attacking Left",false,Game_Events.PLAYER_ATTACK_FINISHED)
+            }else{
+                (<AnimatedSprite>this.owner).animation.playIfNotAlready("Attacking Right",false,Game_Events.PLAYER_ATTACK_FINISHED)
+            }
+        }
+    }
     initializeStates(): void {
         this.speed = 400;
         let idle = new Idle(this, this.owner);
@@ -130,6 +147,9 @@ export default class PlayerController extends StateMachineAI {
         if(this.invicible && this.invincibleTimer.isStopped()){
             this.invicible = false
             this.owner.tweens.stop("iframe");
+        }
+        if(this.attacking && this.attackTimer.isStopped()){
+            this.attacking = false
         }
         if(this.owner.onGround){
             // let rc =  this.tilemap.getColRowAt(this.owner.position);

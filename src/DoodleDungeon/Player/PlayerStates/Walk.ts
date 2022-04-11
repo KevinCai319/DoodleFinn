@@ -29,21 +29,25 @@ export default class Walk extends OnGround {
 		if(this.parent.velocity.x != 0){
 			this.parent.direction = (this.parent.velocity.x < 0)?-1:1;
 		}
-		if(this.parent.direction == -1){
-			this.owner.animation.playIfNotAlready("Walking Left", true);
-		} else {
-			this.owner.animation.playIfNotAlready("Walking Right", true);
+		if(!this.parent.attacking){
+			if(this.parent.direction == -1){
+				this.owner.animation.playIfNotAlready("Walking Left", true);
+			} else {
+				this.owner.animation.playIfNotAlready("Walking Right", true);
+			}
 		}
 
 		this.owner.move(this.parent.velocity.scaled(deltaT));
 	}
 
 	onExit(): Record<string, any> {
-		this.owner.animation.stop();
-		if(this.parent.direction == -1){
-			this.owner.animation.playIfNotAlready("Idle Left", true);
-		} else {
-			this.owner.animation.playIfNotAlready("Idle Right", true);
+		if(!this.parent.attacking){
+			this.owner.animation.stop();
+			if(this.parent.direction == -1){
+				this.owner.animation.playIfNotAlready("Idle Left", true);
+			} else {
+				this.owner.animation.playIfNotAlready("Idle Right", true);
+			}
 		}
 		return {};
 	}

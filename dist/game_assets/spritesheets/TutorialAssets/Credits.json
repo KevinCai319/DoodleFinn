@@ -1,0 +1,15 @@
+{
+    "name": "LevelSelect",
+    "spriteSheetImage": "LevelSelect.png",
+    "spriteWidth": 226,
+    "spriteHeight": 220,
+    "columns": 1,
+    "rows": 1,
+    "durationType": "time",
+    "animations": [
+        { 
+            "name": "idle",
+            "frames": [ {"index": 0, "duration": 500} ]
+        }
+    ]
+}

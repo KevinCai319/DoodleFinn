@@ -7,7 +7,8 @@ import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import Timer from "../../../Wolfie2D/Timing/Timer";
 import PlayerController, { PlayerStates, PlayerType } from "../PlayerController";
 import { Game_Events } from "../../Events";
-import GameLevel from "../../Scenes/Game";
+import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+
 
 export default abstract class PlayerState extends State {
 	owner: GameNode;
@@ -24,7 +25,9 @@ export default abstract class PlayerState extends State {
 
 	
 	handleInput(event: GameEvent): void {
-
+		if(event.type == Game_Events.PLAYER_ATTACK_FINISHED){
+			this.parent.attacking=false;
+		}
 	}
 
 	/** 
@@ -41,6 +44,9 @@ export default abstract class PlayerState extends State {
 			direction.y = (Input.isPressed("jump") ? -1 : 0)
 		}else{
 
+		}
+		if(Input.isKeyJustPressed("space")){
+			this.parent.attack();
 		}
 		return direction;
 	}
