@@ -27,19 +27,19 @@
             "frames": [ 
                 {
                     "index": 1, 
-                    "duration": 16
+                    "duration": 5
                 }, 
                 {
                     "index": 2, 
-                    "duration": 16
+                    "duration": 5
                 }, 
                 {
                     "index": 3,
-                    "duration": 16
+                    "duration": 5
                 }, 
                 {
                     "index": 4, 
-                    "duration": 16
+                    "duration": 5
                 } 
             ]
         }
