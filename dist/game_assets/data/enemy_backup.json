@@ -6,7 +6,7 @@
       "mode": "guard",
       "guardPosition":[400,400],
       "health": 5,
-      "type": "charging_enemy"
+      "type": "gun_enemy"
     }
   ]
 }

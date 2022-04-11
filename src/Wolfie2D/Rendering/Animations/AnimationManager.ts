@@ -80,7 +80,7 @@ export default class AnimationManager {
             return this.animations.get(this.currentAnimation).frames[this.currentFrame].index;
         } else {
             // No current animation, warn the user
-            console.warn(`Animation index was requested, but the current animation: ${this.currentAnimation} was invalid`);
+            // console.warn(`Animation index was requested, but the current animation: ${this.currentAnimation} was invalid`);
             return 0;
         }
     }

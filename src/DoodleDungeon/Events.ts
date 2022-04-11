@@ -19,5 +19,8 @@ export enum AI_Statuses {
     LOW_HEALTH = "LOW_HEALTH",
     CAN_RETREAT = "CAN_RETREAT",
     CAN_BERSERK = "CAN_BERSERK",
-    REACHED_GOAL = "GOAL"
+    REACHED_GOAL = "GOAL",
+
+    WAIT_DONE = "WAIT_DONE",
+    CAN_ATTACK = "CAN_ATTACK"
 }
