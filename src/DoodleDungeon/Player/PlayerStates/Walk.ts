@@ -5,10 +5,8 @@ import OnGround from "./OnGround";
 
 export default class Walk extends OnGround {
 	owner: AnimatedSprite;
-
 	onEnter(options: Record<string, any>): void {
 		this.parent.speed = this.parent.MIN_SPEED;
-		this.owner.animation.playIfNotAlready("WALK", true);
 	}
 
 	update(deltaT: number): void {
@@ -28,12 +26,25 @@ export default class Walk extends OnGround {
 		}else{
 
 		}
+		if(this.parent.velocity.x != 0){
+			this.parent.direction = (this.parent.velocity.x < 0)?-1:1;
+		}
+		if(this.parent.direction == -1){
+			this.owner.animation.playIfNotAlready("Walking Left", true);
+		} else {
+			this.owner.animation.playIfNotAlready("Walking Right", true);
+		}
 
 		this.owner.move(this.parent.velocity.scaled(deltaT));
 	}
 
 	onExit(): Record<string, any> {
 		this.owner.animation.stop();
+		if(this.parent.direction == -1){
+			this.owner.animation.playIfNotAlready("Idle Left", true);
+		} else {
+			this.owner.animation.playIfNotAlready("Idle Right", true);
+		}
 		return {};
 	}
 }

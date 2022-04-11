@@ -14,7 +14,6 @@ export default class Run extends OnGround {
 	update(deltaT: number): void {
 		super.update(deltaT);
 		let dir = this.getInputDirection();
-
 		if(dir.isZero()){
 			this.finished(PlayerStates.IDLE);
 		} else {
@@ -30,7 +29,11 @@ export default class Run extends OnGround {
 
 		}
 
-
+		if(this.parent.direction == -1){
+			this.owner.animation.playIfNotAlready("Walking Left", true);
+		} else {
+			this.owner.animation.playIfNotAlready("Walking Right", true);
+		}
 		this.owner.move(this.parent.velocity.scaled(deltaT));
 	}
 

@@ -8,7 +8,7 @@ export default class Tutorial extends GameLevel {
     loadScene(): void {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/"+this.LEVEL_NAME+"/"+this.LEVEL_NAME+".json");
-        this.load.spritesheet("player", "game_assets/spritesheets/spike.json");
+        this.load.spritesheet("player", "game_assets/spritesheets/DoodleFinn/DoodleFinn-Sprite.json");
         this.load.spritesheet("gun_enemy", "game_assets/spritesheets/gun_enemy.json");
         this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
         this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
@@ -38,7 +38,6 @@ export default class Tutorial extends GameLevel {
         // Add the Demo Level.
         this.nextLevel = null
         this.playerSpawnColRow = new Vec2(77,10)
-        this.playerScale=2
         // Do generic setup for a GameLevel
         this.backgroundSetup.push((layer:Layer)=>{
             let selectSign = this.addLevelGraphic("LevelSelect",layer.getName(),new Vec2(84,12.8).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3))

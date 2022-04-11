@@ -18,11 +18,11 @@ export default class OnGround extends PlayerState {
 		}
 		super.update(deltaT);
 
-		let direction = this.getInputDirection();
-		//set direction of the top
-		if(direction.x !== 0){
-			(<Sprite>this.owner).invertX = MathUtils.sign(direction.x) < 0;
-		}
+		// let direction = this.getInputDirection();
+		// //set direction of the top
+		// if(direction.x !== 0){
+		// 	(<Sprite>this.owner).invertX = MathUtils.sign(direction.x) < 0;
+		// }
 		if(this.parent.playerType == PlayerType.PLATFORMER){
 			if(Input.isPressed("jump")){
 				this.parent.velocity.y = -this.jumpBoost;

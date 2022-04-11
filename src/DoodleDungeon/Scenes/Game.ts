@@ -39,7 +39,7 @@ export default class GameLevel extends Scene {
     
     protected playerSpawnColRow: Vec2;
     protected playerSpawn: Vec2;
-    protected playerScale: number = 1
+    protected playerScale: number = 1/16;
     protected player: AnimatedSprite;
     protected cursor: AnimatedSprite;
     protected cursorDisabled:boolean = false;
@@ -316,7 +316,7 @@ export default class GameLevel extends Scene {
         this.player.position.copy(this.playerSpawn);
         this.viewport.follow(this.player);
         // TODO: update AABB for Finn.
-        this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(7*playerScale, 7*playerScale)));
+        this.player.addPhysics(this.player.boundary.clone());
         this.player.colliderOffset.set(0, 2);
         this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
         this.player.setGroup("player");

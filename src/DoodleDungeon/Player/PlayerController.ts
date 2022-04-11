@@ -34,6 +34,7 @@ export default class PlayerController extends StateMachineAI {
     protected owner: GameNode;
     playerType: PlayerType = PlayerType.PLATFORMER
     velocity: Vec2 = Vec2.ZERO
+    direction: number = 1;
 	speed: number = 200;
     invincibleTimer: Timer
     invicible: boolean = false;
@@ -45,6 +46,7 @@ export default class PlayerController extends StateMachineAI {
         this.owner = owner;
         this.playerType = options.playerType
         this.invincibleTimer = new Timer(1000);
+        this.direction = 1
         this.setInvincible();
         // I-frame animation(blinking)
         owner.tweens.add("iframe",
@@ -86,7 +88,7 @@ export default class PlayerController extends StateMachineAI {
             ]
         });
         this.initializeStates();
-        (<AnimatedSprite>this.owner).animation.playIfNotAlready(PlayerStates.IDLE, true);
+        (<AnimatedSprite>this.owner).animation.playIfNotAlready("idle left", true);
     }
     setInvincible(duration:number=500){
         this.invincibleTimer.start(duration);

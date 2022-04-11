@@ -8,7 +8,7 @@ export default abstract class InAir extends PlayerState {
         super.update(deltaT);
 
         let dir = this.getInputDirection();
-
+        
 		this.parent.velocity.x += dir.x * this.parent.speed/3.5 - 0.3*this.parent.velocity.x;
 
 		this.owner.move(this.parent.velocity.scaled(deltaT));

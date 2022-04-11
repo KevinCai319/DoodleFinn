@@ -24,6 +24,11 @@ export default class Idle extends OnGround {
 			}
 		}
 		
+		if(this.parent.direction == -1){
+			this.owner.animation.playIfNotAlready("Idle Left", true);
+		} else {
+			this.owner.animation.playIfNotAlready("Idle Right", true);
+		}
 		this.parent.velocity.x = 0;
 
 		this.owner.move(this.parent.velocity.scaled(deltaT));
