@@ -38,7 +38,7 @@ export default abstract class PlayerState extends State {
 			direction.y = (Input.isPressed("down") ? 1 : 0) + (Input.isPressed("up") ? -1 : 0)
 			direction.normalize();
 		}else if (type == PlayerType.PLATFORMER){
-			direction.y = (Input.isJustPressed("jump") ? -1 : 0)
+			direction.y = (Input.isPressed("jump") ? -1 : 0)
 		}else{
 
 		}

@@ -32,7 +32,7 @@ export default class PlayerController extends ControllerAI {
         velocity.x = x * 100 * deltaT;
 
         // Check for jump condition
-        if(this.owner.onGround && Input.isJustPressed("jump")){
+        if(this.owner.onGround && Input.isPressed("jump")){
             // We are jumping
             velocity.y = -250*deltaT;
 
@@ -45,7 +45,7 @@ export default class PlayerController extends ControllerAI {
             velocity.y += 10*deltaT;
         }
 
-        if(this.owner.onGround && !Input.isJustPressed("jump")){
+        if(this.owner.onGround && !Input.isPressed("jump")){
             // If we're on the ground, but aren't jumping, show walk animation
             if(velocity.x === 0){
                     this.owner.animation.playIfNotAlready("IDLE", true);

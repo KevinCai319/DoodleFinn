@@ -1,4 +1,3 @@
-import Graph from "../../Wolfie2D/DataTypes/Graphs/Graph";
 import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Debug from "../../Wolfie2D/Debug/Debug";
@@ -6,7 +5,6 @@ import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Input from "../../Wolfie2D/Input/Input";
 import GameNode, { TweenableProperties } from "../../Wolfie2D/Nodes/GameNode";
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
-import Point from "../../Wolfie2D/Nodes/Graphics/Point";
 import Rect from "../../Wolfie2D/Nodes/Graphics/Rect";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
@@ -17,19 +15,15 @@ import Timer from "../../Wolfie2D/Timing/Timer";
 import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import { AI_Statuses, Game_Collectables, Game_Events } from "../Events";
-
 import PlayerController, { PlayerType } from "../Player/PlayerController";
 import DynamicMap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import MainMenu from "./Title";
 import EnemyAI from "../Enemies/EnemyAI";
-import GoapAction from "../../Wolfie2D/DataTypes/Interfaces/GoapAction";
-import GoapActionPlanner from "../../Wolfie2D/AI/GoapActionPlanner";
 import Move from "../Enemies/EnemyActions/Move";
 import AttackAction from "../Enemies/EnemyActions/AttackAction";
 import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
-import Game from "../../Wolfie2D/Loop/Game";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
-import Tilemap from "../../Wolfie2D/Nodes/Tilemap";
+
 
 
 export default class GameLevel extends Scene {
@@ -45,7 +39,8 @@ export default class GameLevel extends Scene {
     protected playerSpawnColRow: Vec2;
     protected playerSpawn: Vec2;
     protected player: AnimatedSprite;
-    
+    protected cursor: AnimatedSprite;
+    protected cursorDisabled:boolean = false;
     // Labels for the UI
     protected livesCount: number = 3;
     protected livesCountLabel: Label;
@@ -92,6 +87,7 @@ export default class GameLevel extends Scene {
         this.subscribeToEvents();
         this.addUI();
         this.initializeEnemies();
+        this.cursor = this.addLevelGraphic("cursor","primary",Input.getGlobalMousePosition())
         // Initialize the timers
         this.levelTransitionTimer = new Timer(500);
         this.levelEndTimer = new Timer(50, () => {
@@ -101,7 +97,6 @@ export default class GameLevel extends Scene {
             Debug.clearLog();
             Debug.clearCanvas();
         });
-
 
         // Start the black screen fade out
         this.levelTransitionScreen.tweens.play("fadeOut");
@@ -113,13 +108,19 @@ export default class GameLevel extends Scene {
 
     updateScene(deltaT: number) {
         // TODO: Add limits to how far the player can click from their body.
-        if (Input.isMouseJustPressed(0)) {
-             // Add tile (Left Click)
-            this.updateLevelGeometry(Input.getGlobalMousePosition(),0)
-        }
-        if (Input.isMouseJustPressed(2)) {
-             // Remove tile (Right Click)
-            this.updateLevelGeometry(Input.getGlobalMousePosition(),2)
+        if(!this.cursorDisabled){
+            this.cursor.position =  this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(1,1)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
+            this.cursor.alpha=0.8;
+            if (Input.isMouseJustPressed(0)) {
+                // Add tile (Left Click)
+                this.updateLevelGeometry(Input.getGlobalMousePosition(),0)
+            }
+            if (Input.isMouseJustPressed(2)) {
+                // Remove tile (Right Click)
+                this.updateLevelGeometry(Input.getGlobalMousePosition(),2)
+            }
+        }else{
+            this.cursor.alpha=0
         }
 
         // Handle events and update the UI if needed
@@ -142,6 +143,7 @@ export default class GameLevel extends Scene {
                     {
                         // Check if the player has collected all the collectibles.
                         if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite) {
+                            Input.disableInput();
                             // If so, start the level end timer
                             this.levelEndTimer.start();
                         }
@@ -151,9 +153,7 @@ export default class GameLevel extends Scene {
                     {
                         this.incPlayerLife(-1)
                         if (this.livesCount <= 0) {
-                            // Enable Controls for Menu.
-                            Input.enableInput();
-                            this.sceneManager.changeToScene(MainMenu);
+                            this.goToMenu()
                         } 
                     }
                     break;
@@ -237,8 +237,7 @@ export default class GameLevel extends Scene {
         this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(100, 30), text: "Lives: " + this.livesCount });
         this.livesCountLabel.textColor = Color.BLACK;
         this.livesCountLabel.font = "PixelSimple";
-        
-        // 
+        // Prompt for paper.
         this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(100, 90), text: "Find some paper!" });
         this.papersCountLabel.textColor = Color.BLACK;
         this.papersCountLabel.font = "PixelSimple";
@@ -347,6 +346,13 @@ export default class GameLevel extends Scene {
             return 0
        }
     }
+    protected addLevelGraphic(name:string, layer:string="primary",position:Vec2, size:Vec2 = new Vec2(1,1)) {
+        let toAdd = this.add.animatedSprite(name, layer);
+        toAdd.position.copy(position)
+        toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size)
+        toAdd.animation.playIfNotAlready("idle",true)
+        return toAdd
+    }
     protected processLevelData(level_id:string): void {
         this.level = level_id
         let tilemapLayers = this.add.tilemap(level_id, GameLevel.LEVEL_SCALING);
@@ -374,6 +380,7 @@ export default class GameLevel extends Scene {
                         break;
                     default:
                         this.addLevelEnd(new Vec2(i+0.5,j+0.5))
+                        animatedTiles.alpha = 1
                         break;
                 }
             });
@@ -383,33 +390,33 @@ export default class GameLevel extends Scene {
         
         // NOTE: This code isn't useful if tiles constantly change.
         // Add a layer to display the graph
-        let gLayer = this.addLayer("graph");
-        this.addLayer("graph_debug");
-        gLayer.setHidden(true);
+        // let gLayer = this.addLayer("graph");
+        // this.addLayer("graph_debug");
+        // gLayer.setHidden(true);
 
         // Create the graph to be overlayed.
-        let graph = this.dynamicMap.graph;
+        // let graph = this.dynamicMap.graph;
 
-        // Add all nodes to our graph
-        for (let node of graph.positions) {
-            this.add.graphic(GraphicType.POINT, "graph", { position: node.clone() });
-        }
-        // Add all edges to our graph
-        for (let i = 0; i < graph.edges.length; i++) {
-            let tmp = graph.edges[i];
-            while (tmp !== null) {
-                this.add.graphic(GraphicType.LINE, "graph", { start: graph.getNodePosition(i).clone(), end: graph.getNodePosition(tmp.y).clone() });
-                tmp = tmp.next;
+        // // Add all nodes to our graph
+        // for (let node of graph.positions) {
+        //     this.add.graphic(GraphicType.POINT, "graph", { position: node.clone() });
+        // }
+        // // Add all edges to our graph
+        // for (let i = 0; i < graph.edges.length; i++) {
+        //     let tmp = graph.edges[i];
+        //     while (tmp !== null) {
+        //         this.add.graphic(GraphicType.LINE, "graph", { start: graph.getNodePosition(i).clone(), end: graph.getNodePosition(tmp.y).clone() });
+        //         tmp = tmp.next;
 
-            }
-        }
+        //     }
+        // }
         this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
 
         if(collectibleLayer !== null){
 
             let collectibles = <OrthogonalTilemap>collectibleLayer.getItems()[0]
             this.processTileLayer(collectibles, (tile:number,i: number,j:number) => {
-                let startTile = new Vec2(i+0.5, j+0.5)
+                let startTile = new Vec2(i+0.5, j+0.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE)
                 let toAdd = null    
                 let trigger = null
                 tile = this.tileToGroup(tile)
@@ -417,13 +424,13 @@ export default class GameLevel extends Scene {
                     // TODO: Make a proper enum to handle this instead of hardcoding.
                     case Game_Collectables.WHITE_PAPER:
                         trigger = Game_Events.WHITE_PAPER_FOUND
-                        toAdd = this.add.animatedSprite("white_paper", "primary");
+                        toAdd = this.addLevelGraphic("white_paper", "primary", startTile)
                         this.numberWhite+=1
                         this.numberPapers+=1
                         break;
                     case Game_Collectables.PINK_PAPER:
                         trigger = Game_Events.PINK_PAPER_FOUND
-                        toAdd = this.add.animatedSprite("pink_paper", "primary");
+                        toAdd = this.addLevelGraphic("pink_paper", "primary", startTile)
                         this.numberPink+=1
                         this.numberPapers+=1
                         break;
@@ -431,11 +438,6 @@ export default class GameLevel extends Scene {
                         break;
                 }
                 if(tile != 0){
-                    startTile.x*=GameLevel.DEFAULT_LEVEL_TILE_SIZE.x
-                    startTile.y*=GameLevel.DEFAULT_LEVEL_TILE_SIZE.y
-                    toAdd.position.copy(startTile)
-                    toAdd.scale = GameLevel.LEVEL_SCALING
-                    toAdd.animation.playIfNotAlready("idle",true)
                     toAdd.addPhysics(toAdd.boundary, undefined, false, true);
                     toAdd.setTrigger("player",trigger, null);
                     this.Collectibles.push(toAdd)
@@ -575,6 +577,7 @@ export default class GameLevel extends Scene {
     }
 
     protected goToMenu(): void{
+        Input.enableInput();
         this.sceneManager.changeToScene(MainMenu);
     }
 }
