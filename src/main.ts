@@ -15,6 +15,7 @@ import MainMenu from "./DoodleDungeon/Scenes/Title";
             {name: "right", keys: ["d"]},
             {name: "up", keys: ["w"]},
             {name: "jump", keys: ["w"]},
+            {name: "space", keys: [" "]},
             {name: "down", keys: ["s"]},
             {name: "run", keys: ["shift"]}
         ],

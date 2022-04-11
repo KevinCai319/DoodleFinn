@@ -6,6 +6,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
+import BattlerAI from "../Enemies/BattlerAI";
 import { Game_Events } from "../Events";
 import Fall from "./PlayerStates/Fall";
 import Idle from "./PlayerStates/Idle";
@@ -30,12 +31,16 @@ export enum PlayerStates {
     SPAWN = "spawn"
 }
 
-export default class PlayerController extends StateMachineAI {
-    protected owner: GameNode;
+export default class PlayerController extends StateMachineAI implements BattlerAI{
+    owner: GameNode;
     playerType: PlayerType = PlayerType.PLATFORMER
     velocity: Vec2 = Vec2.ZERO
+    direction: number = 1;
+    attacking: boolean = false;
+    health: number = 10;
 	speed: number = 200;
     invincibleTimer: Timer
+    attackTimer: Timer
     invicible: boolean = false;
 	MIN_SPEED: number = 200;
     MAX_SPEED: number = 300;
@@ -45,7 +50,9 @@ export default class PlayerController extends StateMachineAI {
         this.owner = owner;
         this.playerType = options.playerType
         this.invincibleTimer = new Timer(1000);
-        this.invicible = false
+        this.attackTimer = new Timer(100);
+        this.direction = 1
+        this.setInvincible();
         // I-frame animation(blinking)
         owner.tweens.add("iframe",
         {
@@ -86,13 +93,35 @@ export default class PlayerController extends StateMachineAI {
             ]
         });
         this.initializeStates();
-        (<AnimatedSprite>this.owner).animation.playIfNotAlready(PlayerStates.IDLE, true);
+        (<AnimatedSprite>this.owner).animation.playIfNotAlready("idle left", true);
     }
     setInvincible(duration:number=500){
         this.invincibleTimer.start(duration);
         this.invicible = true;
         this.emitter.fireEvent(Game_Events.PLAYER_INVINCIBLE);
         this.owner.tweens.play("iframe");
+    }
+    damage(amount: number): void {
+        if(!this.invicible){
+            this.health -= amount;
+            if(this.health <= 0){
+                this.emitter.fireEvent(Game_Events.PLAYER_KILLED);
+                this.owner.tweens.play("death");
+            }  
+        }
+    }
+    attack(){
+        // Prevent spamming attacks.
+        if(this.attackTimer.isStopped()){
+            this.attacking = true
+            this.attackTimer.start(500);
+            this.emitter.fireEvent(Game_Events.PLAYER_ATTACK);
+            if(this.direction == -1){
+                (<AnimatedSprite>this.owner).animation.playIfNotAlready("Attacking Left",false,Game_Events.PLAYER_ATTACK_FINISHED)
+            }else{
+                (<AnimatedSprite>this.owner).animation.playIfNotAlready("Attacking Right",false,Game_Events.PLAYER_ATTACK_FINISHED)
+            }
+        }
     }
     initializeStates(): void {
         this.speed = 400;
@@ -110,9 +139,7 @@ export default class PlayerController extends StateMachineAI {
             let fall = new Fall(this, this.owner);
             this.addState(PlayerStates.FALL, fall);
         }
-
-        this.initialize(PlayerStates.IDLE);
-        
+        this.initialize(PlayerStates.SPAWN);
     }
 
     changeState(stateName: string): void {
@@ -131,6 +158,9 @@ export default class PlayerController extends StateMachineAI {
             this.invicible = false
             this.owner.tweens.stop("iframe");
         }
+        // if(this.attacking && this.attackTimer.isStopped()){
+        //     this.attacking = false
+        // }
         if(this.owner.onGround){
             // let rc =  this.tilemap.getColRowAt(this.owner.position);
             // rc.y+=1;

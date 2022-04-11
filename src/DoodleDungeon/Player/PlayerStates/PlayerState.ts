@@ -7,7 +7,8 @@ import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import Timer from "../../../Wolfie2D/Timing/Timer";
 import PlayerController, { PlayerStates, PlayerType } from "../PlayerController";
 import { Game_Events } from "../../Events";
-import GameLevel from "../../Scenes/Game";
+import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+
 
 export default abstract class PlayerState extends State {
 	owner: GameNode;
@@ -24,7 +25,9 @@ export default abstract class PlayerState extends State {
 
 	
 	handleInput(event: GameEvent): void {
-
+		if(event.type == Game_Events.PLAYER_ATTACK_FINISHED){
+			this.parent.attacking=false;
+		}
 	}
 
 	/** 
@@ -38,9 +41,12 @@ export default abstract class PlayerState extends State {
 			direction.y = (Input.isPressed("down") ? 1 : 0) + (Input.isPressed("up") ? -1 : 0)
 			direction.normalize();
 		}else if (type == PlayerType.PLATFORMER){
-			direction.y = (Input.isJustPressed("jump") ? -1 : 0)
+			direction.y = (Input.isPressed("jump") ? -1 : 0)
 		}else{
 
+		}
+		if(Input.isKeyJustPressed("space")){
+			this.parent.attack();
 		}
 		return direction;
 	}
@@ -55,7 +61,7 @@ export default abstract class PlayerState extends State {
 				this.parent.velocity.y += this.gravity*deltaT;
 			}
 
-			if(this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF){
+			if(this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF && !this.parent.invicible){
 				this.owner.freeze()
 				this.owner.disablePhysics()
 				this.emitter.fireEvent(Game_Events.PLAYER_OUT_OF_BOUNDS);

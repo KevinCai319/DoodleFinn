@@ -118,9 +118,9 @@ export default class DynamicTilemap extends OrthogonalTilemap {
     }
 
     // Inefficient implementation of adding a tile.
-    badAddTile(location: Vec2){
+    badAddTile(location: Vec2,type:number){
         let colRow = this.getColRowAt(location);
-        this.setTileAtRowCol(colRow,14);
+        this.setTileAtRowCol(colRow,type);
         //add the tile, update navmesh accordingly.
         this.badNavMesh()
         

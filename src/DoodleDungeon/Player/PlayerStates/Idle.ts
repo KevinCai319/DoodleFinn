@@ -23,14 +23,23 @@ export default class Idle extends OnGround {
 				this.finished(PlayerStates.WALK);
 			}
 		}
-		
+		if(!this.parent.attacking){
+			if(this.parent.direction == -1){
+				this.owner.animation.playIfNotAlready("Idle Left", true);
+			} else {
+				this.owner.animation.playIfNotAlready("Idle Right", true);
+			}
+		}
 		this.parent.velocity.x = 0;
 
 		this.owner.move(this.parent.velocity.scaled(deltaT));
 	}
 
 	onExit(): Record<string, any> {
-		this.owner.animation.stop();
+
+		if(!this.parent.attacking){
+			this.owner.animation.stop();
+		}
 		return {};
 	}
 }
