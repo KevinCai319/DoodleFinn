@@ -29,6 +29,8 @@ export default class Tutorial extends GameLevel {
         this.load.spritesheet("Controls","game_assets/spritesheets/TutorialAssets/Controls.json" )
         this.load.spritesheet("Backstory", "game_assets/spritesheets/TutorialAssets/Backstory.json")
         this.load.spritesheet("Door","game_assets/spritesheets/Door.json")
+        this.load.spritesheet("credit1","game_assets/spritesheets/credit1.json")
+        this.load.spritesheet("credit2","game_assets/spritesheets/credit2.json")
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/enemy.json");
     }
@@ -64,6 +66,10 @@ export default class Tutorial extends GameLevel {
             let door = this.addLevelGraphic("Door",layer.getName(),new Vec2(90,18).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
             door.alpha = 1
             this.door = door
+            let cred2 =this.addLevelGraphic("credit2",layer.getName(),new Vec2(40,15).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
+            let cred1 =this.addLevelGraphic("credit1",layer.getName(),new Vec2(5,15).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
+            cred2.alpha = 0
+            cred1.alpha = 0
         })
         super.startScene();
         (<PlayerController>this.player._ai).MIN_SPEED = 300;
