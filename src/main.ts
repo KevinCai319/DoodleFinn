@@ -2,6 +2,7 @@ import Game from "./Wolfie2D/Loop/Game";
 import MainMenu from "./DoodleDungeon/Scenes/Title";
 import Splash from "./DoodleDungeon/Scenes/Splash";
 import Title from "./DoodleDungeon/Scenes/Title";
+import Tutorial from "./DoodleDungeon/Scenes/Tutorial";
 
 // The main function is your entrypoint into Wolfie2D. Specify your first scene and any options here.
 (function main(){
@@ -18,6 +19,7 @@ import Title from "./DoodleDungeon/Scenes/Title";
             {name: "up", keys: ["w"]},
             {name: "jump", keys: ["w"]},
             {name: "space", keys: [" "]},
+            {name: "e", keys: ["e"]},
             {name: "down", keys: ["s"]},
             {name: "run", keys: ["shift"]}
         ],

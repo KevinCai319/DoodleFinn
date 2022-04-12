@@ -3,6 +3,7 @@ import Input from "../../Wolfie2D/Input/Input";
 import GameNode from "../../Wolfie2D/Nodes/GameNode";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Layer from "../../Wolfie2D/Scene/Layer";
+import { Game_Events } from "../Events";
 import PlayerController from "../Player/PlayerController";
 import GameLevel from "./Game";
 import Level1 from "./Level1";
@@ -13,6 +14,7 @@ export default class Tutorial extends GameLevel {
     LEVEL_TILESET:string = "Tutorial"
     Instructions:AnimatedSprite = null
     Controls:AnimatedSprite = null
+    door:AnimatedSprite = null
     loadScene(): void {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/"+this.LEVEL_NAME+"/"+this.LEVEL_NAME+".json");
@@ -26,6 +28,7 @@ export default class Tutorial extends GameLevel {
         this.load.spritesheet("InstructionsButton", "game_assets/spritesheets/TutorialAssets/InstructionsButton.json")
         this.load.spritesheet("Controls","game_assets/spritesheets/TutorialAssets/Controls.json" )
         this.load.spritesheet("Backstory", "game_assets/spritesheets/TutorialAssets/Backstory.json")
+        this.load.spritesheet("Door","game_assets/spritesheets/Door.json")
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/enemy.json");
     }
@@ -58,6 +61,9 @@ export default class Tutorial extends GameLevel {
             this.Instructions = this.addLevelGraphic("InstructionsButton",layer.getName(), new Vec2(75,13.4).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(2,2))
             let backstory = this.addLevelGraphic("Backstory",layer.getName(),new Vec2(45,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
             backstory.alpha = 0.8
+            let door = this.addLevelGraphic("Door",layer.getName(),new Vec2(90,18).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
+            door.alpha = 1
+            this.door = door
         })
         super.startScene();
         (<PlayerController>this.player._ai).MIN_SPEED = 300;
@@ -87,7 +93,12 @@ export default class Tutorial extends GameLevel {
         if(!this.Controls.visible){
             this.cursorDisabled = this.cursor.boundary.containsPoint(this.Instructions.position)
         }
-
+        // if(region>92){
+        //     this.emitter.fireEvent(Game_Events.LEVEL_END)
+        // }
+        if(this.door.boundary.overlapArea(this.player.boundary) && Input.isKeyJustPressed("e")){
+            this.emitter.fireEvent(Game_Events.LEVEL_END)
+        }
         super.updateScene(deltaT);
         if(!this.Controls.visible){
             if(this.Instructions.boundary.containsPoint(Input.getGlobalMousePosition())){

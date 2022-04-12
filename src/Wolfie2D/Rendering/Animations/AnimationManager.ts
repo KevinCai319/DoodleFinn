@@ -130,7 +130,7 @@ export default class AnimationManager {
             return index;
         } else {
             // No current animation, can't advance. Warn the user
-            console.warn(`Animation index and advance was requested, but the current animation (${this.currentAnimation}) in node with id: ${this.owner.id} was invalid`);
+            // console.warn(`Animation index and advance was requested, but the current animation (${this.currentAnimation}) in node with id: ${this.owner.id} was invalid`);
             return 0;
         }
     }
