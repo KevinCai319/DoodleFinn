@@ -546,7 +546,7 @@ export default class GameLevel extends Scene {
                     new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 30 })
                 ];
                 actions = actionMelee;
-                range = 30;
+                range = 40;
             }
             else if (data.type === "ranged_enemy") {
                 let actionRanged = [

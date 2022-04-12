@@ -7,6 +7,7 @@ import { Game_Names } from "../../Events";
 import GameLevel from "../../Scenes/Game";
 import EnemyAI from "../EnemyAI";
 import Timer from './../../../Wolfie2D/Timing/Timer';
+import AnimatedSprite from './../../../Wolfie2D/Nodes/Sprites/AnimatedSprite';
 
 export default class Charge extends GoapAction {
     private path: NavigationPath;
@@ -41,7 +42,8 @@ export default class Charge extends GoapAction {
                 this.chargeDirection = enemy.owner.position.dirTo(enemy.playerPos).normalized();
             }
             let distance = enemy.owner.position.distanceTo(enemy.lastPlayerPos);
-            if (this.timer.isStopped() || (distance < enemy.inRange)) {
+            let playerBorder = (<AnimatedSprite>enemy.player).boundary
+            if (this.timer.isStopped() || (distance <= enemy.inRange) || (playerBorder.overlaps(enemy.owner.boundary))) {
                 this.isTimerStarted = false;
                 return this.effects
             }

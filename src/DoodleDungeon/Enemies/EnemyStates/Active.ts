@@ -11,6 +11,7 @@ import { Game_Names, AI_Statuses } from "../../Events";
 import GameLevel from "../../Scenes/Game";
 import EnemyAI, { EnemyStates } from "../EnemyAI";
 import EnemyState from "./EnemyState";
+import AnimatedSprite from './../../../Wolfie2D/Nodes/Sprites/AnimatedSprite';
 
 export default class Active extends EnemyState {
     // Timers for managing this state
@@ -65,7 +66,9 @@ export default class Active extends EnemyState {
         //Add in range to status if close enough to a player
         if (this.parent.playerPos !== null) {
             let distance = this.owner.position.distanceTo(this.parent.playerPos);
-            if (distance > this.parent.inRange) {
+
+            let playerBorder = (<AnimatedSprite>this.parent.player).boundary
+            if ((distance > this.parent.inRange) && !playerBorder.overlaps(this.parent.owner.boundary)) {
                 let index = this.parent.currentStatus.indexOf(AI_Statuses.IN_RANGE);
                 if (index != -1) {
                     this.parent.currentStatus.splice(index, 1);
