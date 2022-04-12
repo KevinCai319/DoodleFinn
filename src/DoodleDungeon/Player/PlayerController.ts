@@ -44,6 +44,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
     invicible: boolean = false;
 	MIN_SPEED: number = 200;
     MAX_SPEED: number = 300;
+    ATTACK_AREA: Vec2= new Vec2(1,1)
     
 
     initializeAI(owner: GameNode, options: Record<string, any>){
@@ -52,6 +53,8 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.invincibleTimer = new Timer(1000);
         this.attackTimer = new Timer(100);
         this.direction = 1
+        let boundary =  (<AnimatedSprite>this.owner).boundary
+        this.ATTACK_AREA = new Vec2(boundary.hw*1.5,boundary.hh*2)
         this.setInvincible();
         // I-frame animation(blinking)
         owner.tweens.add("iframe",
@@ -76,7 +79,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         {
             startDelay: 0,
             duration: 1250,
-            onEnd: Game_Events.PLAYER_KILLED,
+            onEnd: Game_Events.PLAYER_LOSE_LIFE,
             effects:[
                 {
                     property: "rotation",
@@ -93,7 +96,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
             ]
         });
         this.initializeStates();
-        (<AnimatedSprite>this.owner).animation.playIfNotAlready("idle left", true);
+        (<AnimatedSprite>this.owner).animation.playIfNotAlready("Idle left", true);
     }
     setInvincible(duration:number=500){
         this.invincibleTimer.start(duration);
@@ -105,16 +108,19 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         if(!this.invicible){
             this.health -= amount;
             if(this.health <= 0){
-                this.emitter.fireEvent(Game_Events.PLAYER_KILLED);
+                // this.emitter.fireEvent(Game_Events.PLAYER_LOSE_LIFE);
                 this.owner.tweens.play("death");
-            }  
+            }else{
+                this.setInvincible()
+            }
         }
     }
     attack(){
         // Prevent spamming attacks.
+        console.log("atk")
         if(this.attackTimer.isStopped()){
             this.attacking = true
-            this.attackTimer.start(500);
+            this.attackTimer.start(100);
             this.emitter.fireEvent(Game_Events.PLAYER_ATTACK);
             if(this.direction == -1){
                 (<AnimatedSprite>this.owner).animation.playIfNotAlready("Attacking Left",false,Game_Events.PLAYER_ATTACK_FINISHED)
@@ -158,9 +164,9 @@ export default class PlayerController extends StateMachineAI implements BattlerA
             this.invicible = false
             this.owner.tweens.stop("iframe");
         }
-        // if(this.attacking && this.attackTimer.isStopped()){
-        //     this.attacking = false
-        // }
+        if(this.attacking && this.attackTimer.isStopped()){
+            this.attacking = false
+        }
         if(this.owner.onGround){
             // let rc =  this.tilemap.getColRowAt(this.owner.position);
             // rc.y+=1;

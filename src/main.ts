@@ -1,5 +1,6 @@
 import Game from "./Wolfie2D/Loop/Game";
 import MainMenu from "./DoodleDungeon/Scenes/Title";
+import Splash from "./DoodleDungeon/Scenes/Splash";
 
 // The main function is your entrypoint into Wolfie2D. Specify your first scene and any options here.
 (function main(){
@@ -27,7 +28,7 @@ import MainMenu from "./DoodleDungeon/Scenes/Title";
     const game = new Game(options);
 
     // Start our game
-    game.start(MainMenu, {});
+    game.start(Splash, {});
 })();
 
 function runTests(){};

@@ -23,7 +23,9 @@ export default class Idle extends OnGround {
 				this.finished(PlayerStates.WALK);
 			}
 		}
+		console.log("loop")
 		if(!this.parent.attacking){
+			console.log("not atk")
 			if(this.parent.direction == -1){
 				this.owner.animation.playIfNotAlready("Idle Left", true);
 			} else {

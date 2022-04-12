@@ -1,6 +1,6 @@
 export enum Game_Events {
 	PLAYER_ENTERED_LEVEL_END = "PlayerEnteredLevelEnd",
-	PLAYER_OUT_OF_BOUNDS = "PlayerOutOfBounds",
+	PLAYER_LOSE_LIFE = "PlayerOutOfBounds",
 	PLAYER_INVINCIBLE = "PlayerInvincible",
 	PLAYER_INVINCIBLE_END = "PlayerInvincibleEnd",
 	PINK_PAPER_FOUND = "PinkPaperFound",
@@ -11,7 +11,9 @@ export enum Game_Events {
 	PLAYER_MOVE = "PlayerMoved",
 	PLAYER_ATTACK = "PlayerAttacked",
 	PLAYER_ATTACK_FINISHED = "PlayerAttackFinished",
-    ENEMY_KILLED = "EnemyKilled"
+  ENEMY_KILLED = "EnemyKilled",
+	SPLASH_SCREEN_SHOW = "SplashShow",
+	SPLASH_SCREEN_END = "SplashDone"
 }
 export enum Game_Names {
     NAVMESH = "navmesh"
