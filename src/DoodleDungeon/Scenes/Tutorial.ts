@@ -3,6 +3,7 @@ import Input from "../../Wolfie2D/Input/Input";
 import GameNode from "../../Wolfie2D/Nodes/GameNode";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Layer from "../../Wolfie2D/Scene/Layer";
+import PlayerController from "../Player/PlayerController";
 import GameLevel from "./Game";
 
 export default class Tutorial extends GameLevel {
@@ -53,13 +54,15 @@ export default class Tutorial extends GameLevel {
             let helpSign = this.addLevelGraphic("help",layer.getName(),new Vec2(69.3,11.6).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.75,1.75))
             helpSign.alpha = 0.5
             this.Instructions = this.addLevelGraphic("InstructionsButton",layer.getName(), new Vec2(75,13.4).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(2,2))
-            let backstory = this.addLevelGraphic("Backstory",layer.getName(),new Vec2(45,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.6,1.6))
+            let backstory = this.addLevelGraphic("Backstory",layer.getName(),new Vec2(45,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
             backstory.alpha = 0.8
         })
         super.startScene();
+        (<PlayerController>this.player._ai).MIN_SPEED = 300;
+        (<PlayerController>this.player._ai).MAX_SPEED = 400;
         this.Controls = this.add.animatedSprite("Controls","UI")
         this.Controls.position= this.getViewport().getHalfSize()
-        this.Controls.scale=  this.Controls.position.scaled(2).div(this.Controls.size)
+        this.Controls.scale = this.Controls.position.scaled(2).div(this.Controls.size)
         this.Controls.visible = false
         this.viewport.setZoomLevel(1.25);
         this.viewport.setBounds(0, 0, this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y)

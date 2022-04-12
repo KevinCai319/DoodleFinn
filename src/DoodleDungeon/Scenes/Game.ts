@@ -170,7 +170,7 @@ export default class GameLevel extends Scene {
                         }
                     }
                     break;
-                case Game_Events.PLAYER_OUT_OF_BOUNDS:
+                case Game_Events.PLAYER_LOSE_LIFE:
                     {
                         this.incPlayerLife(-1)
                         if (this.livesCount <= 0) {
@@ -184,7 +184,6 @@ export default class GameLevel extends Scene {
                         Input.enableInput();
                     }
                     break;
-
                 case Game_Events.LEVEL_END:
                     {
                         // Go to the next level
@@ -241,7 +240,7 @@ export default class GameLevel extends Scene {
     protected subscribeToEvents() {
         this.receiver.subscribe([
             Game_Events.PLAYER_ENTERED_LEVEL_END,
-            Game_Events.PLAYER_OUT_OF_BOUNDS,
+            Game_Events.PLAYER_LOSE_LIFE,
             Game_Events.PINK_PAPER_FOUND,
             Game_Events.WHITE_PAPER_FOUND,
             Game_Events.LEVEL_START,
