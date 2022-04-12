@@ -11,6 +11,7 @@ import { Game_Names, AI_Statuses } from "../../Events";
 import GameLevel from "../../Scenes/Game";
 import EnemyAI, { EnemyStates } from "../EnemyAI";
 import EnemyState from "./EnemyState";
+import AnimatedSprite from './../../../Wolfie2D/Nodes/Sprites/AnimatedSprite';
 
 export default class Active extends EnemyState {
     // Timers for managing this state
@@ -65,7 +66,9 @@ export default class Active extends EnemyState {
         //Add in range to status if close enough to a player
         if (this.parent.playerPos !== null) {
             let distance = this.owner.position.distanceTo(this.parent.playerPos);
-            if (distance > this.parent.inRange) {
+
+            let playerBorder = (<AnimatedSprite>this.parent.player).boundary
+            if ((distance > this.parent.inRange) && !playerBorder.overlaps(this.parent.owner.boundary)) {
                 let index = this.parent.currentStatus.indexOf(AI_Statuses.IN_RANGE);
                 if (index != -1) {
                     this.parent.currentStatus.splice(index, 1);
@@ -81,16 +84,22 @@ export default class Active extends EnemyState {
 
         //Our action was successful
         if (result !== null) {
-            //If the action was Retreat or Berserk, remove the CAN_RETREAT or CAN_BERSERK status from the enemy, they can only use them once
-            if (nextAction.toString() === "(AttackAction)"){
-                let index = this.parent.currentStatus.indexOf("GO_ATTACK");
+            if (nextAction.toString() === "(Wait)") {
+                let index = this.parent.currentStatus.indexOf(AI_Statuses.MOVE_DONE)
+                if (index != -1) {
+                    this.parent.currentStatus.splice(index, 1);
+                }
+            }
+            if (nextAction.toString() === "(Charge)") {
+                let index = this.parent.currentStatus.indexOf(AI_Statuses.WAIT_DONE)
                 if (index != -1) {
                     this.parent.currentStatus.splice(index, 1);
                 }
             }
             //The action has not reached the goal yet, pass along the effects of our action
             if (!result.includes(AI_Statuses.REACHED_GOAL)) {
-                this.parent.currentStatus = this.parent.currentStatus.concat(...result);
+                this.parent.currentStatus = this.parent.currentStatus.concat(result);
+                // console.log("CURRENT STATUS: ", this.parent.currentStatus)
             }
             this.parent.plan.pop();
         }

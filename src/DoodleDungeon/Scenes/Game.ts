@@ -23,6 +23,8 @@ import Move from "../Enemies/EnemyActions/Move";
 import AttackAction from "../Enemies/EnemyActions/AttackAction";
 import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
+import Wait from './../Enemies/EnemyActions/Wait';
+import Charge from './../Enemies/EnemyActions/Charge';
 import Layer from "../../Wolfie2D/Scene/Layer";
 
 
@@ -209,7 +211,13 @@ export default class GameLevel extends Scene {
                     {
                         this.goToMenu()
                     }
-
+                    break;
+                case Game_Events.ENEMY_KILLED:
+                    {
+                        let node = this.sceneGraph.getNode(event.data.get("owner"));
+                        node.destroy();
+                    }
+                    break;
             }
         }
     }
@@ -509,18 +517,16 @@ export default class GameLevel extends Scene {
         // Create an enemies array
         this.enemies = new Array(enemyData.numEnemies);
 
-        let actionsGun = [
-            new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
-            new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 30 })
-        ];
-
-
         // Initialize the enemies
         for (let i = 0; i < enemyData.numEnemies; i++) {
             let data = enemyData.enemies[i];
 
             // Create an enemy
-            this.enemies[i] = this.add.animatedSprite(data.type, "primary");
+
+            // TODO: CHANGE THIS
+            // this.enemies[i] = this.add.animatedSprite(data.type, "primary");
+            this.enemies[i] = this.add.animatedSprite("gun_enemy", "primary");
+            
             this.enemies[i].position.set(data.position[0], data.position[1]);
             this.enemies[i].animation.play("IDLE");
 
@@ -535,12 +541,37 @@ export default class GameLevel extends Scene {
             //     different statuses, but dont remove these statuses for the original two enemies*/
             let statusArray: Array<string> = [];
 
-            //     //Vary weapon type and choose actions
+            // Vary weapon type and choose actions
             let actions;
             let range;
-            actions = actionsGun;
-            range = 30;
 
+            if (data.type === "melee_enemy"){
+                let actionMelee = [
+                    new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
+                    new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 30 })
+                ];
+                actions = actionMelee;
+                range = 40;
+            }
+            else if (data.type === "ranged_enemy") {
+                let actionRanged = [
+                    new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
+                    new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 100 })
+                ];
+                actions = actionRanged;
+                range = 100;
+            }
+            else if (data.type === "charging_enemy") {
+                /** MOVE => WAIT => CHARGE => ATTACK */
+                let actionCharging = [
+                    new AttackAction(1, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
+                    new Move(2, [], [AI_Statuses.MOVE_DONE], { inRange: 100 }),
+                    new Wait(3, [AI_Statuses.MOVE_DONE], [AI_Statuses.WAIT_DONE], { waitTime: 1000 }),
+                    new Charge(4, [AI_Statuses.WAIT_DONE], [AI_Statuses.IN_RANGE], { chargeTime: 1000 })
+                ]
+                actions = actionCharging;
+                range = 30;
+            }
 
             let enemyOptions = {
                 defaultMode: data.mode,

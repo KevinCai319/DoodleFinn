@@ -1,12 +1,19 @@
 {
-  "numEnemies": 1,
+  "numEnemies": 2,
   "enemies": [
     {
       "position": [400,400],
       "mode": "guard",
       "guardPosition":[400,400],
       "health": 5,
-      "type": "gun_enemy"
-    }
+      "type": "melee_enemy"
+    },
+    {
+      "position": [400,500],
+      "mode": "guard",
+      "guardPosition":[400,500],
+      "health": 5,
+      "type": "charging_enemy"
+    }    
   ]
 }

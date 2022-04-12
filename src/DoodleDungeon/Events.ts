@@ -11,6 +11,7 @@ export enum Game_Events {
 	PLAYER_MOVE = "PlayerMoved",
 	PLAYER_ATTACK = "PlayerAttacked",
 	PLAYER_ATTACK_FINISHED = "PlayerAttackFinished",
+  ENEMY_KILLED = "EnemyKilled",
 	SPLASH_SCREEN_SHOW = "SplashShow",
 	SPLASH_SCREEN_END = "SplashDone"
 }
@@ -26,5 +27,9 @@ export enum AI_Statuses {
     LOW_HEALTH = "LOW_HEALTH",
     CAN_RETREAT = "CAN_RETREAT",
     CAN_BERSERK = "CAN_BERSERK",
-    REACHED_GOAL = "GOAL"
+    REACHED_GOAL = "GOAL",
+
+    MOVE_DONE = "MOVE_DONE",
+    WAIT_DONE = "WAIT_DONE",
+    CAN_ATTACK = "CAN_ATTACK"
 }
