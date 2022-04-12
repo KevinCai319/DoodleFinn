@@ -22,6 +22,7 @@ export default class Tutorial extends GameLevel {
         this.load.spritesheet("help", "game_assets/spritesheets/help.json");
         this.load.spritesheet("InstructionsButton", "game_assets/spritesheets/TutorialAssets/InstructionsButton.json")
         this.load.spritesheet("Controls","game_assets/spritesheets/TutorialAssets/Controls.json" )
+        this.load.spritesheet("Backstory", "game_assets/spritesheets/TutorialAssets/Backstory.json")
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/enemy.json");
     }
@@ -52,6 +53,8 @@ export default class Tutorial extends GameLevel {
             let helpSign = this.addLevelGraphic("help",layer.getName(),new Vec2(69.3,11.6).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.75,1.75))
             helpSign.alpha = 0.5
             this.Instructions = this.addLevelGraphic("InstructionsButton",layer.getName(), new Vec2(75,13.4).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(2,2))
+            let backstory = this.addLevelGraphic("Backstory",layer.getName(),new Vec2(45,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.6,1.6))
+            backstory.alpha = 0.8
         })
         super.startScene();
         this.Controls = this.add.animatedSprite("Controls","UI")
