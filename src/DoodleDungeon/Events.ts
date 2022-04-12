@@ -10,7 +10,9 @@ export enum Game_Events {
 	PLAYER_KILLED = "PlayerKilled",
 	PLAYER_MOVE = "PlayerMoved",
 	PLAYER_ATTACK = "PlayerAttacked",
-	PLAYER_ATTACK_FINISHED = "PlayerAttackFinished"
+	PLAYER_ATTACK_FINISHED = "PlayerAttackFinished",
+	SPLASH_SCREEN_SHOW = "SplashShow",
+	SPLASH_SCREEN_END = "SplashDone"
 }
 export enum Game_Names {
     NAVMESH = "navmesh"

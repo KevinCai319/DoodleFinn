@@ -64,7 +64,7 @@ export default abstract class PlayerState extends State {
 			if(this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF && !this.parent.invicible){
 				this.owner.freeze()
 				this.owner.disablePhysics()
-				this.emitter.fireEvent(Game_Events.PLAYER_OUT_OF_BOUNDS);
+				this.emitter.fireEvent(Game_Events.PLAYER_LOSE_LIFE);
 				this.finished(PlayerStates.SPAWN);
 			}
 		}

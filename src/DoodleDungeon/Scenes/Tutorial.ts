@@ -5,8 +5,10 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Layer from "../../Wolfie2D/Scene/Layer";
 import PlayerController from "../Player/PlayerController";
 import GameLevel from "./Game";
+import Level1 from "./Level1";
 
 export default class Tutorial extends GameLevel {
+    static LevelsUnlocked:number = 1
     LEVEL_NAME:string ="Tutorial"
     LEVEL_TILESET:string = "Tutorial"
     Instructions:AnimatedSprite = null
@@ -45,7 +47,7 @@ export default class Tutorial extends GameLevel {
 
     startScene(): void {
         // Add the Demo Level.
-        this.nextLevel = null
+        this.nextLevel = Level1
         this.playerSpawnColRow = new Vec2(77,10)
         // Do generic setup for a GameLevel
         this.backgroundSetup.push((layer:Layer)=>{
@@ -96,12 +98,14 @@ export default class Tutorial extends GameLevel {
             }else{
                 this.Instructions.animation.playIfNotAlready("idle")
             }
+            
         }else{
             if(Input.isMouseJustPressed()){
                 this.player.unfreeze()
                 this.Controls.visible = false
             }
         }
+
     }
     //@Override
     // Player can fall as many times as needed.
