@@ -65,7 +65,6 @@ export default class MainMenu extends Scene {
                 }
             }
             this.sceneManager.changeToScene(Tutorial, {}, sceneOptions);
-            // this.sceneManager.changeToScene(Level1, {}, sceneOptions);
         }
         // Scene has started, so start playing music
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "menu", loop: true, holdReference: true});
