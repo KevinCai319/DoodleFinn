@@ -6,6 +6,7 @@ import NavigationPath from "../../../Wolfie2D/Pathfinding/NavigationPath";
 import { Game_Names } from "../../Events";
 import GameLevel from "../../Scenes/Game";
 import EnemyAI from "../EnemyAI";
+import AnimatedSprite from './../../../Wolfie2D/Nodes/Sprites/AnimatedSprite';
 
 export default class Move extends GoapAction {
     private inRange: number;
@@ -29,7 +30,8 @@ export default class Move extends GoapAction {
             let distance = enemy.owner.position.distanceTo(playerPos);
 
             //If close enough, we've moved far enough and this loop action is done
-            if (distance <= this.inRange){
+            let playerBorder = (<AnimatedSprite>enemy.player).boundary
+            if ((distance <= this.inRange) || playerBorder.overlaps(enemy.owner.boundary)){
                 return this.effects;
             }
             //Check if the player is directly visible.

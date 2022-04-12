@@ -4,6 +4,7 @@ import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../../Wolfie2D/Events/Emitter";
 import GameNode from "../../../Wolfie2D/Nodes/GameNode";
 import EnemyAI from "../EnemyAI";
+import BattlerAI from './../BattlerAI';
 
 export default class AttackAction extends GoapAction {
     protected emitter: Emitter;
@@ -29,6 +30,10 @@ export default class AttackAction extends GoapAction {
             let dir = enemy.getPlayerPosition().clone().sub(enemy.owner.position).normalize();
             dir.rotateCCW(Math.PI / 4 * Math.random() - Math.PI/8);
             enemy.owner.rotation = Vec2.UP.angleToCCW(dir);
+
+            // TODO: Perform attack
+            console.log("PERFORM ATTACK");
+            (<BattlerAI>enemy.player._ai).damage(1);
             
             return this.effects;
         }

@@ -6,18 +6,12 @@ import { TweenableProperties } from "../../Wolfie2D/Nodes/GameNode";
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Rect from "../../Wolfie2D/Nodes/Graphics/Rect";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
-import Button from "../../Wolfie2D/Nodes/UIElements/Button";
-import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Scene from "../../Wolfie2D/Scene/Scene";
-import ArrayUtils from "../../Wolfie2D/Utils/ArrayUtils";
 import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
-import PriorityQueue from "../../Wolfie2D/Utils/PriorityQueue";
-import RandUtils from "../../Wolfie2D/Utils/RandUtils";
-import SortingUtils from "../../Wolfie2D/Utils/SortingUtils";
+
 import { Game_Events } from "../Events";
-import Game from "./Game";
-import Level1 from "./Level1";
+
 import Tutorial from "./Tutorial";
 
 export default class Splash extends Scene {
@@ -30,10 +24,10 @@ export default class Splash extends Scene {
     }
 
     startScene(): void {
-        this.addUILayer("UI");
-        let back = this.add.graphic(GraphicType.RECT, "UI", { position: new Vec2(2000, 2000), size: new Vec2(4000, 4000) });
+        this.addUILayer("Main");
+        let back = this.add.graphic(GraphicType.RECT, "Main", { position: new Vec2(2000, 2000), size: new Vec2(4000, 4000) });
         back.color = Color.WHITE
-        this.logo = this.add.animatedSprite("splash_screen","UI")
+        this.logo = this.add.animatedSprite("splash_screen","Main")
         this.logo.position= this.getViewport().getHalfSize()
         this.logo.scale = this.logo.position.scaled(2).div(this.logo.size)
         this.logo.animation.playIfNotAlready("idle",false)
