@@ -16,6 +16,8 @@ import BattlerAI from "./BattlerAI";
 import Active from "./EnemyStates/Active";
 import Guard from "./EnemyStates/Guard";
 import GameLevel from "../Scenes/Game";
+import Timer from './../../Wolfie2D/Timing/Timer';
+import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 
 
 export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
@@ -48,6 +50,9 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
     // Path to player
     path: NavigationPath;
 
+    invincible: boolean;
+    invincibleTimer: Timer;
+
     initializeAI(owner: AnimatedSprite, options: Record<string, any>): void {
         this.owner = owner;
 
@@ -74,10 +79,32 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
 
         this.planner = new GoapActionPlanner();
 
+        this.invincible = false;
+        this.invincibleTimer = new Timer(0);
+
         // Initialize to the default state
         this.initialize(EnemyStates.DEFAULT);
 
         this.getPlayerPosition();
+
+        this.owner.tweens.add("iframe",
+        {
+            startDelay: 0,
+            duration: 125,
+            onEnd: Game_Events.PLAYER_INVINCIBLE_END,
+            reverseOnComplete: true,
+            loop:true,
+            effects:[
+                {
+                    property: "alpha",
+                    start: 1,
+                    end: 0,
+                    ease: EaseFunctionType.IN_SINE
+
+                }
+            ]
+           
+        });
 
         this.owner.debugRender = ()=>{
             if(this.path != null){
@@ -98,14 +125,22 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
         }
     }
 
+    setInvincible(duration:number=500){
+        this.invincibleTimer.start(duration);
+        this.invincible = true;
+        this.emitter.fireEvent(Game_Events.PLAYER_INVINCIBLE);
+        this.owner.tweens.play("iframe");
+    }
     damage(damage: number): void {
-        this.health -= damage;
-
-        // If health goes below 0, disable AI and fire enemyDied event
-        if (this.health <= 0) {
-            this.owner.setAIActive(false, {});
-            this.owner.isCollidable = false;
-            this.owner.visible = false;
+        if(!this.invincible){
+            this.health -= damage;
+            this.setInvincible(500)
+            if(this.health <= 0){
+                this.owner.setAIActive(false, {});
+                this.owner.isCollidable = false;
+                this.owner.visible = false;
+                this.emitter.fireEvent(Game_Events.ENEMY_KILLED, {owner: this.owner.id});
+            }  
         }
     }
 
@@ -116,6 +151,11 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
 
     update(deltaT: number){
         super.update(deltaT);
+
+        if(this.invincible && this.invincibleTimer.isStopped()){
+            this.invincible = false
+            this.owner.tweens.stop("iframe");
+        }
 
         // // This is the plan that is executed in the Active state, so whenever we don't have a plan, acquire a new one given the current statuses the enemy has
         if (this.plan.isEmpty()) {
