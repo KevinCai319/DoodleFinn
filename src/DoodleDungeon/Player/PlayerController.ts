@@ -112,9 +112,10 @@ export default class PlayerController extends StateMachineAI implements BattlerA
     }
     attack(){
         // Prevent spamming attacks.
+        console.log("atk")
         if(this.attackTimer.isStopped()){
             this.attacking = true
-            this.attackTimer.start(500);
+            this.attackTimer.start(100);
             this.emitter.fireEvent(Game_Events.PLAYER_ATTACK);
             if(this.direction == -1){
                 (<AnimatedSprite>this.owner).animation.playIfNotAlready("Attacking Left",false,Game_Events.PLAYER_ATTACK_FINISHED)
@@ -158,9 +159,9 @@ export default class PlayerController extends StateMachineAI implements BattlerA
             this.invicible = false
             this.owner.tweens.stop("iframe");
         }
-        // if(this.attacking && this.attackTimer.isStopped()){
-        //     this.attacking = false
-        // }
+        if(this.attacking && this.attackTimer.isStopped()){
+            this.attacking = false
+        }
         if(this.owner.onGround){
             // let rc =  this.tilemap.getColRowAt(this.owner.position);
             // rc.y+=1;
