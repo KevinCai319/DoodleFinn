@@ -24,6 +24,8 @@ import AttackAction from "../Enemies/EnemyActions/AttackAction";
 import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import Layer from "../../Wolfie2D/Scene/Layer";
+import Button from "../../Wolfie2D/Nodes/UIElements/Button";
+import Tutorial from "./Tutorial";
 
 
 
@@ -37,6 +39,7 @@ export default class GameLevel extends Scene {
     static INPUT_TILE_SIZE = new Vec2(256, 256);
     static LEVEL_SCALING: Vec2 = new Vec2(this.DEFAULT_LEVEL_TILE_SIZE.x/this.INPUT_TILE_SIZE.x,this.DEFAULT_LEVEL_TILE_SIZE.y/this.INPUT_TILE_SIZE.y);
     
+    paused:boolean = false
     protected playerSpawnColRow: Vec2;
     protected playerSpawn: Vec2;
     protected playerScale: number = 1/16;
@@ -67,17 +70,19 @@ export default class GameLevel extends Scene {
     dynamicMap: DynamicMap;
     level: string
 
+    menuButton: Button
+    pauseButton:Button
     // Stuff to end the level and go to the next level
     protected levelEndSpots: Array<Rect> = []
     protected nextLevel: new (...args: any) => GameLevel;
+    protected tutorial: new (...args: any) => GameLevel;
     protected levelEndTimer: Timer;
     protected levelEndLabel: Label;
-
     // Screen fade in/out for level start and end
     protected levelTransitionTimer: Timer;
     protected levelTransitionScreen: Rect;
 
-
+    
 
     startScene(): void {
         // Do the game level standard initializations
@@ -110,6 +115,12 @@ export default class GameLevel extends Scene {
 
 
     updateScene(deltaT: number) {
+        if(this.pauseButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()){
+            this.pauseButton.onClick()
+        }
+        if(this.menuButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()){
+            this.menuButton.onClick()
+        }
         // TODO: Add limits to how far the player can click from their body.
         this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(1,1)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
         if(!this.cursorDisabled){
@@ -130,6 +141,13 @@ export default class GameLevel extends Scene {
         while (this.receiver.hasNextEvent()) {
             let event = this.receiver.getNextEvent();
             switch (event.type) {
+                case Game_Events.GAME_PAUSE:
+                {
+                    this.paused = !this.paused
+                    this.menuButton.visible = this.paused 
+                    this.levelTransitionScreen.alpha = (this.paused)?1:0;
+                }
+                break;
                 case Game_Events.PLAYER_ATTACK:
                     {
                         // GO through all enemies and see if they are in range of the cursor hitbox.
@@ -247,7 +265,8 @@ export default class GameLevel extends Scene {
             Game_Events.LEVEL_END,
             Game_Events.PLAYER_KILLED,
             Game_Events.PLAYER_ATTACK,
-            Game_Events.PLAYER_ATTACK_FINISHED
+            Game_Events.PLAYER_ATTACK_FINISHED,
+            Game_Events.GAME_PAUSE
         ]);
     }
 
@@ -318,6 +337,32 @@ export default class GameLevel extends Scene {
             ],
             onEnd: Game_Events.LEVEL_START
         });
+        let size = this.viewport.getHalfSize();
+        let playBtn = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", {position: new Vec2(size.x*1.8, size.y*1.8), text: "Pause"});
+        playBtn.backgroundColor = Color.BLACK;
+        playBtn.borderColor = Color.WHITE;
+        playBtn.borderRadius = 0;
+        playBtn.setPadding(new Vec2(50, 10));
+        playBtn.font = "PixelSimple";
+        playBtn.onClick = () =>{
+            console.log("clicked")
+            this.levelTransitionScreen.alpha = 0;
+            this.emitter.fireEvent(Game_Events.GAME_PAUSE);
+        }
+        this.pauseButton = playBtn
+        let menuBtn = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", {position: new Vec2(size.x, size.y), text: "Menu"});
+        menuBtn.backgroundColor = Color.BLACK;
+        menuBtn.borderColor = Color.WHITE;
+        menuBtn.borderRadius = 0;
+        menuBtn.setPadding(new Vec2(50, 10));
+        menuBtn.font = "PixelSimple";
+        menuBtn.onClick = () =>{
+            if(menuBtn.visible){
+                this.goToMenu()
+            }
+        }
+        menuBtn.visible = false
+        this.menuButton = menuBtn
     }
 
     /**
@@ -608,7 +653,18 @@ export default class GameLevel extends Scene {
 
     protected goToMenu(): void{
         Input.enableInput();
-        this.sceneManager.changeToScene(MainMenu);
+        let sceneOptions = {
+            physics: {
+                groupNames: ["ground", "player","enemy"],
+                collisions:
+                [
+                    [0, 1, 1],
+                    [1, 0, 0],
+                    [1, 0, 0]
+                ]
+            }
+        }
+        this.sceneManager.changeToScene(this.tutorial, {}, sceneOptions);
     }
 }
 

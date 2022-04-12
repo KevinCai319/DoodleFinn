@@ -1,5 +1,6 @@
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameLevel from "./Game";
+import Tutorial from "./Tutorial";
 
 export default class Level1 extends GameLevel {
     LEVEL_NAME:string ="Level_1"
@@ -34,6 +35,7 @@ export default class Level1 extends GameLevel {
     startScene(): void {
         // Add the Demo Level.
         this.nextLevel = null
+        this.tutorial = Tutorial
         this.playerSpawnColRow = new Vec2(7,40)
         // Do generic setup for a GameLevel
         super.startScene();

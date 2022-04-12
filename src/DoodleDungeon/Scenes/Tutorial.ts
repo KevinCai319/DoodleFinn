@@ -78,7 +78,8 @@ export default class Tutorial extends GameLevel {
         this.levelEndLabel.destroy()
         // this.levelTransitionScreen.destroy()
         this.livesCount = 1
-        
+        this.pauseButton.visible = false
+        this.pauseButton.destroy()
     }
 
     updateScene(deltaT: number): void {
@@ -98,7 +99,7 @@ export default class Tutorial extends GameLevel {
             }else{
                 this.Instructions.animation.playIfNotAlready("idle")
             }
-            
+
         }else{
             if(Input.isMouseJustPressed()){
                 this.player.unfreeze()
