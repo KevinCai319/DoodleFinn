@@ -66,10 +66,10 @@ export default class Tutorial extends GameLevel {
             let door = this.addLevelGraphic("Door",layer.getName(),new Vec2(90,18).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
             door.alpha = 1
             this.door = door
-            let cred2 =this.addLevelGraphic("credit2",layer.getName(),new Vec2(40,15).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
-            let cred1 =this.addLevelGraphic("credit1",layer.getName(),new Vec2(5,15).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
-            cred2.alpha = 0
-            cred1.alpha = 0
+            let cred2 =this.addLevelGraphic("credit2",layer.getName(),new Vec2(30,15).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
+            let cred1 =this.addLevelGraphic("credit1",layer.getName(),new Vec2(5,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
+            cred2.alpha = 1
+            cred1.alpha = 1
         })
         super.startScene();
         (<PlayerController>this.player._ai).MIN_SPEED = 300;
