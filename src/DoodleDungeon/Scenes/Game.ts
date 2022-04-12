@@ -111,8 +111,8 @@ export default class GameLevel extends Scene {
 
     updateScene(deltaT: number) {
         // TODO: Add limits to how far the player can click from their body.
+        this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(1,1)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
         if(!this.cursorDisabled){
-            this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(1,1)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
             this.cursor.alpha=0.8;
             if (Input.isMouseJustPressed(0)) {
                 // Add tile (Left Click)

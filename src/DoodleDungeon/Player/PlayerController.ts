@@ -93,7 +93,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
             ]
         });
         this.initializeStates();
-        (<AnimatedSprite>this.owner).animation.playIfNotAlready("idle left", true);
+        (<AnimatedSprite>this.owner).animation.playIfNotAlready("Idle left", true);
     }
     setInvincible(duration:number=500){
         this.invincibleTimer.start(duration);
