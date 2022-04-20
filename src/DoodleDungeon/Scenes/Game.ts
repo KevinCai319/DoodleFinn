@@ -39,13 +39,16 @@ export default class GameLevel extends Scene {
     static INPUT_TILE_SIZE = new Vec2(256, 256);
     static LEVEL_SCALING: Vec2 = new Vec2(this.DEFAULT_LEVEL_TILE_SIZE.x/this.INPUT_TILE_SIZE.x,this.DEFAULT_LEVEL_TILE_SIZE.y/this.INPUT_TILE_SIZE.y);
     
-    paused:boolean = false
+    paused:boolean = false;
+    protected placementHacks:boolean = false;
+    protected placementRange:number = 5;
     protected playerSpawnColRow: Vec2;
     protected playerSpawn: Vec2;
     protected playerScale: number = 1/16;
     protected player: AnimatedSprite;
     protected cursor: AnimatedSprite;
     protected cursorDisabled:boolean = false;
+    
     // Labels for the UI
     protected livesCount: number = 3;
     protected livesCountLabel: Label;
@@ -122,7 +125,7 @@ export default class GameLevel extends Scene {
             this.menuButton.onClick()
         }
         // TODO: Add limits to how far the player can click from their body.
-        this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(1,1)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
+        this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(0.5,0.5)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
         if(!this.cursorDisabled){
             this.cursor.alpha=0.8;
             if (Input.isMouseJustPressed(0)) {
@@ -134,7 +137,7 @@ export default class GameLevel extends Scene {
                 this.updateLevelGeometry(Input.getGlobalMousePosition(),2)
             }
         }else{
-            this.cursor.alpha=0
+            this.cursor.alpha=0;
         }
 
         // Handle events and update the UI if needed
@@ -347,24 +350,29 @@ export default class GameLevel extends Scene {
         let playBtn = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", {position: new Vec2(size.x*1.8, size.y*1.8), text: "Pause"});
         playBtn.backgroundColor = Color.BLACK;
         playBtn.borderColor = Color.WHITE;
-        playBtn.borderRadius = 0;
-        playBtn.setPadding(new Vec2(50, 10));
+        playBtn.borderRadius = 10;
+        playBtn.setPadding(new Vec2(10,15));
+        playBtn.scale = new Vec2(0.5, 0.5);
         playBtn.font = "PixelSimple";
         playBtn.onClick = () =>{
-            console.log("clicked")
-            this.levelTransitionScreen.alpha = 0;
-            this.emitter.fireEvent(Game_Events.GAME_PAUSE);
+
+            if(playBtn.boundary.intersectPoint(Input.getMousePosition())){
+                console.log("clicked")
+                this.levelTransitionScreen.alpha = 0;
+                this.emitter.fireEvent(Game_Events.GAME_PAUSE);
+            }
         }
         this.pauseButton = playBtn
         let menuBtn = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", {position: new Vec2(size.x, size.y), text: "Menu"});
         menuBtn.backgroundColor = Color.BLACK;
         menuBtn.borderColor = Color.WHITE;
         menuBtn.borderRadius = 0;
-        menuBtn.setPadding(new Vec2(50, 10));
+        menuBtn.setPadding(new Vec2(10, 15));
+        playBtn.scale = new Vec2(0.5, 0.5);
         menuBtn.font = "PixelSimple";
         menuBtn.onClick = () =>{
             if(menuBtn.visible){
-                this.goToMenu()
+                this.goToMenu();
             }
         }
         menuBtn.visible = false
@@ -386,8 +394,15 @@ export default class GameLevel extends Scene {
         this.player.position.copy(this.playerSpawn);
         this.viewport.follow(this.player);
         // TODO: update AABB for Finn.
-        this.player.addPhysics(this.player.boundary.clone());
-        this.player.colliderOffset.set(0, 2);
+        let playerBox = this.player.boundary.clone();
+        //remove 1/8 of height and width from the player box.
+        let offset = playerBox.getHalfSize().y/8;
+        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x/4, offset)));
+        //update playerbox center.
+        // playerBox.center.y -=offset/2;
+        // this.player.colliderOffset.set(0, offset);
+        this.player.addPhysics(playerBox,new Vec2(0, offset));
+        
         this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
         this.player.setGroup("player");
         this.livesCount = 3
@@ -536,6 +551,15 @@ export default class GameLevel extends Scene {
             return;
         }
         if(mode == 0){
+            //get the collider of the player in the level.
+            let collider = this.player.boundary.clone();
+            //shrink collider by 0.25 tile.
+            collider.setHalfSize(new Vec2(collider.getHalfSize().x-0.25*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x,collider.getHalfSize().y-0.25*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y));
+            //find the tile colrow closest to the cursor.
+            let tile = this.dynamicMap.getColRowAt(position);
+            //create an AABB based on the found tile.
+            let tileAABB = new AABB(tile.add(new Vec2(0.5,0.5)).clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), GameLevel.DEFAULT_LEVEL_TILE_SIZE.clone().scale(0.5));
+            //create an AABB based on the tile to be added.
             let colrow_player = this.dynamicMap.getColRowAt(this.player.position)
             let colrow_toAdd = this.dynamicMap.getColRowAt(position)
             // Check if the block is not overalapping with the current enemies.
@@ -543,7 +567,7 @@ export default class GameLevel extends Scene {
                 let colrow_enemy = this.dynamicMap.getColRowAt(this.enemies[i].position)
                 if(colrow_enemy.distanceTo(colrow_toAdd) < 1 )return
             }
-            if((colrow_player.distanceTo(colrow_toAdd)>=1) && !this.dynamicMap.isTileCollidable(colrow_toAdd.x,colrow_toAdd.y)){
+            if(collider.overlapArea(tileAABB)<3  && !this.dynamicMap.isTileCollidable(colrow_toAdd.x,colrow_toAdd.y)){
                 this.dynamicMap.badAddTile(position,51);
             }
         }else{

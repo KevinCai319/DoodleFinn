@@ -24,6 +24,11 @@ export default class Fall extends InAir {
     onExit(): Record<string, any> {
 		if(!this.parent.attacking){
 			this.owner.animation.stop();
+			if(this.parent.direction == -1){
+				this.owner.animation.playIfNotAlready("Idle Left", true);
+			} else {
+				this.owner.animation.playIfNotAlready("Idle Right", true);
+			}
 		}
         return {};
     }
