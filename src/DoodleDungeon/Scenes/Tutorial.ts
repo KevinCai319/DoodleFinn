@@ -101,7 +101,13 @@ export default class Tutorial extends GameLevel {
             for(let i = 0; i < this.doors.length; i++){
                 let new_door = this.addLevelGraphic("Door",layer.getName(),new Vec2(90+5*i,17).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
                 if(this.doors[i][0]){
-                    let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.5+5*i,14).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: "+Tutorial.bestTimes[i] });
+                    let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,12).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: \n" });
+                    if(Tutorial.bestTimes[i] != -1){
+                        let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: ""+Tutorial.bestTimes[i] + "s" });
+                    }else{
+                        let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Not Played" });
+                    }
+
                     new_door.alpha = 1;
                 }else{
                     new_door.alpha = 0.5;

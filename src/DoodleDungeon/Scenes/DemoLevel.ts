@@ -47,11 +47,13 @@ export default class DemoLevel extends GameLevel {
     unloadScene(){
         // Keep resources - this is up to you
         this.load.keepSpritesheet("player");
-        let time = this.levelTimer.getTimeElapsed()/1000;
-        Tutorial.bestTimes[0] = Math.min(Tutorial.bestTimes[0],time);
-        if(Tutorial.bestTimes[0] == -1)Tutorial.bestTimes[0] = time;
-        if(Tutorial.LevelsUnlocked == 1){
-            Tutorial.LevelsUnlocked+=1;
+        if(this.gameEnd){
+            let time = this.levelTimer.getTimeElapsed()/1000;
+            Tutorial.bestTimes[0] = Math.min(Tutorial.bestTimes[0],time);
+            if(Tutorial.bestTimes[0] == -1)Tutorial.bestTimes[0] = time;
+            if(Tutorial.LevelsUnlocked == 1){
+                Tutorial.LevelsUnlocked+=1;
+            }
         }
     }
 

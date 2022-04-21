@@ -64,6 +64,7 @@ export default class GameLevel extends Scene {
     protected numberPapers: number = 0;
     protected papersCountLabel: Label;
     protected levelTimer: Timer;
+    protected goMenu = false;
 
     protected backgroundSetup: Array<Function> = [];
     protected healthBar: Array<Sprite> = [];
@@ -92,6 +93,7 @@ export default class GameLevel extends Scene {
 
     startScene(): void {
         this.gameEnd = false;
+        this.goMenu = false;
         this.levelTimer = new Timer(1000 * 100000);
         this.levelTimer.start();
         // Do the game level standard initializations
@@ -422,6 +424,7 @@ export default class GameLevel extends Scene {
         menuBtn.font = "PixelSimple";
         menuBtn.onClick = () =>{
             if(menuBtn.visible){
+                this.goMenu = true;
                 this.goToMenu();
             }
         }
