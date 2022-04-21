@@ -1,10 +1,11 @@
+//Level to have the player understand how the game works.
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameLevel from "./Game";
 import Tutorial from "./Tutorial";
 
-export default class Level1 extends GameLevel {
-    LEVEL_NAME:string ="Level_1"
-    LEVEL_TILESET:string = "Level_1"
+export default class DemoLevel extends GameLevel {
+    LEVEL_NAME:string ="DemoLevel"
+    LEVEL_TILESET:string = "DemoLevel"
     loadScene(): void {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/"+this.LEVEL_NAME+"/"+this.LEVEL_TILESET+".json");
@@ -36,7 +37,7 @@ export default class Level1 extends GameLevel {
         // Add the Demo Level.
         this.nextLevel = null
         this.tutorial = Tutorial
-        this.playerSpawnColRow = new Vec2(7,40)
+        this.playerSpawnColRow = new Vec2(2,46)
         // Do generic setup for a GameLevel
         super.startScene();
         

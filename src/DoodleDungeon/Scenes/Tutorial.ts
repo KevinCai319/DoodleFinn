@@ -5,6 +5,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Layer from "../../Wolfie2D/Scene/Layer";
 import { Game_Events } from "../Events";
 import PlayerController from "../Player/PlayerController";
+import DemoLevel from "./DemoLevel";
 import GameLevel from "./Game";
 import Level1 from "./Level1";
 
@@ -12,7 +13,7 @@ export default class Tutorial extends GameLevel {
     static LevelsUnlocked:number = 1;
     static numberOfLevels = 6;
     //Add references to other levels here.
-    static Levels = [Level1];
+    static Levels = [DemoLevel];
     LEVEL_NAME:string ="Tutorial"
     LEVEL_TILESET:string = "Tutorial"
     Instructions:AnimatedSprite = null
@@ -38,7 +39,8 @@ export default class Tutorial extends GameLevel {
         this.load.spritesheet("credit1","game_assets/spritesheets/credit1.json")
         this.load.spritesheet("credit2","game_assets/spritesheets/credit2.json")
         // Load in the enemy info
-        this.load.object("enemyData", "game_assets/data/enemy.json");
+        this.load.spritesheet("ClickHere", "game_assets/spritesheets/TutorialAssets/ClickHere.json");
+        this.load.spritesheet("PressE", "game_assets/spritesheets/TutorialAssets/PressE.json");
     }
 
     // DoodleFinn TODO
@@ -83,7 +85,8 @@ export default class Tutorial extends GameLevel {
             this.Instructions = this.addLevelGraphic("InstructionsButton",layer.getName(), new Vec2(75,13.4).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(2,2))
             let backstory = this.addLevelGraphic("Backstory",layer.getName(),new Vec2(45,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
             backstory.alpha = 0.8
-
+            this.addLevelGraphic("ClickHere",layer.getName(),new Vec2(78.5,11.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3));
+            this.addLevelGraphic("PressE",layer.getName(),new Vec2(94.5,14).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3));
             //Adding doors, and their best times.
             for(let i = 0; i < this.doors.length; i++){
                 let new_door = this.addLevelGraphic("Door",layer.getName(),new Vec2(90+5*i,17).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
@@ -96,9 +99,9 @@ export default class Tutorial extends GameLevel {
             }
             
             let cred2 =this.addLevelGraphic("credit2",layer.getName(),new Vec2(30,15).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
-            let cred1 =this.addLevelGraphic("credit1",layer.getName(),new Vec2(5,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
-            cred2.alpha = 1
-            cred1.alpha = 1
+            let cred1 =this.addLevelGraphic("credit1",layer.getName(),new Vec2(10,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
+            cred2.alpha = 0.5
+            cred1.alpha = 0.5
         })
         super.startScene();
         (<PlayerController>this.player._ai).MIN_SPEED = 300;
@@ -109,11 +112,6 @@ export default class Tutorial extends GameLevel {
         this.Controls.visible = false
         this.viewport.setZoomLevel(1.25);
         this.viewport.setBounds(0, 0, this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y)
-        this.enemies.forEach(enemy => {
-            enemy.setAIActive(false, {});
-            enemy.isCollidable = false;
-            enemy.visible = false;
-        })
         this.livesCountLabel.destroy()
         this.papersCountLabel.destroy()
         this.levelEndLabel.destroy()
@@ -124,13 +122,9 @@ export default class Tutorial extends GameLevel {
     }
 
     updateScene(deltaT: number): void {
-        let region = Input.getGlobalMousePosition().x/GameLevel.DEFAULT_LEVEL_TILE_SIZE.x
         if(!this.Controls.visible){
             this.cursorDisabled = this.cursor.boundary.containsPoint(this.Instructions.position)
         }
-        // if(region>92){
-        //     this.emitter.fireEvent(Game_Events.LEVEL_END)
-        // }
         // iterate through all doors.
         for(let i = 0; i < this.doors.length; i++){
             //check if it is unlocked.

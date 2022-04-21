@@ -156,17 +156,19 @@ export default class GameLevel extends Scene {
                         // GO through all enemies and see if they are in range of the cursor hitbox.
                         // If they are, then attack them.
                         let cursorHitbox = this.cursor.boundary.clone();
-                        this.enemies.forEach(enemy => {
-                            if (cursorHitbox.overlaps(enemy.boundary)) {
-                                // Attack the enemy
-                                // TODO: finish this method.
-                                (enemy._ai as EnemyAI).damage(1);
-                                // enemy.tweens.play("attack");
-                                // enemy.tweens.on("attack", () => {
-                                //     enemy.tweens.play("idle");
-                                // });
-                            }
-                        });
+                        if(this.enemies!=null){
+                            this.enemies.forEach(enemy => {
+                                if (cursorHitbox.overlaps(enemy.boundary)) {
+                                    // Attack the enemy
+                                    // TODO: finish this method.
+                                    (enemy._ai as EnemyAI).damage(1);
+                                    // enemy.tweens.play("attack");
+                                    // enemy.tweens.on("attack", () => {
+                                    //     enemy.tweens.play("idle");
+                                    // });
+                                }
+                            });
+                        }
                     }
                     break;
                 case Game_Events.PINK_PAPER_FOUND:
@@ -258,7 +260,7 @@ export default class GameLevel extends Scene {
      * Initializes the viewport
      */
     protected initViewport(): void {
-        this.viewport.setZoomLevel(2);
+        this.viewport.setZoomLevel(1.2);
     }
 
     /**
@@ -314,6 +316,7 @@ export default class GameLevel extends Scene {
                 }
             ]
         });
+        this.levelEndLabel.visible = false;
         
         this.levelTransitionScreen = <Rect>this.add.graphic(GraphicType.RECT, "UI", { position: new Vec2(2000, 2000), size: new Vec2(4000, 4000) });
         this.levelTransitionScreen.color = new Color(0, 0,0);
@@ -552,22 +555,23 @@ export default class GameLevel extends Scene {
         }
         if(mode == 0){
             //get the collider of the player in the level.
-            let collider = this.player.boundary.clone();
+            let collider = this.player.sweptRect.clone();
             //shrink collider by 0.25 tile.
             collider.setHalfSize(new Vec2(collider.getHalfSize().x-0.25*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x,collider.getHalfSize().y-0.25*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y));
             //find the tile colrow closest to the cursor.
             let tile = this.dynamicMap.getColRowAt(position);
             //create an AABB based on the found tile.
             let tileAABB = new AABB(tile.add(new Vec2(0.5,0.5)).clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), GameLevel.DEFAULT_LEVEL_TILE_SIZE.clone().scale(0.5));
-            //create an AABB based on the tile to be added.
-            let colrow_player = this.dynamicMap.getColRowAt(this.player.position)
             let colrow_toAdd = this.dynamicMap.getColRowAt(position)
             // Check if the block is not overalapping with the current enemies.
-            for(let i = 0;i<this.enemies.length;i++){
-                let colrow_enemy = this.dynamicMap.getColRowAt(this.enemies[i].position)
-                if(colrow_enemy.distanceTo(colrow_toAdd) < 1 )return
+
+            if(this.enemies!=null){
+                for(let i = 0;i<this.enemies.length;i++){
+                    let colrow_enemy = this.dynamicMap.getColRowAt(this.enemies[i].position)
+                    if(colrow_enemy.distanceTo(colrow_toAdd) < 1 )return
+                }
             }
-            if(collider.overlapArea(tileAABB)<3  && !this.dynamicMap.isTileCollidable(colrow_toAdd.x,colrow_toAdd.y)){
+            if(collider.overlapArea(tileAABB)==0 && !this.dynamicMap.isTileCollidable(colrow_toAdd.x,colrow_toAdd.y)){
                 this.dynamicMap.badAddTile(position,51);
             }
         }else{
@@ -578,82 +582,87 @@ export default class GameLevel extends Scene {
     }
 
     initializeEnemies() {
-        // Get the enemy data
-        const enemyData = this.load.getObject("enemyData");
+        try{
+            // Get the enemy data
+            const enemyData = this.load.getObject("enemyData");
+            // Create an enemies array
+            this.enemies = new Array(enemyData.numEnemies);
 
-        // Create an enemies array
-        this.enemies = new Array(enemyData.numEnemies);
+            // Initialize the enemies
+            for (let i = 0; i < enemyData.numEnemies; i++) {
+                let data = enemyData.enemies[i];
 
-        // Initialize the enemies
-        for (let i = 0; i < enemyData.numEnemies; i++) {
-            let data = enemyData.enemies[i];
+                // Create an enemy
 
-            // Create an enemy
+                // TODO: CHANGE THIS
+                // this.enemies[i] = this.add.animatedSprite(data.type, "primary");
+                this.enemies[i] = this.add.animatedSprite("gun_enemy", "primary");
+                
+                this.enemies[i].position.set(data.position[0], data.position[1]);
+                this.enemies[i].animation.play("IDLE");
 
-            // TODO: CHANGE THIS
-            // this.enemies[i] = this.add.animatedSprite(data.type, "primary");
-            this.enemies[i] = this.add.animatedSprite("gun_enemy", "primary");
-            
-            this.enemies[i].position.set(data.position[0], data.position[1]);
-            this.enemies[i].animation.play("IDLE");
+                //     // Activate physics
+                this.enemies[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
 
-            //     // Activate physics
-            this.enemies[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
+                //     if(data.guardPosition){
+                data.guardPosition = new Vec2(data.guardPosition[0], data.guardPosition[1]);
+                //     }
 
-            //     if(data.guardPosition){
-            data.guardPosition = new Vec2(data.guardPosition[0], data.guardPosition[1]);
-            //     }
+                //     /*initalize status and actions for each enemy. This can be edited if you want your custom enemies to start out with
+                //     different statuses, but dont remove these statuses for the original two enemies*/
+                let statusArray: Array<string> = [];
 
-            //     /*initalize status and actions for each enemy. This can be edited if you want your custom enemies to start out with
-            //     different statuses, but dont remove these statuses for the original two enemies*/
-            let statusArray: Array<string> = [];
+                // Vary weapon type and choose actions
+                let actions;
+                let range;
 
-            // Vary weapon type and choose actions
-            let actions;
-            let range;
+                if (data.type === "melee_enemy"){
+                    let actionMelee = [
+                        new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
+                        new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 30 })
+                    ];
+                    actions = actionMelee;
+                    range = 40;
+                }
+                else if (data.type === "ranged_enemy") {
+                    let actionRanged = [
+                        new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
+                        new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 100 })
+                    ];
+                    actions = actionRanged;
+                    range = 100;
+                }
+                else if (data.type === "charging_enemy") {
+                    /** MOVE => WAIT => CHARGE => ATTACK */
+                    let actionCharging = [
+                        new AttackAction(1, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
+                        new Move(2, [], [AI_Statuses.MOVE_DONE], { inRange: 100 }),
+                        new Wait(3, [AI_Statuses.MOVE_DONE], [AI_Statuses.WAIT_DONE], { waitTime: 1000 }),
+                        new Charge(4, [AI_Statuses.WAIT_DONE], [AI_Statuses.IN_RANGE], { chargeTime: 1000 })
+                    ]
+                    actions = actionCharging;
+                    range = 30;
+                }
 
-            if (data.type === "melee_enemy"){
-                let actionMelee = [
-                    new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
-                    new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 30 })
-                ];
-                actions = actionMelee;
-                range = 40;
+                let enemyOptions = {
+                    defaultMode: data.mode,
+                    patrolRoute: data.route,            // This only matters if they're a patroller
+                    guardPosition: data.guardPosition,  // This only matters if the're a guard
+                    health: data.health,
+                    player1: this.player,
+                    goal: AI_Statuses.REACHED_GOAL,
+                    status: statusArray,
+                    actions: actions,
+                    inRange: range
+                }
+                this.enemies[i].scale = (new Vec2(2, 2));
+                this.enemies[i].addAI(EnemyAI, enemyOptions);
             }
-            else if (data.type === "ranged_enemy") {
-                let actionRanged = [
-                    new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
-                    new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 100 })
-                ];
-                actions = actionRanged;
-                range = 100;
-            }
-            else if (data.type === "charging_enemy") {
-                /** MOVE => WAIT => CHARGE => ATTACK */
-                let actionCharging = [
-                    new AttackAction(1, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
-                    new Move(2, [], [AI_Statuses.MOVE_DONE], { inRange: 100 }),
-                    new Wait(3, [AI_Statuses.MOVE_DONE], [AI_Statuses.WAIT_DONE], { waitTime: 1000 }),
-                    new Charge(4, [AI_Statuses.WAIT_DONE], [AI_Statuses.IN_RANGE], { chargeTime: 1000 })
-                ]
-                actions = actionCharging;
-                range = 30;
-            }
-
-            let enemyOptions = {
-                defaultMode: data.mode,
-                patrolRoute: data.route,            // This only matters if they're a patroller
-                guardPosition: data.guardPosition,  // This only matters if the're a guard
-                health: data.health,
-                player1: this.player,
-                goal: AI_Statuses.REACHED_GOAL,
-                status: statusArray,
-                actions: actions,
-                inRange: range
-            }
-            this.enemies[i].scale = (new Vec2(2, 2));
-            this.enemies[i].addAI(EnemyAI, enemyOptions);
+        } catch(e){
+            console.log("No enemy data found.");
+            return;
         }
+        
     }
 
     protected addLevelEnd(startingTile: Vec2, size: Vec2 = new Vec2(1,1)): void {

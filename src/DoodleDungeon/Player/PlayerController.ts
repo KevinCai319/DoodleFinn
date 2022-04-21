@@ -111,7 +111,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
                 // this.emitter.fireEvent(Game_Events.PLAYER_LOSE_LIFE);
                 this.owner.tweens.play("death");
             }else{
-                this.setInvincible()
+                this.setInvincible();
             }
         }
     }

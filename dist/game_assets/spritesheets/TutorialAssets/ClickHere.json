@@ -1,0 +1,15 @@
+{
+    "name": "ClickHere",
+    "spriteSheetImage": "ClickHere.png",
+    "spriteWidth": 353,
+    "spriteHeight": 145,
+    "columns": 1,
+    "rows": 1,
+    "durationType": "time",
+    "animations": [
+        { 
+            "name": "idle",
+            "frames": [ {"index": 0, "duration": 500} ]
+        }
+    ]
+}
