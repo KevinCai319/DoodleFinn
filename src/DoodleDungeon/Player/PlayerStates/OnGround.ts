@@ -1,5 +1,6 @@
 import GameEvent from "../../../Wolfie2D/Events/GameEvent";
 import Input from "../../../Wolfie2D/Input/Input";
+import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Sprite from "../../../Wolfie2D/Nodes/Sprites/Sprite";
 import MathUtils from "../../../Wolfie2D/Utils/MathUtils";
 import { PlayerStates, PlayerType } from "../PlayerController";
@@ -10,7 +11,6 @@ export default class OnGround extends PlayerState {
 	onEnter(options: Record<string, any>): void {}
 
 	update(deltaT: number): void {
-
 		if(this.parent.playerType == PlayerType.PLATFORMER){
 			if(this.parent.velocity.y > 0){
 				this.parent.velocity.y = 0;
@@ -23,6 +23,8 @@ export default class OnGround extends PlayerState {
 		// if(direction.x !== 0){
 		// 	(<Sprite>this.owner).invertX = MathUtils.sign(direction.x) < 0;
 		// }
+
+
 		if(this.parent.playerType == PlayerType.PLATFORMER){
 			if(Input.isPressed("jump")){
 				this.parent.velocity.y = -this.jumpBoost;

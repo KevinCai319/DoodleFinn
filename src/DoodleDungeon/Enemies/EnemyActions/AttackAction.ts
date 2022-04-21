@@ -3,6 +3,7 @@ import GoapAction from "../../../Wolfie2D/DataTypes/Interfaces/GoapAction";
 import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../../Wolfie2D/Events/Emitter";
 import GameNode from "../../../Wolfie2D/Nodes/GameNode";
+import PlayerController from "../../Player/PlayerController";
 import EnemyAI from "../EnemyAI";
 import BattlerAI from './../BattlerAI';
 
@@ -33,6 +34,8 @@ export default class AttackAction extends GoapAction {
 
             // TODO: Perform attack
             console.log("PERFORM ATTACK");
+            // if(<PlayerController>(enemy.player._ai).owner.boundary)
+            
             (<BattlerAI>enemy.player._ai).damage(1);
             
             return this.effects;

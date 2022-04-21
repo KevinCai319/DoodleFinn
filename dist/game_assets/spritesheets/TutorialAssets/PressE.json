@@ -1,0 +1,15 @@
+{
+    "name": "PressE",
+    "spriteSheetImage": "PressE.png",
+    "spriteWidth": 610,
+    "spriteHeight": 96,
+    "columns": 1,
+    "rows": 1,
+    "durationType": "time",
+    "animations": [
+        { 
+            "name": "idle",
+            "frames": [ {"index": 0, "duration": 500} ]
+        }
+    ]
+}

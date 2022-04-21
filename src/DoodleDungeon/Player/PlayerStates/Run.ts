@@ -8,6 +8,13 @@ export default class Run extends OnGround {
 
 	onEnter(options: Record<string, any>): void {
 		this.parent.speed = this.parent.MAX_SPEED;
+		if(!this.parent.attacking){
+			if(this.parent.direction == -1){
+				this.owner.animation.playIfNotAlready("Walking Left", true);
+			} else {
+				this.owner.animation.playIfNotAlready("Walking Right", true);
+			}
+		}
 	}
 
 
@@ -28,6 +35,9 @@ export default class Run extends OnGround {
 		}else{
 
 		}
+		if(this.parent.velocity.x != 0){
+			this.parent.direction = (this.parent.velocity.x < 0)?-1:1;
+		}
 		if(!this.parent.attacking){
 			if(this.parent.direction == -1){
 				this.owner.animation.playIfNotAlready("Walking Left", true);
@@ -41,6 +51,11 @@ export default class Run extends OnGround {
 	onExit(): Record<string, any> {
 		if(!this.parent.attacking){
 			this.owner.animation.stop();
+			if(this.parent.direction == -1){
+				this.owner.animation.playIfNotAlready("Idle Left", true);
+			} else {
+				this.owner.animation.playIfNotAlready("Idle Right", true);
+			}
 		}
 		return {};
 	}

@@ -14,7 +14,7 @@ export default class Level1 extends GameLevel {
         this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
         this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");
         // Load in the enemy info
-        this.load.object("enemyData", "game_assets/data/enemy.json");
+        this.load.object("enemyData", "game_assets/data/"+this.LEVEL_NAME+"/enemy.json");
     }
 
     // DoodleFinn TODO

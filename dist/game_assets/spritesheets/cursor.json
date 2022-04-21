@@ -1,8 +1,8 @@
 {
     "name": "cursor",
     "spriteSheetImage": "cursor.png",
-    "spriteWidth": 512,
-    "spriteHeight": 512,
+    "spriteWidth": 256,
+    "spriteHeight": 256,
     "columns": 1,
     "rows": 1,
     "durationType": "time",

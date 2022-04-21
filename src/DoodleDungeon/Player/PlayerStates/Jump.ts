@@ -11,7 +11,6 @@ export default class Jump extends InAir {
 
 	onEnter(options: Record<string, any>): void {
 		this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "jump", loop: false, holdReference: false});
-		console.log("jumping")
 		if(!this.parent.attacking){
 			if(this.parent.velocity.x < 0){
 				this.owner.animation.playIfNotAlready("Jumping Left", true);
@@ -23,8 +22,11 @@ export default class Jump extends InAir {
 
 	update(deltaT: number): void {
 		super.update(deltaT);
+		if(this.parent.velocity.x != 0){
+			this.parent.direction = (this.parent.velocity.x < 0)?-1:1;
+		}
 		if(!this.parent.attacking){
-			if(this.parent.velocity.x < 0){
+			if(this.parent.direction == -1){
 				this.owner.animation.playIfNotAlready("Jumping Left", true);
 			} else {
 				this.owner.animation.playIfNotAlready("Jumping Right", true);
