@@ -109,9 +109,11 @@ export default class PlayerController extends StateMachineAI implements BattlerA
     damage(amount: number): void {
         if(!this.invicible){
             this.health -= amount;
+            this.setInvincible();
             if(this.health <= 0){
                 // this.emitter.fireEvent(Game_Events.PLAYER_LOSE_LIFE);
                 this.owner.tweens.play("death");
+                // this.initialize(PlayerStates.SPAWN);
             }else{
                 this.setInvincible();
             }
