@@ -20,6 +20,7 @@ export default class DemoLevel extends GameLevel {
         this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
         //Load in special instructions.
         this.load.image("InstErase", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Erase.png");
+        this.load.image("InstAttack", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Attack.png");
         this.load.image("InstEraseText", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Erase-Text.png");
         this.load.image("InstDraw", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Draw.png");
         this.load.image("InstMove", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Move.png");
@@ -60,6 +61,7 @@ export default class DemoLevel extends GameLevel {
         this.playerSpawnColRow = new Vec2(2,46)
         // Add in special graphics.
         this.backgroundSetup.push((layer:Layer)=>{
+            this.addLevelBackgroundImage("InstAttack",layer.getName(),new Vec2(12,23).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.43,0.43));
             this.addLevelBackgroundImage("InstErase",layer.getName(),new Vec2(5.55,46.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.43,0.43));
             this.addLevelBackgroundImage("InstEraseText",layer.getName(),new Vec2(8.64,46.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.6,0.6));
             this.addLevelBackgroundImage("InstDraw",layer.getName(),new Vec2(12.65,48.25).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.43,0.43));
