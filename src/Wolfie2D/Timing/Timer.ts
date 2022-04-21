@@ -79,6 +79,9 @@ export default class Timer implements Updateable {
         }
     }
 
+    getTimeElapsed() :number{
+        return this.totalTime-this.timeLeft;
+    }
     protected end(){
         // Update the state
         this.state = TimerState.STOPPED;

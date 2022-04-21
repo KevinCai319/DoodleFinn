@@ -45,7 +45,12 @@ export default class DemoLevel extends GameLevel {
     unloadScene(){
         // Keep resources - this is up to you
         this.load.keepSpritesheet("player");
-        
+        let time = this.levelTimer.getTimeElapsed()/1000;
+        Tutorial.bestTimes[0] = Math.min(Tutorial.bestTimes[0],time);
+        if(Tutorial.bestTimes[0] == -1)Tutorial.bestTimes[0] = time;
+        if(Tutorial.LevelsUnlocked == 1){
+            Tutorial.LevelsUnlocked+=1;
+        }
     }
 
     startScene(): void {
@@ -68,7 +73,7 @@ export default class DemoLevel extends GameLevel {
         super.startScene();
 
         // Cheats.
-        (<PlayerController>this.player._ai).playerType = PlayerType.TOPDOWN;
+        // (<PlayerController>this.player._ai).playerType = PlayerType.TOPDOWN;
         
     }
 

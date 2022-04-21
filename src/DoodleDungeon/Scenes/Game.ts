@@ -63,6 +63,7 @@ export default class GameLevel extends Scene {
     protected numberWhite: number = 0;
     protected numberPapers: number = 0;
     protected papersCountLabel: Label;
+    protected levelTimer: Timer;
 
     protected backgroundSetup: Array<Function> = [];
     protected healthBar: Array<Sprite> = [];
@@ -91,6 +92,8 @@ export default class GameLevel extends Scene {
 
     startScene(): void {
         this.gameEnd = false;
+        this.levelTimer = new Timer(1000 * 100000);
+        this.levelTimer.start();
         // Do the game level standard initializations
         this.initLayers();
         this.initViewport();
@@ -205,7 +208,7 @@ export default class GameLevel extends Scene {
                             // this.levelTransitionScreen.alpha=1;
                             // this.levelTransitionScreen.tweens.play("fadeIn");
                             this.levelEndTimer.start();
-                            this.goToMenu();
+                            // this.goToMenu();
                         }
                     }
                     break;
@@ -225,6 +228,7 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.LEVEL_END:
                     {
+                        this.levelTimer.pause();
                         // Go to the next level
                         if (this.nextLevel) {
                             let sceneOptions = {

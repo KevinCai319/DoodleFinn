@@ -31,7 +31,12 @@ export default class Level1 extends GameLevel {
     unloadScene(){
         // Keep resources - this is up to you
         this.load.keepSpritesheet("player");
-        
+        let time = this.levelTimer.getTimeElapsed()/1000;
+        Tutorial.bestTimes[1] = Math.min(Tutorial.bestTimes[1],time);
+        if(Tutorial.bestTimes[1] == -1)Tutorial.bestTimes[1] = time;
+        if(Tutorial.LevelsUnlocked == 2){
+            Tutorial.LevelsUnlocked+=1;
+        }
     }
 
     startScene(): void {

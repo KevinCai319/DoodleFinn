@@ -2,6 +2,8 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Input from "../../Wolfie2D/Input/Input";
 import GameNode from "../../Wolfie2D/Nodes/GameNode";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+import Label from "../../Wolfie2D/Nodes/UIElements/Label";
+import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Layer from "../../Wolfie2D/Scene/Layer";
 import { Game_Events } from "../Events";
 import PlayerController from "../Player/PlayerController";
@@ -13,7 +15,7 @@ export default class Tutorial extends GameLevel {
     static LevelsUnlocked:number = 1;
     static numberOfLevels = 6;
     //Add references to other levels here.
-    static Levels = [DemoLevel];
+    static Levels = [DemoLevel,Level1];
     LEVEL_NAME:string ="Tutorial"
     LEVEL_TILESET:string = "Tutorial"
     Instructions:AnimatedSprite = null
@@ -21,6 +23,7 @@ export default class Tutorial extends GameLevel {
     //           [unlocked, door sprite, level, min time]
     doors:Array<[boolean, AnimatedSprite, new (...args: any) => GameLevel]>;
     static bestTimes:Array<number>;
+    bestTimeLabels:Array<Label> = []
     static firstLoad: boolean = true;
     loadScene(): void {
         // Load resources
@@ -63,6 +66,7 @@ export default class Tutorial extends GameLevel {
             for(let i = 0; i < Tutorial.numberOfLevels; i++){
                 Tutorial.bestTimes[i] = -1.0;
             }
+            Tutorial.firstLoad = false;
         }
         this.doors = [];
         for(let i = 0; i < Tutorial.numberOfLevels; i++){
@@ -73,11 +77,17 @@ export default class Tutorial extends GameLevel {
             }
         }
 
-
         this.playerSpawnColRow = new Vec2(77,10);
 
         // Add custom background graphics for this level.
         this.backgroundSetup.push((layer:Layer)=>{
+            //add the lables for best times
+            for(let i = 0; i < Tutorial.LevelsUnlocked; i++){
+                // let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(-300, 200), text: "Best Time"+Tutorial.bestTimes[i] });
+                // this.bestTimeLabels.push(new Label(layer.getName(), new Vec2(0,0), "Best Time: " + Tutorial.bestTimes[i], "Arial", 32, "white"));
+                // this.bestTimeLabels.push(levelLabel);
+                // this.bestTimeLabels[i].visible = false;
+            }
             let selectSign = this.addLevelBackgroundImage("LevelSelect",layer.getName(),new Vec2(84,12.8).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3))
             selectSign.alpha = 0.5
             let helpSign = this.addLevelBackgroundImage("help",layer.getName(),new Vec2(69.3,11.6).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.75,1.75))
@@ -91,6 +101,7 @@ export default class Tutorial extends GameLevel {
             for(let i = 0; i < this.doors.length; i++){
                 let new_door = this.addLevelGraphic("Door",layer.getName(),new Vec2(90+5*i,17).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
                 if(this.doors[i][0]){
+                    let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.5+5*i,14).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: "+Tutorial.bestTimes[i] });
                     new_door.alpha = 1;
                 }else{
                     new_door.alpha = 0.5;
