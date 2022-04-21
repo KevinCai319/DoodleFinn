@@ -108,12 +108,14 @@ export default class GameLevel extends Scene {
         this.setupHealthBar();
         // Initialize the timers
         this.levelTransitionTimer = new Timer(500);
-        this.levelEndTimer = new Timer(50, () => {
+        this.levelEndTimer = new Timer(100, () => {
             // After the level end timer ends, fade to black and then go to the next scene
             this.levelTransitionScreen.tweens.play("fadeIn");
+            console.log('level end timer ended');
             // Clear debug log.
             Debug.clearLog();
             Debug.clearCanvas();
+
         });
 
         // Start the black screen fade out
@@ -193,11 +195,15 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.PLAYER_ENTERED_LEVEL_END:
                     {
+
                         // Check if the player has collected all the collectibles.
-                        if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite) {
+                        if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && this.levelEndTimer.isStopped()) {
+         
                             Input.disableInput();
                             // If so, start the level end timer
-                            this.levelEndTimer.start();
+                            this.levelTransitionScreen.alpha=1;
+                            this.levelTransitionScreen.tweens.play("fadeIn");
+                            // this.levelEndTimer.start();
                         }
                     }
                     break;
@@ -319,12 +325,14 @@ export default class GameLevel extends Scene {
      */
     protected addUI() {
         // Lives Count Label. TODO: Make this using sprites.)
-        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(100, 30), text: "Lives: " + this.livesCount });
-        this.livesCountLabel.textColor = Color.BLACK;
+        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(50, 30), text: "Lives: " + this.livesCount });
+        this.livesCountLabel.textColor = Color.RED;
+        this.livesCountLabel.backgroundColor = new Color(32, 32, 32,0.5);
         this.livesCountLabel.font = "PixelSimple";
         // Prompt for paper.
-        this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(100, 90), text: "Find some paper!" });
-        this.papersCountLabel.textColor = Color.BLACK;
+        this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(90,60), text: "Find some paper!" });
+        this.papersCountLabel.textColor = Color.RED;
+        this.papersCountLabel.backgroundColor = new Color(32, 32, 32,0.5);
         this.papersCountLabel.font = "PixelSimple";
 
         // End of level label (start off screen)
