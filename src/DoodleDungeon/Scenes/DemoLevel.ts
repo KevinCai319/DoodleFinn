@@ -72,7 +72,7 @@ export default class DemoLevel extends GameLevel {
         
     }
 
-    updateScene(deltaT: number): void {
-        super.updateScene(deltaT);
-    }
+    // updateScene(deltaT: number): void {
+    //     super.updateScene(deltaT);
+    // }
 }

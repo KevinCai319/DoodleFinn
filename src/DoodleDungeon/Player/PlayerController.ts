@@ -119,7 +119,6 @@ export default class PlayerController extends StateMachineAI implements BattlerA
     }
     attack(){
         // Prevent spamming attacks.
-        console.log("atk")
         if(this.attackTimer.isStopped()){
             this.attacking = true
             this.attackTimer.start(100);

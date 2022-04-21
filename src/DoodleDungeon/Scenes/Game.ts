@@ -69,7 +69,7 @@ export default class GameLevel extends Scene {
     // Enemies
     // A list of enemies
     protected enemies: Array<AnimatedSprite>;
-
+    protected gameEnd: boolean = false;
     // Special maps specific to the level.
     // Dynamic maps are used for handling pathfinding and collision.
     dynamicMap: DynamicMap;
@@ -90,6 +90,7 @@ export default class GameLevel extends Scene {
     
 
     startScene(): void {
+        this.gameEnd = false;
         // Do the game level standard initializations
         this.initLayers();
         this.initViewport();
@@ -106,16 +107,16 @@ export default class GameLevel extends Scene {
         this.cursor = this.addLevelGraphic("cursor","primary",Input.getGlobalMousePosition())
 
         this.setupHealthBar();
+        this.updateHealthBar();
         // Initialize the timers
         this.levelTransitionTimer = new Timer(500);
         this.levelEndTimer = new Timer(100, () => {
             // After the level end timer ends, fade to black and then go to the next scene
             this.levelTransitionScreen.tweens.play("fadeIn");
-            console.log('level end timer ended');
             // Clear debug log.
             Debug.clearLog();
             Debug.clearCanvas();
-
+            this.gameEnd = true;
         });
 
         // Start the black screen fade out
@@ -197,13 +198,14 @@ export default class GameLevel extends Scene {
                     {
 
                         // Check if the player has collected all the collectibles.
-                        if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && this.levelEndTimer.isStopped()) {
+                        if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) {
          
                             Input.disableInput();
                             // If so, start the level end timer
-                            this.levelTransitionScreen.alpha=1;
-                            this.levelTransitionScreen.tweens.play("fadeIn");
-                            // this.levelEndTimer.start();
+                            // this.levelTransitionScreen.alpha=1;
+                            // this.levelTransitionScreen.tweens.play("fadeIn");
+                            this.levelEndTimer.start();
+                            this.goToMenu();
                         }
                     }
                     break;
@@ -440,8 +442,9 @@ export default class GameLevel extends Scene {
         // TODO: update AABB for Finn.
         let playerBox = this.player.boundary.clone();
         //remove 1/8 of height and width from the player box.
-        let offset = playerBox.getHalfSize().y/8;
-        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x/4, offset)));
+        let offset = 0;
+        // offset = playerBox.getHalfSize().y/8;
+        // playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x/4, offset)));
         //update playerbox center.
         // playerBox.center.y -=offset/2;
         // this.player.colliderOffset.set(0, offset);
