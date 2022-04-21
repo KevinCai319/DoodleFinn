@@ -630,7 +630,7 @@ export default class GameLevel extends Scene {
                     /** MOVE => WAIT => CHARGE => ATTACK */
                     let actionCharging = [
                         new AttackAction(1, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
-                        new Move(2, [], [AI_Statuses.MOVE_DONE], { inRange: 100 }),
+                        new Move(2, [], [AI_Statuses.MOVE_DONE], { inRange: 100, untilVisible: true }),
                         new Wait(3, [AI_Statuses.MOVE_DONE], [AI_Statuses.WAIT_DONE], { waitTime: 1000 }),
                         new Charge(4, [AI_Statuses.WAIT_DONE], [AI_Statuses.IN_RANGE], { chargeTime: 1000 })
                     ]

@@ -10,6 +10,7 @@ import AnimatedSprite from './../../../Wolfie2D/Nodes/Sprites/AnimatedSprite';
 
 export default class Move extends GoapAction {
     private inRange: number;
+    private untilVisible: boolean;
 
     private path: NavigationPath;
     protected emitter: Emitter;
@@ -20,6 +21,7 @@ export default class Move extends GoapAction {
         this.effects = effects;
         this.loopAction = true;
         this.inRange = options.inRange;
+        this.untilVisible = options.untilVisible || false
     }
 
     performAction(statuses: Array<string>, actor: StateMachineGoapAI, deltaT: number, target?: StateMachineGoapAI): Array<string> {
@@ -29,10 +31,14 @@ export default class Move extends GoapAction {
             let playerPos = enemy.lastPlayerPos;
             let distance = enemy.owner.position.distanceTo(playerPos);
 
+            let isPlayerVisible = (enemy.owner.getScene() as GameLevel).dynamicMap.canAABBgoToPoint(enemy.owner.boundary,enemy.playerPos)
+
             //If close enough, we've moved far enough and this loop action is done
             let playerBorder = (<AnimatedSprite>enemy.player).boundary
             if ((distance <= this.inRange) || playerBorder.overlaps(enemy.owner.boundary)){
-                return this.effects;
+                if (!this.untilVisible || isPlayerVisible) {
+                    return this.effects;
+                }
             }
             //Check if the player is directly visible.
             if((enemy.owner.getScene() as GameLevel).dynamicMap.canAABBgoToPoint(enemy.owner.boundary,enemy.playerPos)){
