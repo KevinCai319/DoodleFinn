@@ -233,12 +233,6 @@ export default class GameLevel extends Scene {
                         this.goToMenu()
                     }
                     break;
-                case Game_Events.ENEMY_KILLED:
-                    {
-                        let node = this.sceneGraph.getNode(event.data.get("owner"));
-                        node.destroy();
-                    }
-                    break;
             }
         }
     }

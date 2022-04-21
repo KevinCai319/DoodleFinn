@@ -32,11 +32,7 @@ export default class AttackAction extends GoapAction {
             dir.rotateCCW(Math.PI / 4 * Math.random() - Math.PI/8);
             enemy.owner.rotation = Vec2.UP.angleToCCW(dir);
 
-            // TODO: Perform attack
-            console.log("PERFORM ATTACK");
-            // if(<PlayerController>(enemy.player._ai).owner.boundary)
-            
-            (<BattlerAI>enemy.player._ai).damage(1);
+            enemy.attack()
             
             return this.effects;
         }
