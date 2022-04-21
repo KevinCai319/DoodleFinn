@@ -1,0 +1,15 @@
+{
+    "name": "Door",
+    "spriteSheetImage": "Door.png",
+    "spriteWidth": 1500,
+    "spriteHeight": 2224,
+    "columns": 1,
+    "rows": 1,
+    "durationType": "time",
+    "animations": [
+        { 
+            "name": "idle",
+            "frames": [ {"index": 0, "duration": 500} ]
+        }
+    ]
+}

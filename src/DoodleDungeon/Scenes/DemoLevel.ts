@@ -12,7 +12,11 @@ export default class DemoLevel extends GameLevel {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/"+this.LEVEL_NAME+"/"+this.LEVEL_TILESET+".json");
         this.load.spritesheet("player", "game_assets/spritesheets/DoodleFinn/DoodleFinn-Sprite.json");
+        
         this.load.spritesheet("gun_enemy", "game_assets/spritesheets/gun_enemy.json");
+        this.load.spritesheet("melee_enemy", "game_assets/spritesheets/FlyEnemy/FlyEnemy.json")
+        this.load.spritesheet("charging_enemy", "game_assets/spritesheets/ChargeEnemy/ChargeEnemy.json")
+        
         this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
         this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
         this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");

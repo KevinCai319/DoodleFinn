@@ -49,7 +49,10 @@ export default class Charge extends GoapAction {
             }
             enemy.owner.pathfinding = false;
             enemy.owner.moving = true;
-            enemy.owner.rotation = Vec2.UP.angleToCCW(this.chargeDirection);
+
+            // enemy.owner.rotation = Vec2.UP.angleToCCW(this.chargeDirection);
+            enemy.owner.rotation = 0;
+            
             // enemy.owner._velocity = this.chargeDirection.scale(enemy.speed * deltaT);
             enemy.owner._velocity = this.chargeDirection.scaled(2 * enemy.speed * deltaT);
         }

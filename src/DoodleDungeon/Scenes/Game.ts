@@ -255,12 +255,6 @@ export default class GameLevel extends Scene {
                         this.goToMenu()
                     }
                     break;
-                case Game_Events.ENEMY_KILLED:
-                    {
-                        let node = this.sceneGraph.getNode(event.data.get("owner"));
-                        node.destroy();
-                    }
-                    break;
             }
         }
     }
@@ -654,11 +648,11 @@ export default class GameLevel extends Scene {
                 // Create an enemy
 
                 // TODO: CHANGE THIS
-                // this.enemies[i] = this.add.animatedSprite(data.type, "primary");
-                this.enemies[i] = this.add.animatedSprite("gun_enemy", "primary");
+                this.enemies[i] = this.add.animatedSprite(data.type, "primary");
+                // this.enemies[i] = this.add.animatedSprite("gun_enemy", "primary");
                 
                 this.enemies[i].position.set(data.position[0], data.position[1]);
-                this.enemies[i].animation.play("IDLE");
+                this.enemies[i].animation.play("Idle Left");
 
                 //     // Activate physics
                 this.enemies[i].addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
@@ -695,7 +689,7 @@ export default class GameLevel extends Scene {
                     /** MOVE => WAIT => CHARGE => ATTACK */
                     let actionCharging = [
                         new AttackAction(1, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
-                        new Move(2, [], [AI_Statuses.MOVE_DONE], { inRange: 100 }),
+                        new Move(2, [], [AI_Statuses.MOVE_DONE], { inRange: 100, untilVisible: true }),
                         new Wait(3, [AI_Statuses.MOVE_DONE], [AI_Statuses.WAIT_DONE], { waitTime: 1000 }),
                         new Charge(4, [AI_Statuses.WAIT_DONE], [AI_Statuses.IN_RANGE], { chargeTime: 1000 })
                     ]
@@ -714,7 +708,7 @@ export default class GameLevel extends Scene {
                     actions: actions,
                     inRange: range
                 }
-                this.enemies[i].scale = (new Vec2(2, 2));
+                this.enemies[i].scale = (new Vec2(0.0625, 0.0625));
                 this.enemies[i].addAI(EnemyAI, enemyOptions);
             }
         } catch(e){

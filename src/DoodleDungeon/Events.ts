@@ -11,7 +11,6 @@ export enum Game_Events {
 	PLAYER_MOVE = "PlayerMoved",
 	PLAYER_ATTACK = "PlayerAttacked",
 	PLAYER_ATTACK_FINISHED = "PlayerAttackFinished",
-    ENEMY_KILLED = "EnemyKilled",
 	SPLASH_SCREEN_SHOW = "SplashShow",
 	SPLASH_SCREEN_END = "SplashDone",
 	GAME_PAUSE = "GAME_PAUSE"

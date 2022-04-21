@@ -53,6 +53,9 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
     invincible: boolean;
     invincibleTimer: Timer;
 
+    attacking: boolean;
+    attackTimer: Timer;
+
     initializeAI(owner: AnimatedSprite, options: Record<string, any>): void {
         this.owner = owner;
 
@@ -81,6 +84,9 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
 
         this.invincible = false;
         this.invincibleTimer = new Timer(0);
+
+        this.attacking = false;
+        this.attackTimer = new Timer(0);
 
         // Initialize to the default state
         this.initialize(EnemyStates.DEFAULT);
@@ -128,9 +134,10 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
     setInvincible(duration:number=500){
         this.invincibleTimer.start(duration);
         this.invincible = true;
-        this.emitter.fireEvent(Game_Events.PLAYER_INVINCIBLE);
-        this.owner.tweens.play("iframe");
+        // this.emitter.fireEvent(Game_Events.PLAYER_INVINCIBLE);
+        // this.owner.tweens.play("iframe");
     }
+
     damage(damage: number): void {
         if(!this.invincible){
             this.health -= damage;
@@ -139,7 +146,6 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
                 this.owner.setAIActive(false, {});
                 this.owner.isCollidable = false;
                 this.owner.visible = false;
-                this.emitter.fireEvent(Game_Events.ENEMY_KILLED, {owner: this.owner.id});
             }  
         }
     }
@@ -149,12 +155,24 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
         return this.player.position;
     }
 
+    attack(){
+        console.log("enemy atk")
+        if(this.attackTimer.isStopped()){
+            this.attacking = true
+            this.attackTimer.start(100);
+            (<BattlerAI>this.player._ai).damage(1)
+        }
+    }
+    
     update(deltaT: number){
         super.update(deltaT);
 
         if(this.invincible && this.invincibleTimer.isStopped()){
             this.invincible = false
             this.owner.tweens.stop("iframe");
+        }
+        if(this.attacking && this.attackTimer.isStopped()){
+            this.attacking = false
         }
 
         // // This is the plan that is executed in the Active state, so whenever we don't have a plan, acquire a new one given the current statuses the enemy has

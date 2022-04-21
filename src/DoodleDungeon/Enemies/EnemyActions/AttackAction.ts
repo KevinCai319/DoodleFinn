@@ -28,15 +28,11 @@ export default class AttackAction extends GoapAction {
             }
 
             //Randomize attack direction, gives the enemy gun users stormtrooper aim
-            let dir = enemy.getPlayerPosition().clone().sub(enemy.owner.position).normalize();
-            dir.rotateCCW(Math.PI / 4 * Math.random() - Math.PI/8);
-            enemy.owner.rotation = Vec2.UP.angleToCCW(dir);
+            // let dir = enemy.getPlayerPosition().clone().sub(enemy.owner.position).normalize();
+            // dir.rotateCCW(Math.PI / 4 * Math.random() - Math.PI/8);
+            enemy.owner.rotation = 0;
 
-            // TODO: Perform attack
-            console.log("PERFORM ATTACK");
-            // if(<PlayerController>(enemy.player._ai).owner.boundary)
-            
-            (<BattlerAI>enemy.player._ai).damage(1);
+            enemy.attack()
             
             return this.effects;
         }
