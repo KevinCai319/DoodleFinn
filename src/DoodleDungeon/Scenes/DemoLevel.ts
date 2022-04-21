@@ -32,6 +32,7 @@ export default class DemoLevel extends GameLevel {
         this.load.image("InstPaper", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Paper.png");
         this.load.image("InstEndLevel", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-NextLevel.png");
         this.load.image("InstEnd", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-End.png");
+        this.load.image("InstAttack2", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Attack2.png");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/"+this.LEVEL_NAME+"/enemy.json");
 
@@ -65,7 +66,9 @@ export default class DemoLevel extends GameLevel {
         this.playerSpawnColRow = new Vec2(2,46)
         // Add in special graphics.
         this.backgroundSetup.push((layer:Layer)=>{
+
             this.addLevelBackgroundImage("InstAttack",layer.getName(),new Vec2(12,23).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.43,0.43));
+            this.addLevelBackgroundImage("InstAttack2",layer.getName(),new Vec2(12,20).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(4,4));
             this.addLevelBackgroundImage("InstErase",layer.getName(),new Vec2(5.55,46.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.43,0.43));
             this.addLevelBackgroundImage("InstEraseText",layer.getName(),new Vec2(8.64,46.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.6,0.6));
             this.addLevelBackgroundImage("InstDraw",layer.getName(),new Vec2(12.65,48.25).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.43,0.43));
