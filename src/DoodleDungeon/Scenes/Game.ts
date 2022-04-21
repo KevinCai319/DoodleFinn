@@ -649,7 +649,7 @@ export default class GameLevel extends Scene {
                     actions: actions,
                     inRange: range
                 }
-                this.enemies[i].scale = (new Vec2(0.125, 0.125));
+                this.enemies[i].scale = (new Vec2(0.0625, 0.0625));
                 this.enemies[i].addAI(EnemyAI, enemyOptions);
             }
         } catch(e){
