@@ -37,7 +37,8 @@ export default class PlayerController extends StateMachineAI implements BattlerA
     velocity: Vec2 = Vec2.ZERO
     direction: number = 1;
     attacking: boolean = false;
-    health: number = 10;
+    MAX_HEALTH:number = 10;
+    health: number = this.MAX_HEALTH;
 	speed: number = 200;
     invincibleTimer: Timer
     attackTimer: Timer
@@ -53,6 +54,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.invincibleTimer = new Timer(1000);
         this.attackTimer = new Timer(100);
         this.direction = 1
+        this.health = this.MAX_HEALTH;
         let boundary =  (<AnimatedSprite>this.owner).boundary
         this.ATTACK_AREA = new Vec2(boundary.hw*1.5,boundary.hh*2)
         this.setInvincible();

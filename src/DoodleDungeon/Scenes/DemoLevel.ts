@@ -16,6 +16,8 @@ export default class DemoLevel extends GameLevel {
         this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
         this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
         this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");
+        this.load.image("heart", "game_assets/spritesheets/Full_Heart.png");
+        this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
         //Load in special instructions.
         this.load.image("InstErase", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Erase.png");
         this.load.image("InstEraseText", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Erase-Text.png");

@@ -26,6 +26,7 @@ import Wait from './../Enemies/EnemyActions/Wait';
 import Charge from './../Enemies/EnemyActions/Charge';
 import Layer from "../../Wolfie2D/Scene/Layer";
 import Button from "../../Wolfie2D/Nodes/UIElements/Button";
+import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 
 
 
@@ -64,6 +65,7 @@ export default class GameLevel extends Scene {
     protected papersCountLabel: Label;
 
     protected backgroundSetup: Array<Function> = [];
+    protected healthBar: Array<Sprite> = [];
     // Enemies
     // A list of enemies
     protected enemies: Array<AnimatedSprite>;
@@ -102,6 +104,8 @@ export default class GameLevel extends Scene {
         this.addUI();
         this.initializeEnemies();
         this.cursor = this.addLevelGraphic("cursor","primary",Input.getGlobalMousePosition())
+
+        this.setupHealthBar();
         // Initialize the timers
         this.levelTransitionTimer = new Timer(500);
         this.levelEndTimer = new Timer(50, () => {
@@ -121,6 +125,7 @@ export default class GameLevel extends Scene {
 
 
     updateScene(deltaT: number) {
+        this.updateHealthBar();
         if(this.pauseButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()){
             this.pauseButton.onClick()
         }
@@ -263,9 +268,34 @@ export default class GameLevel extends Scene {
      * Initializes the viewport
      */
     protected initViewport(): void {
-        this.viewport.setZoomLevel(1.2);
+        this.viewport.setZoomLevel(1.5);
     }
 
+    protected setupHealthBar(): void {
+        let location = new Vec2(50, this.viewport.getView().bottom - 100);
+        let scale = new Vec2(0.2, 0.2);
+        // Create up to 10 hearts on the UI layer.
+        try{
+            for (let i = 0; i < 10; i++) {
+                this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI",location,scale));
+                this.healthBar.push(this.addLevelBackgroundImage("heart", "UI",location,scale));
+                location.x+=65;
+            }
+        }catch(e){
+            
+        }
+    }
+    protected updateHealthBar(): void {
+        let playerMaxHealth = (this.player._ai as PlayerController).MAX_HEALTH;
+        let playerHealth = (this.player._ai as PlayerController).health;
+        for (let i = 0; i < this.healthBar.length; i++) {
+            if(i%2==1){
+                this.healthBar[i].visible = (i+1 <= playerHealth);
+            }else{
+                this.healthBar[i].visible = (i+1 == playerHealth && playerHealth%2==1);
+            }            
+        }
+    }
     /**
      * Handles all subscriptions to events
      */
