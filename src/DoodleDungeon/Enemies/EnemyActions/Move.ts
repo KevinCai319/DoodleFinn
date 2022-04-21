@@ -45,7 +45,17 @@ export default class Move extends GoapAction {
                 //If it is, then move directly to the player.
                 enemy.owner.pathfinding = false;
                 let dir = enemy.owner.position.dirTo(enemy.playerPos);
-                enemy.owner.rotation = Vec2.UP.angleToCCW(dir);
+                
+                // enemy.owner.rotation = Vec2.UP.angleToCCW(dir);
+                // enemy.owner.rotation = Vec2.UP
+                let isPlayerLeft = Math.sin(Vec2.UP.angleToCCW(dir)) >= 0
+                if (isPlayerLeft) {
+                    enemy.owner.animation.playIfNotAlready("Walk Left", true)
+                }
+                else {
+                    enemy.owner.animation.playIfNotAlready("Walk Right", true)
+                }
+                enemy.owner.rotation = 0
                 enemy.owner.moving = true;
                 enemy.owner._velocity = dir.scale(enemy.speed * deltaT);
             }else{
@@ -56,7 +66,16 @@ export default class Move extends GoapAction {
                     this.path = enemy.path;
                     enemy.owner.moveOnPath(enemy.speed * deltaT, this.path);
                 }
-                enemy.owner.rotation = Vec2.UP.angleToCCW(this.path.getMoveDirection(enemy.owner));
+                // enemy.owner.rotation = Vec2.UP.angleToCCW(this.path.getMoveDirection(enemy.owner));
+                let dir = enemy.owner.position.dirTo(enemy.playerPos);
+                let isPlayerLeft = Math.sin(Vec2.UP.angleToCCW(dir)) >= 0
+                if (isPlayerLeft) {
+                    enemy.owner.animation.playIfNotAlready("Walk Left", true)
+                }
+                else {
+                    enemy.owner.animation.playIfNotAlready("Walk Right", true)
+                }
+                enemy.owner.rotation = 0
             }
             return null;
         }
