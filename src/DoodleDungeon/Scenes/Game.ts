@@ -443,6 +443,12 @@ export default class GameLevel extends Scene {
         toAdd.animation.playIfNotAlready("idle",true)
         return toAdd
     }
+    protected addLevelBackgroundImage(name:string, layer:string="primary",position:Vec2, size:Vec2 = new Vec2(1,1)) {
+        let toAdd = this.add.sprite(name, layer);
+        toAdd.position.copy(position)
+        toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size)
+        return toAdd
+    }   
     protected processLevelData(level_id:string): void {
         this.level = level_id
         let tilemapLayers = this.add.tilemap(level_id, GameLevel.LEVEL_SCALING);
