@@ -38,7 +38,7 @@ export default class GameLevel extends Scene {
     // Size of a tile in a tilemap.
     static INPUT_TILE_SIZE = new Vec2(256, 256);
     static LEVEL_SCALING: Vec2 = new Vec2(this.DEFAULT_LEVEL_TILE_SIZE.x/this.INPUT_TILE_SIZE.x,this.DEFAULT_LEVEL_TILE_SIZE.y/this.INPUT_TILE_SIZE.y);
-    
+    static LEVEL_PADDING: Vec2 = this.DEFAULT_LEVEL_TILE_SIZE.clone().mult(new Vec2(3, 5));
     paused:boolean = false;
     protected placementHacks:boolean = false;
     protected placementRange:number = 5;
@@ -92,7 +92,10 @@ export default class GameLevel extends Scene {
         this.initLayers();
         this.initViewport();
         this.processLevelData(this.LEVEL_NAME);
-        this.viewport.setBounds(0, 0, this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
+        this.viewport.setBounds(-GameLevel.LEVEL_PADDING.x, 
+                                -GameLevel.LEVEL_PADDING.y,
+                                this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x+GameLevel.LEVEL_PADDING.x,
+                                this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y+GameLevel.LEVEL_PADDING.y);
         this.playerSpawn = new Vec2(this.playerSpawnColRow.x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.playerSpawnColRow.y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
         this.initPlayer(this.playerScale);
         this.subscribeToEvents();
@@ -436,17 +439,19 @@ export default class GameLevel extends Scene {
             return 0
        }
     }
-    protected addLevelGraphic(name:string, layer:string="primary",position:Vec2, size:Vec2 = new Vec2(1,1)) {
+    protected addLevelGraphic(name:string, layer:string="primary",position:Vec2, size:Vec2 = new Vec2(1,1), alpha:number = 1) {
         let toAdd = this.add.animatedSprite(name, layer);
         toAdd.position.copy(position)
         toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size)
         toAdd.animation.playIfNotAlready("idle",true)
+        toAdd.alpha = alpha;
         return toAdd
     }
-    protected addLevelBackgroundImage(name:string, layer:string="primary",position:Vec2, size:Vec2 = new Vec2(1,1)) {
+    protected addLevelBackgroundImage(name:string, layer:string="primary",position:Vec2, size:Vec2 = new Vec2(1,1),alpha:number = 1) {
         let toAdd = this.add.sprite(name, layer);
         toAdd.position.copy(position)
         toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size)
+        toAdd.alpha = alpha;
         return toAdd
     }   
     protected processLevelData(level_id:string): void {
