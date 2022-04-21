@@ -13,6 +13,8 @@ export default class Level1 extends GameLevel {
         this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
         this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
         this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");
+        this.load.image("heart", "game_assets/spritesheets/Full_Heart.png");
+        this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/"+this.LEVEL_NAME+"/enemy.json");
     }
@@ -29,7 +31,12 @@ export default class Level1 extends GameLevel {
     unloadScene(){
         // Keep resources - this is up to you
         this.load.keepSpritesheet("player");
-        
+        let time = this.levelTimer.getTimeElapsed()/1000;
+        Tutorial.bestTimes[1] = Math.min(Tutorial.bestTimes[1],time);
+        if(Tutorial.bestTimes[1] == -1)Tutorial.bestTimes[1] = time;
+        // if(Tutorial.LevelsUnlocked == 2){
+        //     Tutorial.LevelsUnlocked+=1;
+        // }
     }
 
     startScene(): void {

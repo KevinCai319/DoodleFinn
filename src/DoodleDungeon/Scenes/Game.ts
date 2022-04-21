@@ -26,6 +26,7 @@ import Wait from './../Enemies/EnemyActions/Wait';
 import Charge from './../Enemies/EnemyActions/Charge';
 import Layer from "../../Wolfie2D/Scene/Layer";
 import Button from "../../Wolfie2D/Nodes/UIElements/Button";
+import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 
 
 
@@ -38,7 +39,7 @@ export default class GameLevel extends Scene {
     // Size of a tile in a tilemap.
     static INPUT_TILE_SIZE = new Vec2(256, 256);
     static LEVEL_SCALING: Vec2 = new Vec2(this.DEFAULT_LEVEL_TILE_SIZE.x/this.INPUT_TILE_SIZE.x,this.DEFAULT_LEVEL_TILE_SIZE.y/this.INPUT_TILE_SIZE.y);
-    
+    static LEVEL_PADDING: Vec2 = this.DEFAULT_LEVEL_TILE_SIZE.clone().mult(new Vec2(3, 5));
     paused:boolean = false;
     protected placementHacks:boolean = false;
     protected placementRange:number = 5;
@@ -62,12 +63,14 @@ export default class GameLevel extends Scene {
     protected numberWhite: number = 0;
     protected numberPapers: number = 0;
     protected papersCountLabel: Label;
+    protected levelTimer: Timer;
 
     protected backgroundSetup: Array<Function> = [];
+    protected healthBar: Array<Sprite> = [];
     // Enemies
     // A list of enemies
     protected enemies: Array<AnimatedSprite>;
-
+    protected gameEnd: boolean = false;
     // Special maps specific to the level.
     // Dynamic maps are used for handling pathfinding and collision.
     dynamicMap: DynamicMap;
@@ -88,25 +91,35 @@ export default class GameLevel extends Scene {
     
 
     startScene(): void {
+        this.gameEnd = false;
+        this.levelTimer = new Timer(1000 * 100000);
+        this.levelTimer.start();
         // Do the game level standard initializations
         this.initLayers();
         this.initViewport();
         this.processLevelData(this.LEVEL_NAME);
-        this.viewport.setBounds(0, 0, this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
+        this.viewport.setBounds(-GameLevel.LEVEL_PADDING.x, 
+                                -GameLevel.LEVEL_PADDING.y,
+                                this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x+GameLevel.LEVEL_PADDING.x,
+                                this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y+GameLevel.LEVEL_PADDING.y);
         this.playerSpawn = new Vec2(this.playerSpawnColRow.x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.playerSpawnColRow.y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
         this.initPlayer(this.playerScale);
         this.subscribeToEvents();
         this.addUI();
         this.initializeEnemies();
         this.cursor = this.addLevelGraphic("cursor","primary",Input.getGlobalMousePosition())
+
+        this.setupHealthBar();
+        this.updateHealthBar();
         // Initialize the timers
         this.levelTransitionTimer = new Timer(500);
-        this.levelEndTimer = new Timer(50, () => {
+        this.levelEndTimer = new Timer(100, () => {
             // After the level end timer ends, fade to black and then go to the next scene
             this.levelTransitionScreen.tweens.play("fadeIn");
             // Clear debug log.
             Debug.clearLog();
             Debug.clearCanvas();
+            this.gameEnd = true;
         });
 
         // Start the black screen fade out
@@ -118,6 +131,7 @@ export default class GameLevel extends Scene {
 
 
     updateScene(deltaT: number) {
+        this.updateHealthBar();
         if(this.pauseButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()){
             this.pauseButton.onClick()
         }
@@ -185,11 +199,16 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.PLAYER_ENTERED_LEVEL_END:
                     {
+
                         // Check if the player has collected all the collectibles.
-                        if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite) {
+                        if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) {
+         
                             Input.disableInput();
                             // If so, start the level end timer
+                            // this.levelTransitionScreen.alpha=1;
+                            // this.levelTransitionScreen.tweens.play("fadeIn");
                             this.levelEndTimer.start();
+                            // this.goToMenu();
                         }
                     }
                     break;
@@ -209,6 +228,7 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.LEVEL_END:
                     {
+                        this.levelTimer.pause();
                         // Go to the next level
                         if (this.nextLevel) {
                             let sceneOptions = {
@@ -254,9 +274,34 @@ export default class GameLevel extends Scene {
      * Initializes the viewport
      */
     protected initViewport(): void {
-        this.viewport.setZoomLevel(1.2);
+        this.viewport.setZoomLevel(1.5);
     }
 
+    protected setupHealthBar(): void {
+        let location = new Vec2(50, this.viewport.getView().bottom - 100);
+        let scale = new Vec2(0.2, 0.2);
+        // Create up to 10 hearts on the UI layer.
+        try{
+            for (let i = 0; i < 10; i++) {
+                this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI",location,scale));
+                this.healthBar.push(this.addLevelBackgroundImage("heart", "UI",location,scale));
+                location.x+=65;
+            }
+        }catch(e){
+            
+        }
+    }
+    protected updateHealthBar(): void {
+        let playerMaxHealth = (this.player._ai as PlayerController).MAX_HEALTH;
+        let playerHealth = (this.player._ai as PlayerController).health;
+        for (let i = 0; i < this.healthBar.length; i++) {
+            if(i%2==1){
+                this.healthBar[i].visible = (i+1 <= playerHealth);
+            }else{
+                this.healthBar[i].visible = (i+1 == playerHealth && playerHealth%2==1);
+            }            
+        }
+    }
     /**
      * Handles all subscriptions to events
      */
@@ -280,12 +325,14 @@ export default class GameLevel extends Scene {
      */
     protected addUI() {
         // Lives Count Label. TODO: Make this using sprites.)
-        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(100, 30), text: "Lives: " + this.livesCount });
-        this.livesCountLabel.textColor = Color.BLACK;
+        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(50, 30), text: "Lives: " + this.livesCount });
+        this.livesCountLabel.textColor = Color.RED;
+        this.livesCountLabel.backgroundColor = new Color(32, 32, 32,0.5);
         this.livesCountLabel.font = "PixelSimple";
         // Prompt for paper.
-        this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(100, 90), text: "Find some paper!" });
-        this.papersCountLabel.textColor = Color.BLACK;
+        this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(90,60), text: "Find some paper!" });
+        this.papersCountLabel.textColor = Color.RED;
+        this.papersCountLabel.backgroundColor = new Color(32, 32, 32,0.5);
         this.papersCountLabel.font = "PixelSimple";
 
         // End of level label (start off screen)
@@ -393,8 +440,9 @@ export default class GameLevel extends Scene {
         // TODO: update AABB for Finn.
         let playerBox = this.player.boundary.clone();
         //remove 1/8 of height and width from the player box.
-        let offset = playerBox.getHalfSize().y/8;
-        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x/4, offset)));
+        let offset = 0;
+        // offset = playerBox.getHalfSize().y/8;
+        // playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x/4, offset)));
         //update playerbox center.
         // playerBox.center.y -=offset/2;
         // this.player.colliderOffset.set(0, offset);
@@ -430,13 +478,21 @@ export default class GameLevel extends Scene {
             return 0
        }
     }
-    protected addLevelGraphic(name:string, layer:string="primary",position:Vec2, size:Vec2 = new Vec2(1,1)) {
+    protected addLevelGraphic(name:string, layer:string="primary",position:Vec2, size:Vec2 = new Vec2(1,1), alpha:number = 1) {
         let toAdd = this.add.animatedSprite(name, layer);
         toAdd.position.copy(position)
         toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size)
         toAdd.animation.playIfNotAlready("idle",true)
+        toAdd.alpha = alpha;
         return toAdd
     }
+    protected addLevelBackgroundImage(name:string, layer:string="primary",position:Vec2, size:Vec2 = new Vec2(1,1),alpha:number = 1) {
+        let toAdd = this.add.sprite(name, layer);
+        toAdd.position.copy(position)
+        toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size)
+        toAdd.alpha = alpha;
+        return toAdd
+    }   
     protected processLevelData(level_id:string): void {
         this.level = level_id
         let tilemapLayers = this.add.tilemap(level_id, GameLevel.LEVEL_SCALING);

@@ -15,6 +15,7 @@ export default class Spawn extends PlayerState {
         // this.owner.alpha=0.2
         this.timeElapsed = 0
         this.startLocation = this.owner.position.clone()
+        this.parent.health = this.parent.MAX_HEALTH;
         this.owner.tweens.play("iframe",true)
         this.parent.setInvincible(this.RESPAWN_TIME)
 	}
