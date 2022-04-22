@@ -112,9 +112,11 @@ export default class PlayerController extends StateMachineAI implements BattlerA
             this.emitter.fireEvent(Game_Events.PLAYER_HURT);
             this.setInvincible();
             if(this.health <= 0){
+                this.health = 0
                 // this.emitter.fireEvent(Game_Events.PLAYER_LOSE_LIFE);
                 this.owner.tweens.play("death");
-                // this.initialize(PlayerStates.SPAWN);
+                // end current state.
+                this.changeState(PlayerStates.SPAWN);
             }else{
                 this.setInvincible();
             }

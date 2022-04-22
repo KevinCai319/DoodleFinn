@@ -61,18 +61,14 @@ export default abstract class PlayerState extends State {
 				this.parent.velocity.y += this.gravity*deltaT;
 			}
 
-			if( this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF && !this.parent.invicible){
+			if(( this.parent.health <= 0 || this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF) && !this.parent.invicible){
 				this.owner.freeze()
 				this.owner.disablePhysics()
-				// this.parent.damage(99999099);
-				// this.
-				this.emitter.fireEvent(Game_Events.PLAYER_LOSE_LIFE);
-				this.finished(PlayerStates.SPAWN);
-			}else if ( this.parent.health <= 0 && !this.parent.invicible){
-				this.owner.freeze()
-				this.owner.disablePhysics()
-				this.finished(PlayerStates.SPAWN);
+				if(this.parent.health >0 ){
+					this.parent.damage(9999999999);
+				}
 			}
+			
 		}
 	}
 

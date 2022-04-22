@@ -174,6 +174,7 @@ export default class GameLevel extends Scene {
         if (this.menuButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()) {
             this.menuButton.onClick()
         }
+        this.updateHealthBar();
 
         /**
          * Handle Cursor Actions.
@@ -209,6 +210,29 @@ export default class GameLevel extends Scene {
                         this.paused = !this.paused
                         this.menuButton.visible = this.paused
                         this.levelTransitionScreen.alpha = (this.paused) ? 1 : 0;
+                        //pause the game
+                        if (this.paused) {
+                            //freeze the game.
+                            this.getLayer("primary").disable();
+        
+                            this.player.freeze();
+                            
+                            //iterate through all enemies and freeze them.
+                            this.enemies.forEach(enemy => {
+                                enemy.freeze();
+                            });
+
+                        }else{
+                            //unfreeze the game.
+                            this.getLayer("primary").enable();
+                            if((this.player._ai as PlayerController).health > 0){
+                                this.player.unfreeze();
+                            }
+                            //iterate through all enemies and freeze them.
+                            this.enemies.forEach(enemy => {
+                                enemy.unfreeze();
+                            });
+                        }
                     }
                     break;
                 case Game_Events.PLAYER_ATTACK:

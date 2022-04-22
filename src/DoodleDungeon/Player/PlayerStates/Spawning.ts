@@ -12,10 +12,8 @@ export default class Spawn extends PlayerState {
     RESPAWN_TIME: number = 1200
     timeElapsed: number = 0
 	onEnter(options: Record<string, any>): void {
-        // this.owner.alpha=0.2
         this.timeElapsed = 0
         this.startLocation = this.owner.position.clone()
-        this.parent.health = this.parent.MAX_HEALTH;
         this.owner.tweens.play("iframe",true)
         this.parent.setInvincible(this.RESPAWN_TIME)
 	}
@@ -29,7 +27,8 @@ export default class Spawn extends PlayerState {
         }
 	}
 
-    onExit(): Record<string, any> {  
+    onExit(): Record<string, any> {
+        this.parent.health = this.parent.MAX_HEALTH;  
 		this.positionTimer.start();
         this.parent.setInvincible(1500)
         this.owner._velocity = Vec2.ZERO
