@@ -96,7 +96,7 @@ export default class DynamicTilemap extends OrthogonalTilemap {
 
                     let hit = collider.intersectSegment(start, delta, Vec2.ZERO);
 
-                    if (hit !== null && start.distanceSqTo(hit.pos) < totalDistance) {
+                    if (hit !== null) {
                         // We hit a wall, we can't see the player
                         return null;
                     }
@@ -113,6 +113,7 @@ export default class DynamicTilemap extends OrthogonalTilemap {
         this.isVisible(entity.topRight, entity.topRight.clone().add(point))   !== null&&
         this.isVisible(entity.bottomRight, entity.bottomRight.clone().add(point))!== null);
     }
+
     canAABBgoToPoint(entity:AABB, point:Vec2):boolean{
         return this.canAABBgo(entity, entity.center.vecTo(point));
     }
@@ -131,12 +132,16 @@ export default class DynamicTilemap extends OrthogonalTilemap {
         //remove the tile, update navmesh accordingly.
         this.badNavMesh()
     }
+
     //better implmentation not done yet.
     initializeNavMesh(): void {
         //convert the collision map 
         
         //iterate through all the tiles, and add links to neighboring nodes.
         let graph = new PositionGraph();
+        // Do marching squares.
+        // Do triangulation.
+        // Create the graph.
 
         //create the new navmesh using the graph.
         this.navmesh = new Navmesh(graph);

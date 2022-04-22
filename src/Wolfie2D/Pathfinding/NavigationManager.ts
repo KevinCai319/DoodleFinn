@@ -27,17 +27,26 @@ export default class NavigationManager {
 	}
 
 	/**
-	 * Gets a path frome one point to another using a specified Navigable object
+	 * Gets a path from one point to another using a specified Navigable object
 	 * @param navName The name of the registered Navigable object
 	 * @param fromPosition The starting position of navigation
-	 * @param toPosition The ending position of Navigation
+	 * @param toPosition The ending position of navigation
 	 * @returns A NavigationPath containing the route to take over the Navigable entity to get between the provided positions.
+	 * 			or null if no path could be found.
 	 */
 	getPath(navName: string, fromPosition: Vec2, toPosition: Vec2): NavigationPath {
 		let nav = this.navigableEntities.get(navName);
 		return nav.getNavigationPath(fromPosition.clone(), toPosition.clone());
 	}
 
+	/**
+	 * Gets a approximate path from one point to another using a specified Navigable object
+	 * @param navName The name of the registered Navigable object
+	 * @param fromPosition The starting position of navigation
+	 * @param toPosition The ending position of navigation
+	 * @returns A NavigationPath containing the route to take over the Navigable entity to get between the provided positions,
+	 * 			or null if no path could be found.
+	 */
 	getApproximatePath(navName: string, fromPosition: Vec2, toPosition: Vec2): NavigationPath {
 		let nav = this.navigableEntities.get(navName);
 		return (nav as Navmesh).getNavigationApproximatePath(fromPosition.clone(), toPosition.clone());

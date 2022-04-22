@@ -122,8 +122,9 @@ export default class Home extends GameLevel {
         this.Controls.position= this.getViewport().getHalfSize()
         this.Controls.scale = this.Controls.position.scaled(2).div(this.Controls.size)
         this.Controls.visible = false
-        this.viewport.setZoomLevel(1.25);
+        this.viewport.setZoomLevel(1.1);
         this.viewport.setBounds(0, 0, this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y)
+        // this.viewport.update(0);
         this.livesCountLabel.destroy()
         this.papersCountLabel.destroy()
         // this.levelEndLabel.destroy()

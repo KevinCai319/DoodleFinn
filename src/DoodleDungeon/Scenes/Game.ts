@@ -129,6 +129,8 @@ export default class GameLevel extends Scene {
         this.subscribeToEvents();
         this.addUI();
         this.initializeEnemies();
+        
+        // console.log(this.player.position);
         this.cursor = this.addLevelAnimatedSprite("cursor", "primary", Input.getGlobalMousePosition())
         // Initialize the timers
         this.levelEndTimer = new Timer(10, () => {
@@ -167,12 +169,12 @@ export default class GameLevel extends Scene {
     }
 
     updateScene(deltaT: number) {
-        // TODO: figure out why buttons are not working without these lines.
-        if (this.pauseButton.visible && ((this.pauseButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()) || Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
-            this.pauseButton.onClick()
-        }
-        if (this.menuButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()) {
-            this.menuButton.onClick()
+
+
+        console.log(Input.isMousePressed(0) + "|"+ Input.isMousePressed(2));
+
+        if (this.pauseButton.visible && (Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
+           this.pauseButton.onClick()
         }
         this.updateHealthBar();
 
@@ -185,16 +187,18 @@ export default class GameLevel extends Scene {
                                 mousePosition.x <= canvasInfo.x && mousePosition.y <= canvasInfo.y);
 
         this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(0.5, 0.5)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
-        if (!this.cursorDisabled && this.cursorVisible) {
+        if (!this.cursorDisabled && this.cursorVisible && !this.paused) {
             this.cursor.alpha = 1;
-            // TODO: Add limits to how far the player can click from their body.
-            if (Input.isMousePressed(0)) {
-                // Add tile (Left Click)
-                this.updateLevelGeometry(Input.getGlobalMousePosition(), 0)
-            }
-            if (Input.isMousePressed(2)) {
-                // Remove tile (Right Click)
-                this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
+            if(Input.isMousePressed(0) != Input.isMousePressed(2)){
+                // TODO: Add limits to how far the player can click from their body.
+                if (Input.isMousePressed(0)) {
+                    // Add tile (Left Click)
+                    this.updateLevelGeometry(Input.getGlobalMousePosition(), 0)
+                }
+                if (Input.isMousePressed(2)) {
+                    // Remove tile (Right Click)
+                    this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
+                }
             }
         } else {
             this.cursor.alpha = 0;
@@ -216,7 +220,6 @@ export default class GameLevel extends Scene {
                             this.getLayer("primary").disable();
         
                             this.player.freeze();
-                            
                             //iterate through all enemies and freeze them.
                             this.enemies.forEach(enemy => {
                                 enemy.freeze();
@@ -302,6 +305,8 @@ export default class GameLevel extends Scene {
                     {
                         // Re-enable controls
                         Input.enableInput();
+                        this.viewport.enableStaticBoundary();
+                        this.viewport.setStaticBoundary(new Vec2(200,100));
                     }
                     break;
                 case Game_Events.LEVEL_END:
@@ -429,7 +434,7 @@ export default class GameLevel extends Scene {
 
         // Pause button setup.
         let halfViewport = this.viewport.getHalfSize();
-        let pauseButton = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", { position: new Vec2(halfViewport.x * 1.8, halfViewport.y * 1.8), text: "Pause" });
+        let pauseButton = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", { position: new Vec2(halfViewport.x * 2-50, halfViewport.y*2-50), text: "Pause" });
         pauseButton.backgroundColor = Color.BLACK;
         pauseButton.borderColor = Color.WHITE;
         pauseButton.borderRadius = 10;
@@ -437,10 +442,8 @@ export default class GameLevel extends Scene {
         pauseButton.scale = new Vec2(0.5, 0.5);
         pauseButton.font = "PixelSimple";
         pauseButton.onClick = () => {
-            // if (pauseButton.boundary.intersectPoint(Input.getMousePosition())) {
             this.levelTransitionScreen.alpha = 0;
             this.emitter.fireEvent(Game_Events.GAME_PAUSE);
-            // }
         }
         this.pauseButton = pauseButton
 
@@ -466,7 +469,7 @@ export default class GameLevel extends Scene {
      * May be removed in the future.
      */
     protected setupHealthBar(): void {
-        let location = new Vec2(50, this.viewport.getView().bottom - 100);
+        let location = new Vec2(50, this.viewport.getView().hh*2 - 50);
         let scale = new Vec2(0.2, 0.2);
         // Create up to 10 hearts on the UI layer.
         try {
@@ -509,8 +512,6 @@ export default class GameLevel extends Scene {
             this.playerSpawn = Vec2.ZERO;
         }
         this.player.position.copy(this.playerSpawn);
-        this.viewport.follow(this.player);
-
         let playerBox = this.player.boundary.clone();
         //remove 1/8 of height and 1/4 width from the player box.
         let offset = 0;
@@ -521,6 +522,9 @@ export default class GameLevel extends Scene {
 
         this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
         this.player.setGroup("player");
+
+
+        this.viewport.follow(this.player);
         this.livesCount = 3
     }
 

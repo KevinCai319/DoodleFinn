@@ -64,7 +64,6 @@ export default class DemoLevel extends GameLevel {
         this.playerSpawnColRow = new Vec2(2,47)
         // Add in special graphics.
         this.backgroundSetup.push((layer:Layer)=>{
-
             this.addLevelBackgroundImage("InstAttack",layer.getName(),new Vec2(12,23).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.43,0.43));
             this.addLevelBackgroundImage("InstAttack2",layer.getName(),new Vec2(12,20).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(4,4));
             this.addLevelBackgroundImage("InstErase",layer.getName(),new Vec2(5.55,46.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.43,0.43));

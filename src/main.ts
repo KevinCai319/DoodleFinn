@@ -1,17 +1,23 @@
 import Game from "./Wolfie2D/Loop/Game";
-import MainMenu from "./DoodleDungeon/Scenes/Title";
 import Splash from "./DoodleDungeon/Scenes/Splash";
-import Title from "./DoodleDungeon/Scenes/Title";
-import Home from "./DoodleDungeon/Scenes/Home";
+import Vec2 from "./Wolfie2D/DataTypes/Vec2";
+import GameLevel from "./DoodleDungeon/Scenes/Game";
 
 // The main function is your entrypoint into Wolfie2D. Specify your first scene and any options here.
 (function main(){
     // Run any tests
     runTests();
+    // Find resolution of the window.
+    const resolution = new Vec2(window.screen.width * window.devicePixelRatio , window.screen.height * window.devicePixelRatio);
+    const CANVAS_SCALE = 0.65;
+    // console.log(resolution.x*CANVAS_SCALE*9/16);
+    // console.log(GameLevel.DEFAULT_LEVEL_TILE_SIZE.y*20);
+    // const tile_height = (resolution.x*CANVAS_SCALE*9/16)/(GameLevel.DEFAULT_LEVEL_TILE_SIZE.y*20);
+    // GameLevel.DEFAULT_LEVEL_TILE_SIZE.scale(tile_height);
 
     // Set up options for our game
     let options = {
-        canvasSize: {x: 1200, y: 800},          // The size of the game
+        canvasSize: {x: resolution.x*CANVAS_SCALE, y: resolution.x*CANVAS_SCALE*9/16},          // The size of the game
         clearColor: {r: 34, g: 32, b: 52},   // The color the game clears to
         inputs: [
             {name: "left", keys: ["a"]},

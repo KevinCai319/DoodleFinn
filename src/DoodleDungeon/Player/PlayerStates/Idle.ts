@@ -7,6 +7,7 @@ export default class Idle extends OnGround {
 	owner: AnimatedSprite;
 
 	onEnter(options: Record<string, any>): void {
+		this.parent.velocity.set(0, 0);
 		this.parent.speed = this.parent.MIN_SPEED;
 	}
 

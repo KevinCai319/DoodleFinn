@@ -17,6 +17,9 @@ export default class Viewport {
     private view: AABB;
     /** The boundary for the viewport. This represents the limits to where the viewport can go */
     private boundary: AABB;
+    /** The boundary for which the viewport doesn't update following */
+    private staticBoundary: Vec2;
+    private useStaticBoundary: boolean = false;
     /** The GameNode the Viewport is following */
     private following: GameNode;
     /** The position the GameNode is focusing on. This is overridden if "following" is set. */
@@ -99,7 +102,6 @@ export default class Viewport {
         } else {
             pos = new Vec2(vecOrX, y);
         }
-
         this.view.center = pos;
     }
 
@@ -215,6 +217,17 @@ export default class Viewport {
         this.boundary.halfSize.set(hwidth, hheight);
     }
 
+    enableStaticBoundary(): void {
+        this.useStaticBoundary = true;
+    }
+
+    disableStaticBoundary(): void {
+        this.useStaticBoundary = false;
+    }
+
+    setStaticBoundary(dimensions: Vec2): void {
+        this.staticBoundary= dimensions.clone();
+    }
     /**
      * Make the viewport follow the specified GameNode
      * @param node The GameNode to follow
@@ -241,7 +254,23 @@ export default class Viewport {
         pos.x = Math.floor(pos.x);
         pos.y = Math.floor(pos.y);
         
-        this.view.center.copy(pos);
+        if(this.useStaticBoundary && this.staticBoundary !== undefined){
+            let minX = Math.abs(this.view.center.x-pos.x);
+            let minY = Math.abs(this.view.center.y-pos.y);
+            if(minX > this.staticBoundary.x || minY > this.staticBoundary.y){
+                //Find minimum translation vector.
+                let min = new Vec2(this.view.center.x, this.view.center.y);
+                min.sub(pos);
+                min.x = minX > this.staticBoundary.x ? Math.sign(min.x)*(minX-this.staticBoundary.x) : 0;
+                min.y = minY > this.staticBoundary.y ? Math.sign(min.y)*(minY-this.staticBoundary.y) : 0;
+                this.view.center.sub(min);
+            }else{
+                // console.log(minX+ " " + minY);
+            }
+            
+        } else {
+            this.view.center.copy(pos);
+        }
     }
 
     update(deltaT: number): void {

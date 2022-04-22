@@ -43,6 +43,7 @@ export default class NavigationPath{
 	getDistanceTraveled(): number{
 		return this.distanceTraveled;
 	}
+
 	/**
 	 * Gets the movement direction in the current position along the path
 	 * @param node The node to move along the path
@@ -53,7 +54,13 @@ export default class NavigationPath{
 		return node.position.dirTo(this.path.peek());
 	}
 
-	//shorten overall path to player.
+	/**
+	 * 
+	 * @param navigationPath The path to optimize
+	 * @param map The tilemap to optimize the path on
+	 * @param boundary The box that will traverse this path.
+	 * @returns a new optimized path.
+	 */
 	static AABBOptimization(navigationPath :NavigationPath, map:DynamicTilemap, boundary: AABB):NavigationPath{
 		let start:Vec2= null;
 		let end:Vec2 = null;
@@ -120,7 +127,7 @@ export default class NavigationPath{
 		return this.path.toString()
 	}
 
-	// To be called by some AI debugRender()
+	// To be called by some AI's debugRender()
     renderPath(offset:GameNode){
 		let start:Vec2 = null;
 		let end:Vec2 = null;
