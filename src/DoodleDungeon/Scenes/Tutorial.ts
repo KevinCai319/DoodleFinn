@@ -92,14 +92,14 @@ export default class Tutorial extends GameLevel {
             selectSign.alpha = 0.5
             let helpSign = this.addLevelBackgroundImage("help",layer.getName(),new Vec2(69.3,11.6).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.75,1.75))
             helpSign.alpha = 0.5
-            this.Instructions = this.addLevelGraphic("InstructionsButton",layer.getName(), new Vec2(75,13.4).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(2,2))
+            this.Instructions = this.addLevelAnimatedSprite("InstructionsButton",layer.getName(), new Vec2(75,13.4).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(2,2))
             let backstory = this.addLevelBackgroundImage("Backstory",layer.getName(),new Vec2(45,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.8,1.8))
             backstory.alpha = 0.8
             this.addLevelBackgroundImage("ClickHere",layer.getName(),new Vec2(78.5,11.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3));
             this.addLevelBackgroundImage("PressE",layer.getName(),new Vec2(94.5,14).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3));
             //Adding doors, and their best times.d
             for(let i = 0; i < this.doors.length; i++){
-                let new_door = this.addLevelGraphic("Door",layer.getName(),new Vec2(90+5*i,17).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
+                let new_door = this.addLevelAnimatedSprite("Door",layer.getName(),new Vec2(90+5*i,17).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
                 if(this.doors[i][0]){
                     let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,12).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: \n" });
                     if(Tutorial.bestTimes[i] != -1){
@@ -131,7 +131,7 @@ export default class Tutorial extends GameLevel {
         this.viewport.setBounds(0, 0, this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y)
         this.livesCountLabel.destroy()
         this.papersCountLabel.destroy()
-        this.levelEndLabel.destroy()
+        // this.levelEndLabel.destroy()
         // this.levelTransitionScreen.destroy()
         this.livesCount = 1
         this.pauseButton.visible = false
