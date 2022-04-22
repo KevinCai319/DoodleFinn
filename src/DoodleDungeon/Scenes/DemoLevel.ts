@@ -65,7 +65,7 @@ export default class DemoLevel extends GameLevel {
         // Add the Demo Level.
         this.nextLevel = null
         this.tutorial = Tutorial
-        this.playerSpawnColRow = new Vec2(2,46)
+        this.playerSpawnColRow = new Vec2(2,47)
         // Add in special graphics.
         this.backgroundSetup.push((layer:Layer)=>{
 

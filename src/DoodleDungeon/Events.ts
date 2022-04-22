@@ -1,6 +1,7 @@
 export enum Game_Events {
 	PLAYER_ENTERED_LEVEL_END = "PlayerEnteredLevelEnd",
 	PLAYER_LOSE_LIFE = "PlayerOutOfBounds",
+	PLAYER_HURT = "PlayerHurt",
 	PLAYER_INVINCIBLE = "PlayerInvincible",
 	PLAYER_INVINCIBLE_END = "PlayerInvincibleEnd",
 	PINK_PAPER_FOUND = "PinkPaperFound",
