@@ -76,6 +76,11 @@ export default class GameLevel extends Scene {
     protected livesCount: number = 3;
     protected livesCountLabel: Label;
     protected papersCountLabel: Label;
+    protected levelEndLabel: Label;
+
+    // Curtain to do screen fade in/out
+    protected levelTransitionScreen: Rect;
+
     // TODO: Move health bar to a separate class.
     protected healthBar: Array<Sprite> = [];
     protected menuButton: Button
@@ -98,19 +103,10 @@ export default class GameLevel extends Scene {
     // various methods for adding UI elements to the scene.
     protected backgroundSetup: Array<Function> = [];
 
-
-
     // Stuff to end the level and go to the next level
     protected levelEndSpots: Array<Rect> = []
     protected nextLevel: new (...args: any) => GameLevel;
     protected tutorial: new (...args: any) => GameLevel;
-
-    protected levelEndLabel: Label;
-
-    // Curtain to do screen fade in/out
-    protected levelTransitionScreen: Rect;
-
-
 
     startScene(): void {
         this.gameEnd = false;
@@ -120,19 +116,19 @@ export default class GameLevel extends Scene {
         this.initLayers();
         this.initViewport();
         this.processLevelData(this.LEVEL_NAME);
-        this.viewport.setBounds(-GameLevel.LEVEL_PADDING.x,
+        this.viewport.setBounds(
+            -GameLevel.LEVEL_PADDING.x,
             -GameLevel.LEVEL_PADDING.y,
             this.dynamicMap.getDimensions().x * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x + GameLevel.LEVEL_PADDING.x,
             this.dynamicMap.getDimensions().y * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y + GameLevel.LEVEL_PADDING.y);
-        this.playerSpawn = new Vec2(this.playerSpawnColRow.x * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.playerSpawnColRow.y * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
+        this.playerSpawn = new Vec2(
+            this.playerSpawnColRow.x * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x,
+            this.playerSpawnColRow.y * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
         this.initPlayer(this.playerScale);
         this.subscribeToEvents();
         this.addUI();
         this.initializeEnemies();
         this.cursor = this.addLevelAnimatedSprite("cursor", "primary", Input.getGlobalMousePosition())
-
-        this.setupHealthBar();
-        this.updateHealthBar();
         // Initialize the timers
         this.levelEndTimer = new Timer(10, () => {
             // After the level end timer ends, fade to black and then go to the next scene
@@ -143,25 +139,48 @@ export default class GameLevel extends Scene {
             this.gameEnd = true;
         });
 
-        // Start the black screen fade out
+        // Have the curtains fade out.
         this.levelTransitionScreen.tweens.play("fadeOut");
 
         // Initially disable player movement
         Input.disableInput();
     }
 
+    /**
+     * Handles all subscriptions to events
+     */
+    protected subscribeToEvents() {
+        this.receiver.subscribe([
+            Game_Events.PLAYER_ENTERED_LEVEL_END,
+            Game_Events.PLAYER_LOSE_LIFE,
+            Game_Events.PINK_PAPER_FOUND,
+            Game_Events.WHITE_PAPER_FOUND,
+            Game_Events.LEVEL_START,
+            Game_Events.LEVEL_END,
+            Game_Events.PLAYER_KILLED,
+            Game_Events.PLAYER_HURT,
+            Game_Events.PLAYER_ATTACK,
+            Game_Events.PLAYER_ATTACK_FINISHED,
+            Game_Events.GAME_PAUSE
+        ]);
+    }
 
     updateScene(deltaT: number) {
+        // TODO: figure out why buttons are not working without these lines.
         if (this.pauseButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()) {
             this.pauseButton.onClick()
         }
         if (this.menuButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()) {
             this.menuButton.onClick()
         }
-        // TODO: Add limits to how far the player can click from their body.
+
+        /**
+         * Handle Cursor Actions.
+         */
         this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(0.5, 0.5)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
         if (!this.cursorDisabled) {
-            this.cursor.alpha = 0.8;
+            this.cursor.alpha = 1;
+            // TODO: Add limits to how far the player can click from their body.
             if (Input.isMousePressed(0)) {
                 // Add tile (Left Click)
                 this.updateLevelGeometry(Input.getGlobalMousePosition(), 0)
@@ -173,6 +192,7 @@ export default class GameLevel extends Scene {
         } else {
             this.cursor.alpha = 0;
         }
+
 
         // Handle events and update the UI if needed
         while (this.receiver.hasNextEvent()) {
@@ -187,8 +207,9 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.PLAYER_ATTACK:
                     {
-                        // GO through all enemies and see if they are in range of the cursor hitbox.
+                        // Go through all enemies and see if they are in range of the cursor hitbox.
                         // If they are, then attack them.
+                        // TODO: make attacking cleaner.
                         let cursorHitbox = this.cursor.boundary.clone();
                         if (this.enemies != null) {
                             this.enemies.forEach(enemy => {
@@ -205,11 +226,6 @@ export default class GameLevel extends Scene {
                         }
                     }
                     break;
-                case Game_Events.PLAYER_HURT:
-                    {
-                        this.updateHealthBar();
-                    }
-                    break;
                 case Game_Events.PINK_PAPER_FOUND:
                     {
                         this.pinkFound++;
@@ -224,17 +240,17 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.PLAYER_ENTERED_LEVEL_END:
                     {
-
                         // Check if the player has collected all the collectibles.
+                        // TODO: make this less rigid.
                         if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) {
-
                             Input.disableMouseInput();
-                            // If so, start the level end timer
-                            // this.levelTransitionScreen.alpha=1;
-                            // this.levelTransitionScreen.tweens.play("fadeIn");
                             this.levelEndTimer.start();
-                            // this.goToMenu();
                         }
+                    }
+                    break;
+                case Game_Events.PLAYER_HURT:
+                    {
+                        this.updateHealthBar();
                     }
                     break;
                 case Game_Events.PLAYER_LOSE_LIFE:
@@ -245,6 +261,11 @@ export default class GameLevel extends Scene {
                                 this.goToMenu()
                             }
                         }
+                    }
+                    break;
+                case Game_Events.PLAYER_KILLED:
+                    {
+                        this.goToMenu()
                     }
                     break;
                 case Game_Events.LEVEL_START:
@@ -275,17 +296,8 @@ export default class GameLevel extends Scene {
                         }
                     }
                     break;
-                case Game_Events.PLAYER_KILLED:
-                    {
-                        this.goToMenu()
-                    }
-                    break;
             }
         }
-    }
-
-    get PlayerSpawn(): Vec2 {
-        return this.playerSpawn.clone();
     }
 
     /**
@@ -307,59 +319,6 @@ export default class GameLevel extends Scene {
     }
 
     /**
-     * Initializes the player's health bar.
-     * May be removed in the future.
-     */
-    protected setupHealthBar(): void {
-        let location = new Vec2(50, this.viewport.getView().bottom - 100);
-        let scale = new Vec2(0.2, 0.2);
-        // Create up to 10 hearts on the UI layer.
-        try {
-            for (let i = 0; i < 10; i++) {
-                this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI", location, scale));
-                this.healthBar.push(this.addLevelBackgroundImage("heart", "UI", location, scale));
-                location.x += 65;
-            }
-        } catch (e) {
-
-        }
-    }
-
-    /**
-     * Updates the player's health bar.
-     * May be removed in the future to another class.
-     */
-    protected updateHealthBar(): void {
-        let playerHealth = (this.player._ai as PlayerController).health;
-        for (let i = 0; i < this.healthBar.length; i++) {
-            if (i % 2 == 1) {
-                this.healthBar[i].visible = (i + 1 <= playerHealth);
-            } else {
-                this.healthBar[i].visible = (i + 1 == playerHealth && playerHealth % 2 == 1);
-            }
-        }
-    }
-
-    /**
-     * Handles all subscriptions to events
-     */
-    protected subscribeToEvents() {
-        this.receiver.subscribe([
-            Game_Events.PLAYER_ENTERED_LEVEL_END,
-            Game_Events.PLAYER_LOSE_LIFE,
-            Game_Events.PINK_PAPER_FOUND,
-            Game_Events.WHITE_PAPER_FOUND,
-            Game_Events.LEVEL_START,
-            Game_Events.LEVEL_END,
-            Game_Events.PLAYER_KILLED,
-            Game_Events.PLAYER_HURT,
-            Game_Events.PLAYER_ATTACK,
-            Game_Events.PLAYER_ATTACK_FINISHED,
-            Game_Events.GAME_PAUSE
-        ]);
-    }
-
-    /**
      * Adds in any necessary UI to the game
      */
     protected addUI() {
@@ -368,6 +327,9 @@ export default class GameLevel extends Scene {
         this.livesCountLabel.textColor = Color.RED;
         this.livesCountLabel.backgroundColor = new Color(32, 32, 32, 0.5);
         this.livesCountLabel.font = "PixelSimple";
+
+        this.setupHealthBar();
+        this.updateHealthBar();
         // Prompt for paper.
         this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(90, 60), text: "Find some paper!" });
         this.papersCountLabel.textColor = Color.RED;
@@ -470,6 +432,40 @@ export default class GameLevel extends Scene {
     }
 
     /**
+     * Initializes the player's health bar.
+     * May be removed in the future.
+     */
+    protected setupHealthBar(): void {
+        let location = new Vec2(50, this.viewport.getView().bottom - 100);
+        let scale = new Vec2(0.2, 0.2);
+        // Create up to 10 hearts on the UI layer.
+        try {
+            for (let i = 0; i < 10; i++) {
+                this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI", location, scale));
+                this.healthBar.push(this.addLevelBackgroundImage("heart", "UI", location, scale));
+                location.x += 65;
+            }
+        } catch (e) {
+
+        }
+    }
+
+    /**
+     * Updates the player's health bar.
+     * May be removed in the future to another class.
+     */
+    protected updateHealthBar(): void {
+        let playerHealth = (this.player._ai as PlayerController).health;
+        for (let i = 0; i < this.healthBar.length; i++) {
+            if (i % 2 == 1) {
+                this.healthBar[i].visible = (i + 1 <= playerHealth);
+            } else {
+                this.healthBar[i].visible = (i + 1 == playerHealth && playerHealth % 2 == 1);
+            }
+        }
+    }
+
+    /**
      * Initializes the player
      * @param playerScale The scale of the player
      */
@@ -500,259 +496,13 @@ export default class GameLevel extends Scene {
         this.livesCount = 3
     }
 
-    /**
-     * Applies some function to every single tile in tilemap.
-     * @param map The tilemap to apply the function to.
-     * @param process The function to apply to each tile.
-     */
-    protected processTileLayer(map: OrthogonalTilemap, process: Function) {
-        // Comb through every single tile in the tilemap and check if it is nonzero.
-        for (let i = 0; i < map.getDimensions().x; i += 1) {
-            for (let j = 0; j < map.getDimensions().y; j += 1) {
-                let startTile = new Vec2(i, j)
-                let tile = map.getTileAtRowCol(startTile)
-                if (tile !== 0) {
-                    process(tile, i, j)
-                }
-            }
-        }
+    get PlayerSpawn(): Vec2 {
+        return this.playerSpawn.clone();
     }
 
     /**
-     * Takes in a tile ID from spritesheet and assigns it to some group.
-     * @param tileInfo The tile id to process.
-     * @returns A Game_Collectables group.
-     */
-    protected tileToGroup(tileInfo: number): number {
-        //    TODO: do a better job of this. maybe do additional parsing to orignal spritesheets.
-        // Arrays are size 4 to indicate all 4 tiles that could be part of a pink/white paper.
-        let PINK_PAPER_TILES = [16 + 1, 17 + 1, 24 + 1, 25 + 1]
-        let WHITE_PAPER_TILES = [6 + 1, 7 + 1, 14 + 1, 15 + 1]
-        if (PINK_PAPER_TILES.includes(tileInfo)) {
-            return Game_Collectables.PINK_PAPER
-        } else if (WHITE_PAPER_TILES.includes(tileInfo)) {
-            return Game_Collectables.WHITE_PAPER
-        } else {
-            return 0
-        }
-    }
-
-    /**
-     * Adds an animated sprite to a certain layer, with scale already adjusted.
-     * [NOTE]: this attempts to play "idle" animation by default.
-     * @param name The name of the sprite to add. (You can find this when you loaded the sheet)
-     * @param layer The layer to add the sprite to.
-     * @param position The <col, row> in the tilemap to add the sprite to. 
-     *                 Done to make it easier to add sprites by looking in Tiled editor.
-     * @param scale The scale of the sprite.
-     * @param alpha The transparency of the sprite.
-     * @return The sprite that was added.
-     */
-    protected addLevelAnimatedSprite(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
-        let toAdd = this.add.animatedSprite(name, layer);
-        toAdd.position.copy(position);
-        toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size);
-        toAdd.animation.playIfNotAlready("idle", true);
-        toAdd.alpha = alpha;
-        return toAdd;
-    }
-
-    /**
-     * Adds a static image to a certain layer, with scale already adjusted.
-     * @param name The name of the sprite to add. (You can find this when you loaded the sheet)
-     * @param layer The layer to add the sprite to.
-     * @param position The <col, row> in the tilemap to add the sprite to. 
-     *                 Done to make it easier to add sprites by looking in Tiled editor.
-     * @param scale The scale of the sprite.
-     * @param alpha The transparency of the sprite.
-     * @return The sprite that was added.
-     */
-    protected addLevelBackgroundImage(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
-        let toAdd = this.add.sprite(name, layer);
-        toAdd.position.copy(position);
-        toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size);
-        toAdd.alpha = alpha;
-        return toAdd;
-    }
-
-    
-    protected processLevelData(level_id: string): void {
-        let tilemapLayers = this.add.tilemap(level_id, GameLevel.LEVEL_SCALING);
-        //Get only solid layer.
-        // TODO: add support for multiple solid layers.
-        let solidLayer = null
-        let collectibleLayer = null
-        let animatedLayer = null
-        let backgroundLayer: Layer = null
-        for (let i = 0; i < tilemapLayers.length; i += 1) {
-            let name = tilemapLayers[i].getName()
-            if (name == "Platforms") {
-                solidLayer = tilemapLayers[i]
-            } else if (name == "Collectables") {
-                collectibleLayer = tilemapLayers[i]
-            } else if (name == "Animated") {
-                animatedLayer = tilemapLayers[i]
-            } else if (name == "Background") {
-                backgroundLayer = tilemapLayers[i]
-            }
-        }
-
-        // Go through all background setup functions.
-        this.backgroundSetup.forEach((func) => {
-            func(backgroundLayer)
-        })
-        // backgroundLayer.addNode()
-        if (animatedLayer !== null) {
-            let animatedTiles = <OrthogonalTilemap>animatedLayer.getItems()[0]
-            this.processTileLayer(animatedTiles, (tile: number, i: number, j: number) => {
-                // let startTile = new Vec2(i+0.5, j+0.5)
-                switch (tile) {
-                    case 0:
-                        break;
-                    default:
-                        this.addLevelEnd(new Vec2(i + 0.5, j + 0.5))
-                        animatedTiles.alpha = 1
-                        break;
-                }
-            });
-        }
-        this.dynamicMap = <DynamicTilemap>solidLayer.getItems()[0];
-        this.dynamicMap.badNavMesh();
-
-        // NOTE: This code isn't useful if tiles constantly change.
-        // Add a layer to display the graph
-        // let gLayer = this.addLayer("graph");
-        // this.addLayer("graph_debug");
-        // gLayer.setHidden(true);
-
-        // Create the graph to be overlayed.
-        // let graph = this.dynamicMap.graph;
-
-        // // Add all nodes to our graph
-        // for (let node of graph.positions) {
-        //     this.add.graphic(GraphicType.POINT, "graph", { position: node.clone() });
-        // }
-        // // Add all edges to our graph
-        // for (let i = 0; i < graph.edges.length; i++) {
-        //     let tmp = graph.edges[i];
-        //     while (tmp !== null) {
-        //         this.add.graphic(GraphicType.LINE, "graph", { start: graph.getNodePosition(i).clone(), end: graph.getNodePosition(tmp.y).clone() });
-        //         tmp = tmp.next;
-
-        //     }
-        // }
-        this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
-
-        if (collectibleLayer !== null) {
-
-            let collectibles = <OrthogonalTilemap>collectibleLayer.getItems()[0]
-            this.processTileLayer(collectibles, (tile: number, i: number, j: number) => {
-                let startTile = new Vec2(i + 0.5, j + 0.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE)
-                let toAdd = null
-                let trigger = null
-                tile = this.tileToGroup(tile)
-                switch (tile) {
-                    // TODO: Make a proper enum to handle this instead of hardcoding.
-                    case Game_Collectables.WHITE_PAPER:
-                        trigger = Game_Events.WHITE_PAPER_FOUND
-                        toAdd = this.addLevelAnimatedSprite("white_paper", "primary", startTile)
-                        this.numberWhite += 1
-                        this.numberPapers += 1
-                        break;
-                    case Game_Collectables.PINK_PAPER:
-                        trigger = Game_Events.PINK_PAPER_FOUND
-                        toAdd = this.addLevelAnimatedSprite("pink_paper", "primary", startTile)
-                        this.numberPink += 1
-                        this.numberPapers += 1
-                        break;
-                    default:
-                        break;
-                }
-                if (tile != 0) {
-                    toAdd.addPhysics(toAdd.boundary, undefined, false, true);
-                    toAdd.setTrigger("player", trigger, null);
-                    this.Collectibles.push(toAdd)
-                    // remove the tile from the map, we parsed it.
-                    collectibles.setTileAtRowCol(new Vec2(i, j), 0)
-                }
-            })
-        }
-    }
-
-    // Replace the level geometry when a tile is added/deleted.
-    protected updateLevelGeometry(position: Vec2, mode: number = 0): void {
-        // Check if the click position if out of bounds of the level.
-        if (this.dynamicMap.getTileAtWorldPosition(position) == -1) {
-            return;
-        }
-        //find the tile colrow closest to the cursor.
-        let tile = this.dynamicMap.getColRowAt(position);
-        //create an AABB based on the found tile.
-        let tileAABB = new AABB(tile.clone().add(new Vec2(0.5, 0.5)).clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), GameLevel.DEFAULT_LEVEL_TILE_SIZE.clone().scale(0.5));
-        //prevents edits to spawn.
-        if (tileAABB.center.distanceTo(this.playerSpawnColRow.clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE)) < 2 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x) {
-            return;
-        }
-
-        //check if the tile is in the level.
-        if (mode == 0) {
-            //get the collider of the player in the level.
-            let collider = this.player.sweptRect.clone();
-            //shrink collider by 0.25 tile.
-            collider.setHalfSize(new Vec2(collider.getHalfSize().x - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, collider.getHalfSize().y - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y));
-
-            let colrow_toAdd = this.dynamicMap.getColRowAt(position)
-            // Check if the block is not overalapping with the current enemies.
-
-            if (this.enemies != null) {
-                for (let i = 0; i < this.enemies.length; i++) {
-                    if (this.enemies[i] != null) {
-                        let colrow_enemy = this.dynamicMap.getColRowAt(this.enemies[i].position)
-                        if (colrow_enemy.distanceTo(colrow_toAdd) < 1) return
-                    }
-                }
-            }
-            if (collider.overlapArea(tileAABB) == 0 && !this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)) {
-                this.dynamicMap.badAddTile(position, 51);
-            }
-        } else {
-            // if(this.checkErasingPlatform(this.playerSpawnColRow,tile)) return;
-            this.dynamicMap.badRemoveTile(position);
-        }
-        this.navManager = new NavigationManager()
-        this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
-    }
-    /**
-     * Returns true if the tile if part of a platform.
-     * @param startPos The row and column of the platform.
-     * @param tile The tile to check.
-     * @param offset The width of the platform.
-     * @returns A flag representing whether or not the tile is collidable.
-     */
-    checkErasingPlatform(startPos: Vec2, tile: Vec2, offset: number = 2): boolean {
-        //round y to lower value.
-        startPos.y = Math.floor(startPos.y);
-        let startY = startPos.y;
-        //round x to lower value.
-        startPos.x = Math.floor(startPos.x);
-        let offsetX = offset;
-        let startX = Math.max(startPos.x - offsetX, 0);
-        let firstBlockFound = Array(offsetX * 2 + 1).fill(-1);
-        // decrement to the first tile that is soild below the spawn.
-        for (let i = startX; i <= startX + offsetX * 2 && i < this.dynamicMap.getDimensions().x; i++) {
-            while (!this.dynamicMap.isTileCollidable(i, startPos.y) && startPos.y < this.dynamicMap.getDimensions().y) {
-                startPos.y++;
-            }
-            firstBlockFound[i - startX] = startPos.y;
-            if (startPos.y == tile.y && i == tile.x) {
-                return true;
-            }
-            startPos.y = startY;
-        }
-        return false;
-    }
-
-
+    * Initialize the enemies in the level.
+    */
     initializeEnemies() {
         try {
             // Get the enemy data
@@ -831,35 +581,293 @@ export default class GameLevel extends Scene {
             }
         } catch (e) {
             console.log("No enemy data found.");
+            console.log(e)
+            return;
+        }
+    }
+
+    /**
+     * Applies some function to every single tile in tilemap.
+     * @param map The tilemap to apply the function to.
+     * @param process The function to apply to each tile.
+     */
+    protected processTileLayer(map: OrthogonalTilemap, process: Function) {
+        // Comb through every single tile in the tilemap and check if it is nonzero.
+        for (let i = 0; i < map.getDimensions().x; i += 1) {
+            for (let j = 0; j < map.getDimensions().y; j += 1) {
+                let startTile = new Vec2(i, j)
+                let tile = map.getTileAtRowCol(startTile)
+                if (tile !== 0) {
+                    process(tile, i, j)
+                }
+            }
+        }
+    }
+
+    /**
+     * Takes in a tile ID from spritesheet and assigns it to some group.
+     * @param tileInfo The tile id to process.
+     * @returns A Game_Collectables group.
+     */
+    protected tileToGroup(tileInfo: number): number {
+        //    TODO: do a better job of this. maybe do additional parsing to orignal spritesheets.
+        // Arrays are size 4 to indicate all 4 tiles that could be part of a pink/white paper.
+        let PINK_PAPER_TILES = [16 + 1, 17 + 1, 24 + 1, 25 + 1]
+        let WHITE_PAPER_TILES = [6 + 1, 7 + 1, 14 + 1, 15 + 1]
+        if (PINK_PAPER_TILES.includes(tileInfo)) {
+            return Game_Collectables.PINK_PAPER
+        } else if (WHITE_PAPER_TILES.includes(tileInfo)) {
+            return Game_Collectables.WHITE_PAPER
+        } else {
+            return 0
+        }
+    }
+
+    /**
+     * Adds an animated sprite to a certain layer, with scale already adjusted.
+     * [NOTE]: this attempts to play "idle" animation by default.
+     * @param name The name of the sprite to add. (You can find this when you loaded the sheet)
+     * @param layer The layer to add the sprite to.
+     * @param position The <col, row> in the tilemap to add the sprite to. 
+     *                 Done to make it easier to add sprites by looking in Tiled editor.
+     * @param scale The scale of the sprite.
+     * @param alpha The transparency of the sprite.
+     * @return The sprite that was added.
+     */
+    protected addLevelAnimatedSprite(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
+        let toAdd = this.add.animatedSprite(name, layer);
+        toAdd.position.copy(position);
+        toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size);
+        toAdd.animation.playIfNotAlready("idle", true);
+        toAdd.alpha = alpha;
+        return toAdd;
+    }
+
+    /**
+     * Adds a static image to a certain layer, with scale already adjusted.
+     * @param name The name of the sprite to add. (You can find this when you loaded the sheet)
+     * @param layer The layer to add the sprite to.
+     * @param position The <col, row> in the tilemap to add the sprite to. 
+     *                 Done to make it easier to add sprites by looking in Tiled editor.
+     * @param scale The scale of the sprite.
+     * @param alpha The transparency of the sprite.
+     * @return The sprite that was added.
+     */
+    protected addLevelBackgroundImage(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
+        let toAdd = this.add.sprite(name, layer);
+        toAdd.position.copy(position);
+        toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size);
+        toAdd.alpha = alpha;
+        return toAdd;
+    }
+
+    /**
+     * Processes level data given reference to tilemap.
+     * @param level_id The tilemap to process.
+     */
+    protected processLevelData(level_id: string): void {
+        let tilemapLayers = this.add.tilemap(level_id, GameLevel.LEVEL_SCALING);
+        //Get only solid layer.
+        // TODO: add support for multiple solid layers(mapping to different groups)
+        // TODO: change animatedLayer to be levelEndLayer.
+        let solidLayer = null
+        let collectibleLayer = null
+        let animatedLayer = null
+        let backgroundLayer: Layer = null
+        for (let i = 0; i < tilemapLayers.length; i += 1) {
+            let name = tilemapLayers[i].getName()
+            if (name == "Platforms") {
+                solidLayer = tilemapLayers[i]
+            } else if (name == "Collectables") {
+                collectibleLayer = tilemapLayers[i]
+            } else if (name == "Animated") {
+                animatedLayer = tilemapLayers[i]
+            } else if (name == "Background") {
+                backgroundLayer = tilemapLayers[i]
+            }
+        }
+
+        // Go through all background setup functions.
+        this.backgroundSetup.forEach((func) => {
+            func(backgroundLayer)
+        })
+
+        // add physics to end level blocks.
+        if (animatedLayer !== null) {
+            let animatedTiles = <OrthogonalTilemap>animatedLayer.getItems()[0]
+            this.processTileLayer(animatedTiles, (tile: number, i: number, j: number) => {
+                // let startTile = new Vec2(i+0.5, j+0.5)
+                switch (tile) {
+                    case 0:
+                        break;
+                    default:
+                        this.addLevelEnd(new Vec2(i + 0.5, j + 0.5))
+                        animatedTiles.alpha = 1
+                        break;
+                }
+            });
+        }
+
+        //setup the navmesh.
+        this.dynamicMap = <DynamicTilemap>solidLayer.getItems()[0];
+        this.dynamicMap.badNavMesh();
+        this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
+
+        // NOTE: This code isn't useful if tiles constantly change.
+        // Add a layer to display the graph
+        // let gLayer = this.addLayer("graph");
+        // this.addLayer("graph_debug");
+        // gLayer.setHidden(true);
+
+        // Create the graph to be overlayed.
+        // let graph = this.dynamicMap.graph;
+
+        // // Add all nodes to our graph
+        // for (let node of graph.positions) {
+        //     this.add.graphic(GraphicType.POINT, "graph", { position: node.clone() });
+        // }
+        // // Add all edges to our graph
+        // for (let i = 0; i < graph.edges.length; i++) {
+        //     let tmp = graph.edges[i];
+        //     while (tmp !== null) {
+        //         this.add.graphic(GraphicType.LINE, "graph", { start: graph.getNodePosition(i).clone(), end: graph.getNodePosition(tmp.y).clone() });
+        //         tmp = tmp.next;
+
+        //     }
+        // }
+
+        // Parse all collectables.
+        if (collectibleLayer !== null) {
+            let collectibles = <OrthogonalTilemap>collectibleLayer.getItems()[0]
+            this.processTileLayer(collectibles, (tile: number, i: number, j: number) => {
+                let startTile = new Vec2(i + 0.5, j + 0.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE)
+                let toAdd = null
+                let trigger = null
+                tile = this.tileToGroup(tile)
+                switch (tile) {
+                    // TODO: Make a proper enum to handle this instead of hardcoding.
+                    case Game_Collectables.WHITE_PAPER:
+                        trigger = Game_Events.WHITE_PAPER_FOUND
+                        toAdd = this.addLevelAnimatedSprite("white_paper", "primary", startTile)
+                        this.numberWhite += 1
+                        this.numberPapers += 1
+                        break;
+                    case Game_Collectables.PINK_PAPER:
+                        trigger = Game_Events.PINK_PAPER_FOUND
+                        toAdd = this.addLevelAnimatedSprite("pink_paper", "primary", startTile)
+                        this.numberPink += 1
+                        this.numberPapers += 1
+                        break;
+                    default:
+                        break;
+                }
+                if (tile != 0) {
+                    toAdd.addPhysics(toAdd.boundary, undefined, false, true);
+                    toAdd.setTrigger("player", trigger, null);
+                    this.Collectibles.push(toAdd)
+                    // remove the tile from the map, we parsed it.
+                    collectibles.setTileAtRowCol(new Vec2(i, j), 0)
+                }
+            })
+        }
+    }
+
+    /**
+     * Replace the level geometry when a tile is added/deleted.
+     * @param position The position of the click
+     * @param mode the operation to perform.
+     *              0: add tile
+     *              1: delete tile
+     **/
+    protected updateLevelGeometry(position: Vec2, mode: number = 0): void {
+        // Check if the click position if out of bounds of the level.
+        if (this.dynamicMap.getTileAtWorldPosition(position) == -1) {
             return;
         }
 
+        //find the tile coordinates closest to the cursor.
+        let tile = this.dynamicMap.getColRowAt(position);
+        let tileAABB = new AABB(tile.clone().add(new Vec2(0.5, 0.5)).clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), GameLevel.DEFAULT_LEVEL_TILE_SIZE.clone().scale(0.5));
+
+        //prevent edits to spawn.(blocked area is a circle of radius 2)
+        if (tileAABB.center.distanceTo(this.playerSpawnColRow.clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE)) < 2 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x) {
+            return;
+        }
+
+        if (mode == 0) {
+            //get the collider of the player in the level.
+            let collider = this.player.sweptRect.clone();
+            //shrink collider by 0.25 tile.
+            collider.setHalfSize(new Vec2(collider.getHalfSize().x - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, collider.getHalfSize().y - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y));
+
+            let colrow_toAdd = this.dynamicMap.getColRowAt(position)
+            // Check if the block is not overalapping with the current enemies.
+            if (this.enemies != null) {
+                for (let i = 0; i < this.enemies.length; i++) {
+                    // if (this.enemies[i] != null) {
+                    let colrow_enemy = this.dynamicMap.getColRowAt(this.enemies[i].position)
+                    if (colrow_enemy.distanceTo(colrow_toAdd) < 1) return
+                }
+            }
+            if (collider.overlapArea(tileAABB) == 0 && !this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)) {
+                this.dynamicMap.badAddTile(position, 51);
+            }
+        } else {
+            // if(this.checkErasingPlatform(this.playerSpawnColRow,tile)) return;
+            this.dynamicMap.badRemoveTile(position);
+        }
+        this.navManager = new NavigationManager()
+        this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
     }
 
-    protected addLevelEnd(startingTile: Vec2, size: Vec2 = new Vec2(1, 1)): void {
-        let levelEndArea = <Rect>this.add.graphic(GraphicType.RECT, "primary", { position: startingTile.scale(GameLevel.DEFAULT_LEVEL_TILE_SIZE.x), size: size.scale(GameLevel.DEFAULT_LEVEL_TILE_SIZE.x) });
+    /**
+     * Returns true if the tile if part of a platform.
+     * @param startPos The row and column of the platform.
+     * @param tile The tile to check.
+     * @param offset The width of the platform.
+     * @returns A flag representing whether or not the tile is collidable.
+     */
+    checkErasingPlatform(startPos: Vec2, tile: Vec2, offset: number = 2): boolean {
+        //round y to lower value.
+        startPos.y = Math.floor(startPos.y);
+        let startY = startPos.y;
+        //round x to lower value.
+        startPos.x = Math.floor(startPos.x);
+        let offsetX = offset;
+        let startX = Math.max(startPos.x - offsetX, 0);
+        let firstBlockFound = Array(offsetX * 2 + 1).fill(-1);
+        // decrement to the first tile that is soild below the spawn.
+        for (let i = startX; i <= startX + offsetX * 2 && i < this.dynamicMap.getDimensions().x; i++) {
+            while (!this.dynamicMap.isTileCollidable(i, startPos.y) && startPos.y < this.dynamicMap.getDimensions().y) {
+                startPos.y++;
+            }
+            firstBlockFound[i - startX] = startPos.y;
+            if (startPos.y == tile.y && i == tile.x) {
+                return true;
+            }
+            startPos.y = startY;
+        }
+        return false;
+    }
+
+    /**
+     * Adds a trigger to end the level.
+     * @param tileCoordinate The <col,row> of the tile to add.
+     * @param size The area of the square to add.
+     */
+    protected addLevelEnd(tileCoordinate: Vec2, size: Vec2 = new Vec2(1, 1)): void {
+        let levelEndArea = <Rect>this.add.graphic(GraphicType.RECT, "primary", { position: tileCoordinate.scale(GameLevel.DEFAULT_LEVEL_TILE_SIZE.x), size: size.scale(GameLevel.DEFAULT_LEVEL_TILE_SIZE.x) });
         levelEndArea.addPhysics(undefined, undefined, false, true);
         levelEndArea.setTrigger("player", Game_Events.PLAYER_ENTERED_LEVEL_END, null);
         levelEndArea.color = new Color(0, 0, 0, 0);
         this.levelEndSpots.push(levelEndArea);
     }
 
-
     /**
-     * Increments the amount of life the player has
-     * @param amt The amount to add to the player life
+     * Handles some kind of collectable.
+     * @param item_type The type of item to add.
+     * @param collectableID The ID of the GameNode that represents the collectable.
      */
-    protected incPlayerLife(amt: number): void {
-        this.livesCount += amt;
-        this.livesCountLabel.text = "Lives: " + this.livesCount;
-        if (this.livesCount <= 0) {
-            Input.disableInput();
-            this.player.disablePhysics();
-            this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_death", loop: false, holdReference: false });
-            this.player.tweens.play("death");
-        }
-    }
-
     protected collectObject(item_type: Game_Collectables, collectableID: number): void {
         // disable the trigger.
         let object = this.sceneGraph.getNode(collectableID)
@@ -878,12 +886,23 @@ export default class GameLevel extends Scene {
     }
 
     /**
-     * Returns the player to start of level.
+     * Increments the amount of life the player has
+     * @param amt The amount to add to the player life
      */
-    protected respawnPlayer(): void {
-        this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: "level_music" });
+    protected incPlayerLife(amt: number): void {
+        this.livesCount += amt;
+        this.livesCountLabel.text = "Lives: " + this.livesCount;
+        if (this.livesCount <= 0) {
+            Input.disableInput();
+            this.player.disablePhysics();
+            this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_death", loop: false, holdReference: false });
+            this.player.tweens.play("death");
+        }
     }
 
+    /**
+     * Goes to the menu screen.
+     */
     protected goToMenu(): void {
         Input.enableInput();
         let sceneOptions = {

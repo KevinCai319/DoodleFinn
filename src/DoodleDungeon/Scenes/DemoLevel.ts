@@ -12,8 +12,6 @@ export default class DemoLevel extends GameLevel {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/"+this.LEVEL_NAME+"/"+this.LEVEL_TILESET+".json");
         this.load.spritesheet("player", "game_assets/spritesheets/DoodleFinn/DoodleFinn-Sprite.json");
-        
-        this.load.spritesheet("gun_enemy", "game_assets/spritesheets/gun_enemy.json");
         this.load.spritesheet("melee_enemy", "game_assets/spritesheets/FlyEnemy/FlyEnemy.json")
         this.load.spritesheet("charging_enemy", "game_assets/spritesheets/ChargeEnemy/ChargeEnemy.json")
         
@@ -35,8 +33,6 @@ export default class DemoLevel extends GameLevel {
         this.load.image("InstAttack2", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Attack2.png");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/"+this.LEVEL_NAME+"/enemy.json");
-
-
     }
 
     // DoodleFinn TODO
