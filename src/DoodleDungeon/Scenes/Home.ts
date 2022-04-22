@@ -11,16 +11,18 @@ import DemoLevel from "./DemoLevel";
 import GameLevel from "./Game";
 import Level1 from "./Level1";
 
-export default class Tutorial extends GameLevel {
+export default class Home extends GameLevel {
     static LevelsUnlocked:number = 1;
     static numberOfLevels = 6;
+
     //Add references to other levels here.
     static Levels = [DemoLevel,Level1];
+
     LEVEL_NAME:string ="Tutorial"
     LEVEL_TILESET:string = "Tutorial"
     Instructions:AnimatedSprite = null
     Controls:AnimatedSprite = null
-    //           [unlocked, door sprite, level, min time]
+    //           [unlocked, door sprite, level]
     doors:Array<[boolean, AnimatedSprite, new (...args: any) => GameLevel]>;
     static bestTimes:Array<number>;
     bestTimeLabels:Array<Label> = []
@@ -60,20 +62,20 @@ export default class Tutorial extends GameLevel {
     }
 
     startScene(): void {
-        if(Tutorial.firstLoad){
-            Tutorial.bestTimes = new Array<number>(Tutorial.numberOfLevels);
+        if(Home.firstLoad){
+            Home.bestTimes = new Array<number>(Home.numberOfLevels);
             // Clear best times.
-            for(let i = 0; i < Tutorial.numberOfLevels; i++){
-                Tutorial.bestTimes[i] = -1.0;
+            for(let i = 0; i < Home.numberOfLevels; i++){
+                Home.bestTimes[i] = -1.0;
             }
-            Tutorial.firstLoad = false;
+            Home.firstLoad = false;
         }
         this.doors = [];
-        for(let i = 0; i < Tutorial.numberOfLevels; i++){
-            if(i >= Tutorial.LevelsUnlocked){
+        for(let i = 0; i < Home.numberOfLevels; i++){
+            if(i >= Home.LevelsUnlocked){
                 this.doors.push([false, null, null]);
             }else{
-                this.doors.push([true, null, Tutorial.Levels[i]]);
+                this.doors.push([true, null, Home.Levels[i]]);
             }
         }
 
@@ -81,13 +83,6 @@ export default class Tutorial extends GameLevel {
 
         // Add custom background graphics for this level.
         this.backgroundSetup.push((layer:Layer)=>{
-            //add the lables for best times
-            for(let i = 0; i < Tutorial.LevelsUnlocked; i++){
-                // let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(-300, 200), text: "Best Time"+Tutorial.bestTimes[i] });
-                // this.bestTimeLabels.push(new Label(layer.getName(), new Vec2(0,0), "Best Time: " + Tutorial.bestTimes[i], "Arial", 32, "white"));
-                // this.bestTimeLabels.push(levelLabel);
-                // this.bestTimeLabels[i].visible = false;
-            }
             let selectSign = this.addLevelBackgroundImage("LevelSelect",layer.getName(),new Vec2(84,12.8).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3))
             selectSign.alpha = 0.5
             let helpSign = this.addLevelBackgroundImage("help",layer.getName(),new Vec2(69.3,11.6).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1.75,1.75))
@@ -102,8 +97,8 @@ export default class Tutorial extends GameLevel {
                 let new_door = this.addLevelAnimatedSprite("Door",layer.getName(),new Vec2(90+5*i,17).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
                 if(this.doors[i][0]){
                     let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,12).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: \n" });
-                    if(Tutorial.bestTimes[i] != -1){
-                        let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: ""+Tutorial.bestTimes[i] + "s" });
+                    if(Home.bestTimes[i] != -1){
+                        let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: ""+Home.bestTimes[i] + "s" });
                     }else{
                         let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Not Played" });
                     }

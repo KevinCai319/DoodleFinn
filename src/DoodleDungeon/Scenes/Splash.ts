@@ -12,7 +12,7 @@ import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 
 import { Game_Events } from "../Events";
 
-import Tutorial from "./Tutorial";
+import Home from "./Home";
 
 export default class Splash extends Scene {
 
@@ -75,7 +75,7 @@ export default class Splash extends Scene {
                     ]
                 }
             }
-            this.sceneManager.changeToScene(Tutorial, {}, sceneOptions);
+            this.sceneManager.changeToScene(Home, {}, sceneOptions);
         }
     }
     unloadScene(): void {

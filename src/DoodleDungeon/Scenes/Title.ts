@@ -11,7 +11,7 @@ import RandUtils from "../../Wolfie2D/Utils/RandUtils";
 import SortingUtils from "../../Wolfie2D/Utils/SortingUtils";
 import Game from "./Game";
 import Level1 from "./Level1";
-import Tutorial from "./Tutorial";
+import Home from "./Home";
 
 export default class MainMenu extends Scene {
 
@@ -64,7 +64,7 @@ export default class MainMenu extends Scene {
                     ]
                 }
             }
-            this.sceneManager.changeToScene(Tutorial, {}, sceneOptions);
+            this.sceneManager.changeToScene(Home, {}, sceneOptions);
         }
  }
     unloadScene(): void {

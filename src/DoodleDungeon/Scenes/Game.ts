@@ -106,7 +106,7 @@ export default class GameLevel extends Scene {
     // Stuff to end the level and go to the next level
     protected levelEndSpots: Array<Rect> = []
     protected nextLevel: new (...args: any) => GameLevel;
-    protected tutorial: new (...args: any) => GameLevel;
+    protected home: new (...args: any) => GameLevel;
 
     startScene(): void {
         this.gameEnd = false;
@@ -484,11 +484,11 @@ export default class GameLevel extends Scene {
         let playerBox = this.player.boundary.clone();
         //remove 1/8 of height and width from the player box.
         let offset = 0;
-        // offset = playerBox.getHalfSize().y/8;
-        // playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x/4, offset)));
+        offset = playerBox.getHalfSize().y/8;
+        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x/4, offset)));
         //update playerbox center.
-        // playerBox.center.y -=offset/2;
-        // this.player.colliderOffset.set(0, offset);
+        playerBox.center.y -=offset/2;
+        this.player.colliderOffset.set(0, offset);
         this.player.addPhysics(playerBox, new Vec2(0, offset));
 
         this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
@@ -797,8 +797,9 @@ export default class GameLevel extends Scene {
         if (mode == 0) {
             //get the collider of the player in the level.
             let collider = this.player.sweptRect.clone();
+            // let simpleCollider = collider.clone();
             //shrink collider by 0.25 tile.
-            collider.setHalfSize(new Vec2(collider.getHalfSize().x - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, collider.getHalfSize().y - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y));
+            // simpleCollider.setHalfSize(new Vec2(collider.getHalfSize().x - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, collider.getHalfSize().y - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y));
 
             let colrow_toAdd = this.dynamicMap.getColRowAt(position)
             // Check if the block is not overalapping with the current enemies.
@@ -916,7 +917,7 @@ export default class GameLevel extends Scene {
                     ]
             }
         }
-        this.sceneManager.changeToScene(this.tutorial, {}, sceneOptions);
+        this.sceneManager.changeToScene(this.home, {}, sceneOptions);
     }
 }
 

@@ -3,7 +3,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Layer from "../../Wolfie2D/Scene/Layer";
 import PlayerController, { PlayerType } from "../Player/PlayerController";
 import GameLevel from "./Game";
-import Tutorial from "./Tutorial";
+import Home from "./Home";
 
 export default class DemoLevel extends GameLevel {
     LEVEL_NAME:string ="DemoLevel"
@@ -49,10 +49,10 @@ export default class DemoLevel extends GameLevel {
         this.load.keepSpritesheet("player");
         if(this.gameEnd){
             let time = this.levelTimer.getTimeElapsed()/1000;
-            Tutorial.bestTimes[0] = Math.min(Tutorial.bestTimes[0],time);
-            if(Tutorial.bestTimes[0] == -1)Tutorial.bestTimes[0] = time;
-            if(Tutorial.LevelsUnlocked == 1){
-                Tutorial.LevelsUnlocked+=1;
+            Home.bestTimes[0] = Math.min(Home.bestTimes[0],time);
+            if(Home.bestTimes[0] == -1)Home.bestTimes[0] = time;
+            if(Home.LevelsUnlocked == 1){
+                Home.LevelsUnlocked+=1;
             }
         }
     }
@@ -60,7 +60,7 @@ export default class DemoLevel extends GameLevel {
     startScene(): void {
         // Add the Demo Level.
         this.nextLevel = null
-        this.tutorial = Tutorial
+        this.home = Home
         this.playerSpawnColRow = new Vec2(2,47)
         // Add in special graphics.
         this.backgroundSetup.push((layer:Layer)=>{
