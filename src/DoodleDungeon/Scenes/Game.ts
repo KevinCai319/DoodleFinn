@@ -55,6 +55,7 @@ export default class GameLevel extends Scene {
     protected placementHacks: boolean = false;
     protected placementRange: number = 5;
     protected cursor: AnimatedSprite;
+    protected cursorVisible: boolean = true;
     protected cursorDisabled: boolean = false;
 
     /**
@@ -167,7 +168,7 @@ export default class GameLevel extends Scene {
 
     updateScene(deltaT: number) {
         // TODO: figure out why buttons are not working without these lines.
-        if (this.pauseButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()) {
+        if (this.pauseButton.visible && ((this.pauseButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()) || Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
             this.pauseButton.onClick()
         }
         if (this.menuButton.boundary.containsPoint(Input.getMousePosition()) && Input.isMouseJustPressed()) {
@@ -177,8 +178,13 @@ export default class GameLevel extends Scene {
         /**
          * Handle Cursor Actions.
          */
+        let mousePosition = Input.getMousePosition();
+        let canvasInfo = this.viewport.getHalfSize().clone().scale(2);
+        this.cursorVisible =  (mousePosition.x >= 0 && mousePosition.y >= 0 &&
+                                mousePosition.x <= canvasInfo.x && mousePosition.y <= canvasInfo.y);
+
         this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(0.5, 0.5)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
-        if (!this.cursorDisabled) {
+        if (!this.cursorDisabled && this.cursorVisible) {
             this.cursor.alpha = 1;
             // TODO: Add limits to how far the player can click from their body.
             if (Input.isMousePressed(0)) {
@@ -407,10 +413,10 @@ export default class GameLevel extends Scene {
         pauseButton.scale = new Vec2(0.5, 0.5);
         pauseButton.font = "PixelSimple";
         pauseButton.onClick = () => {
-            if (pauseButton.boundary.intersectPoint(Input.getMousePosition())) {
-                this.levelTransitionScreen.alpha = 0;
-                this.emitter.fireEvent(Game_Events.GAME_PAUSE);
-            }
+            // if (pauseButton.boundary.intersectPoint(Input.getMousePosition())) {
+            this.levelTransitionScreen.alpha = 0;
+            this.emitter.fireEvent(Game_Events.GAME_PAUSE);
+            // }
         }
         this.pauseButton = pauseButton
 
@@ -480,15 +486,13 @@ export default class GameLevel extends Scene {
         }
         this.player.position.copy(this.playerSpawn);
         this.viewport.follow(this.player);
-        // TODO: fix Finn's AABB collision detection.
+
         let playerBox = this.player.boundary.clone();
-        //remove 1/8 of height and width from the player box.
+        //remove 1/8 of height and 1/4 width from the player box.
         let offset = 0;
-        offset = playerBox.getHalfSize().y/8;
-        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x/4, offset)));
-        //update playerbox center.
-        playerBox.center.y -=offset/2;
-        this.player.colliderOffset.set(0, offset);
+        offset = playerBox.getHalfSize().y / 8;
+        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x / 4, offset)));
+        playerBox.center.y -= offset / 2;
         this.player.addPhysics(playerBox, new Vec2(0, offset));
 
         this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });

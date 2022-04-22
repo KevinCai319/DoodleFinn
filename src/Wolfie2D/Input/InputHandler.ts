@@ -16,10 +16,12 @@ export default class InputHandler {
     constructor(canvas: HTMLCanvasElement){
 		this.eventQueue = EventQueue.getInstance();
 		
-        canvas.onmousedown = (event) => this.handleMouseDown(event, canvas);
-        canvas.onmouseup = (event) => this.handleMouseUp(event, canvas);
+        // canvas.onmousedown = (event) => this.handleMouseDown(event, canvas);
+        // canvas.onmouseup = (event) => this.handleMouseUp(event, canvas);
         canvas.oncontextmenu = this.handleContextMenu;
-        canvas.onmousemove = (event) => this.handleMouseMove(event, canvas);
+        document.onmousemove = (event) => this.handleMouseMove(event, canvas);
+        document.onmouseup = (event) => this.handleMouseUp(event, canvas);
+        document.onmousedown = (event) => this.handleMouseDown(event, canvas);
         document.onkeydown = this.handleKeyDown;
         document.onkeyup = this.handleKeyUp;
         document.onblur = this.handleBlur;
