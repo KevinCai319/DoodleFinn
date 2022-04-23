@@ -23,6 +23,9 @@ export enum Game_Collectables{
     WHITE_PAPER = 4,
     PINK_PAPER =  5
 }
+export enum Tileset_Names {
+	SOLID_INK = 51
+}
 export enum AI_Statuses {
     IN_RANGE = "IN_RANGE",
     LOW_HEALTH = "LOW_HEALTH",

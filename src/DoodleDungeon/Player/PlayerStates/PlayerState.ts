@@ -64,8 +64,8 @@ export default abstract class PlayerState extends State {
 			if(( this.parent.health <= 0 || this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF) && !this.parent.invicible){
 				this.owner.freeze()
 				this.owner.disablePhysics()
-				if(this.parent.health >0 ){
-					this.parent.damage(9999999999);
+				if(this.parent.health > 0){
+					this.parent.damage(this.parent.health);
 				}
 			}
 			

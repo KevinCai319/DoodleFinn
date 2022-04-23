@@ -16,9 +16,9 @@ export default abstract class InAir extends PlayerState {
 		    this.parent.velocity.x += dir.x * this.parent.speed/3.5 - 0.3*this.parent.velocity.x;
         }else{
             // //without this line, the player's velocity will never be reduced to 0
-            // this.parent.velocity.x *= 0.9;
+            this.parent.velocity.x *= 0.9;
             // if(Math.abs(this.parent.velocity.x) < (this.parent.speed/3.5)){
-                this.parent.velocity.x = 0;
+                // this.parent.velocity.x = 0;
             // }
         }
         // console.log(this.parent.velocity.x);
@@ -26,7 +26,6 @@ export default abstract class InAir extends PlayerState {
 		this.owner.move(this.parent.velocity.scaled(deltaT));
 
         if(this.owner.onGround){
-            console.log("onGround");
 			this.finished(PlayerStates.PREVIOUS);
 		}
     }

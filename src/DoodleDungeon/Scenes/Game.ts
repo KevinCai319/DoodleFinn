@@ -14,7 +14,7 @@ import Scene from "../../Wolfie2D/Scene/Scene";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
-import { AI_Statuses, Game_Collectables, Game_Events } from "../Events";
+import { AI_Statuses, Game_Collectables, Game_Events, Tileset_Names } from "../Events";
 import PlayerController, { PlayerType } from "../Player/PlayerController";
 import DynamicMap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import EnemyAI from "../Enemies/EnemyAI";
@@ -516,7 +516,7 @@ export default class GameLevel extends Scene {
         //remove 1/8 of height and 1/4 width from the player box.
         let offset = 0;
         offset = playerBox.getHalfSize().y / 8;
-        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x / 4, offset)));
+        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x / 3, offset)));
         playerBox.center.y -= offset / 2;
         this.player.addPhysics(playerBox, new Vec2(0, offset));
 
@@ -828,23 +828,17 @@ export default class GameLevel extends Scene {
 
         if (mode == 0) {
             //get the collider of the player in the level.
-            
             let collider = (!this.player.onGround)?this.player.sweptRect.clone():this.player.boundary.clone();
-            // let simpleCollider = collider.clone();
-            //shrink collider by 0.25 tile.
-            // simpleCollider.setHalfSize(new Vec2(collider.getHalfSize().x - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, collider.getHalfSize().y - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y));
-
             let colrow_toAdd = this.dynamicMap.getColRowAt(position)
             // Check if the block is not overalapping with the current enemies.
             if (this.enemies != null) {
                 for (let i = 0; i < this.enemies.length; i++) {
-                    // if (this.enemies[i] != null) {
                     let colrow_enemy = this.dynamicMap.getColRowAt(this.enemies[i].position)
                     if (colrow_enemy.distanceTo(colrow_toAdd) < 1) return
                 }
             }
             if (collider.overlapArea(tileAABB) == 0 && !this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)) {
-                this.dynamicMap.badAddTile(position, 51);
+                this.dynamicMap.badAddTile(position, Tileset_Names.SOLID_INK);
             }
         } else {
             // if(this.checkErasingPlatform(this.playerSpawnColRow,tile)) return;

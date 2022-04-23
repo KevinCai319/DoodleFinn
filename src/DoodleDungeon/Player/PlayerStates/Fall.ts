@@ -20,6 +20,13 @@ export default class Fall extends InAir {
 		if(this.owner.onCeiling){
 			this.parent.velocity.y = 0
 		}
+		if(!this.parent.attacking){
+			if(this.parent.velocity.x < 0){
+				this.owner.animation.playIfNotAlready("Falling Left", true);
+			} else {
+				this.owner.animation.playIfNotAlready("Falling Right", true);
+			}
+		}
 	}
     onExit(): Record<string, any> {
 		if(!this.parent.attacking){
