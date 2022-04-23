@@ -171,7 +171,7 @@ export default class GameLevel extends Scene {
     updateScene(deltaT: number) {
 
 
-        console.log(Input.isMousePressed(0) + "|"+ Input.isMousePressed(2));
+        // console.log(Input.isMousePressed(0) + "|"+ Input.isMousePressed(2));
 
         if (this.pauseButton.visible && (Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
            this.pauseButton.onClick()

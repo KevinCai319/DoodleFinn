@@ -246,31 +246,30 @@ export default class Viewport {
         this.lastPositions.forEach(position => pos.add(position));
         pos.scale(1/this.lastPositions.getSize());
 
-        // Set this position either to the object or to its bounds
-        pos.x = MathUtils.clamp(pos.x, this.boundary.left + this.view.hw, this.boundary.right - this.view.hw);
-        pos.y = MathUtils.clamp(pos.y, this.boundary.top + this.view.hh, this.boundary.bottom - this.view.hh);
-
-        // Assure there are no lines in the tilemap
-        pos.x = Math.floor(pos.x);
-        pos.y = Math.floor(pos.y);
         
         if(this.useStaticBoundary && this.staticBoundary !== undefined){
             let minX = Math.abs(this.view.center.x-pos.x);
             let minY = Math.abs(this.view.center.y-pos.y);
+            // minX and minY are the differnce between the center Sviewport and the object.
             if(minX > this.staticBoundary.x || minY > this.staticBoundary.y){
                 //Find minimum translation vector.
                 let min = new Vec2(this.view.center.x, this.view.center.y);
                 min.sub(pos);
                 min.x = minX > this.staticBoundary.x ? Math.sign(min.x)*(minX-this.staticBoundary.x) : 0;
                 min.y = minY > this.staticBoundary.y ? Math.sign(min.y)*(minY-this.staticBoundary.y) : 0;
-                this.view.center.sub(min);
+                pos = this.view.center.clone().sub(min);
             }else{
-                // console.log(minX+ " " + minY);
+                return;
             }
-            
-        } else {
-            this.view.center.copy(pos);
         }
+        pos.x = MathUtils.clamp(pos.x, this.boundary.left + this.view.hw, this.boundary.right - this.view.hw);
+        pos.y = MathUtils.clamp(pos.y, this.boundary.top + this.view.hh, this.boundary.bottom - this.view.hh);
+
+        // Assure there are no lines in the tilemap
+        pos.x = Math.floor(pos.x);
+        pos.y = Math.floor(pos.y);
+        this.view.center.copy(pos);
+        
     }
 
     update(deltaT: number): void {
