@@ -828,7 +828,8 @@ export default class GameLevel extends Scene {
 
         if (mode == 0) {
             //get the collider of the player in the level.
-            let collider = this.player.sweptRect.clone();
+            
+            let collider = (!this.player.onGround)?this.player.sweptRect.clone():this.player.boundary.clone();
             // let simpleCollider = collider.clone();
             //shrink collider by 0.25 tile.
             // simpleCollider.setHalfSize(new Vec2(collider.getHalfSize().x - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, collider.getHalfSize().y - 0.25 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y));
