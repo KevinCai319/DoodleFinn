@@ -17,9 +17,9 @@ export default abstract class InAir extends PlayerState {
         }else{
             // //without this line, the player's velocity will never be reduced to 0
             this.parent.velocity.x *= 0.9;
-            // if(Math.abs(this.parent.velocity.x) < (this.parent.speed/3.5)){
-                // this.parent.velocity.x = 0;
-            // }
+            if((<AnimatedSprite>this.owner).onWall){
+                this.parent.velocity.x = 0;
+            }
         }
         // console.log(this.parent.velocity.x);
         // console.log((<AnimatedSprite>this.owner).onWall);

@@ -516,7 +516,7 @@ export default class GameLevel extends Scene {
         //remove 1/8 of height and 1/4 width from the player box.
         let offset = 0;
         offset = playerBox.getHalfSize().y / 8;
-        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x / 3, offset)));
+        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x /4, offset)));
         playerBox.center.y -= offset / 2;
         this.player.addPhysics(playerBox, new Vec2(0, offset));
 

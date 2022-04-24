@@ -56,7 +56,7 @@ export default class BasicPhysicsManager extends PhysicsManager {
 	/** An array of the collision masks for each group */
 	protected collisionMasks: Array<number>;
 
-	constructor(options: Record<string, any>) {
+	constructor(options: Record<string, any>){
 		super();
 		this.staticNodes = new Array();
 		this.dynamicNodes = new Array();
@@ -72,8 +72,8 @@ export default class BasicPhysicsManager extends PhysicsManager {
 	 * @param options A record of options
 	 */
 	protected parseOptions(options: Record<string, any>): void {
-		if (options.groupNames !== undefined && options.collisions !== undefined) {
-			for (let i = 0; i < options.groupNames.length; i++) {
+		if(options.groupNames !== undefined && options.collisions !== undefined){
+			for(let i = 0; i < options.groupNames.length; i++){
 				let group = options.groupNames[i];
 
 				// Register the group name and number
@@ -83,8 +83,8 @@ export default class BasicPhysicsManager extends PhysicsManager {
 
 				let collisionMask = 0;
 
-				for (let j = 0; j < options.collisions[i].length; j++) {
-					if (options.collisions[i][j]) {
+				for(let j = 0; j < options.collisions[i].length; j++){
+					if(options.collisions[i][j]){
 						collisionMask |= 1 << j;
 					}
 				}
@@ -96,7 +96,7 @@ export default class BasicPhysicsManager extends PhysicsManager {
 
 	// @override
 	registerObject(node: Physical): void {
-		if (node.isStatic) {
+		if(node.isStatic){
 			// Static and not collidable
 			this.staticNodes.push(node);
 		} else {
@@ -107,7 +107,7 @@ export default class BasicPhysicsManager extends PhysicsManager {
 
 	// @override
 	deregisterObject(node: Physical): void {
-		if (node.isStatic) {
+		if(node.isStatic){
 			// Remove the node from the static list
 			const index = this.staticNodes.indexOf(node);
 			this.staticNodes.splice(index, 1);
@@ -131,8 +131,7 @@ export default class BasicPhysicsManager extends PhysicsManager {
 
 	// @override
 	update(deltaT: number): void {
-		let triggerCheck = false;
-		for (let node of this.dynamicNodes) {
+		for(let node of this.dynamicNodes){
 			/*---------- INITIALIZATION PHASE ----------*/
 			// Clear frame dependent boolean values for each node
 			node.onGround = false;
@@ -140,203 +139,176 @@ export default class BasicPhysicsManager extends PhysicsManager {
 			node.onWall = false;
 			node.collidedWithTilemap = false;
 			node.isColliding = false;
+
 			// If this node is not active, don't process it
-			if (!node.active) {
+			if(!node.active){
 				continue;
 			}
-			if (!node.moving) {
+
+			// Update the swept shapes of each node
+			if(node.moving){
+				// If moving, reflect that in the swept shape
+				node.sweptRect.sweep(node._velocity, node.collisionShape.center, node.collisionShape.halfSize);
+			} else {
+				// If our node isn't moving, don't bother to check it (other nodes will detect if they run into it)
 				node._velocity.zero();
 				continue;
 			}
-			console.log("frame start");
+
+			/*---------- DETECTION PHASE ----------*/
+			// Gather a set of overlaps
 			let overlaps = new Array<AreaCollision>();
-			let oldVelocity = node._velocity.clone();
-			do {
-				//create swept shape.
-				node.sweptRect.sweep(node._velocity, node.collisionShape.center, node.collisionShape.halfSize);
-				overlaps = this.createOverlaps(node);
-			} while (overlaps.length > 0);
-			// If there is still some velocity, finish the update.
+
+			let groupIndex = node.group === -1 ? -1 : Math.log2(node.group);
+
+			// First, check this node against every static node (order doesn't actually matter here, since we sort anyways)
+			for(let other of this.staticNodes){
+				// Ignore inactive nodes
+				if(!other.active) continue;
+
+				let collider = other.collisionShape.getBoundingRect();
+				let area = node.sweptRect.overlapArea(collider);
+				if(area > 0){
+					// We had a collision
+					overlaps.push(new AreaCollision(area, collider, other, "GameNode", null));
+				}
+			}
+
+			// Then, check it against every dynamic node
+			for(let other of this.dynamicNodes){
+				// Ignore ourselves
+				if(node === other) continue;
+
+				// Ignore inactive nodes
+				if(!other.active) continue;
+
+				let collider = other.collisionShape.getBoundingRect();
+				let area = node.sweptRect.overlapArea(collider);
+				if(area > 0){
+					// We had a collision
+					overlaps.push(new AreaCollision(area, collider, other, "GameNode", null));
+				}
+			}
+
+			// Lastly, gather a set of AABBs from the tilemap.
+			// This step involves the most extra work, so it is abstracted into a method
+			for(let tilemap of this.tilemaps){
+				// Ignore inactive tilemaps
+				if(!tilemap.active) continue;
+
+				if(tilemap instanceof OrthogonalTilemap){
+					this.collideWithOrthogonalTilemap(node, tilemap, overlaps);
+				}
+			}
+
+			// Sort the overlaps by area
+			overlaps = overlaps.sort((a, b) => b.area - a.area);
+
+			// Keep track of hits to use later
+			let hits = [];
+
+			/*---------- RESOLUTION PHASE ----------*/
+			// For every overlap, determine if we need to collide with it and when
+			for(let overlap of overlaps){
+				// Ignore nodes we don't interact with
+				if( groupIndex !== -1 && overlap.other.group !== -1 && ((this.collisionMasks[groupIndex] & overlap.other.group) === 0) ) continue;
+
+				// Do a swept line test on the static AABB with this AABB size as padding (this is basically using a minkowski sum!)
+				// Start the sweep at the position of this node with a delta of _velocity
+				const point = node.collisionShape.center;
+				const delta = node._velocity;
+				const padding = node.collisionShape.halfSize;
+				const otherAABB = overlap.collider;
+
+
+				const hit = otherAABB.intersectSegment(node.collisionShape.center, node._velocity, node.collisionShape.halfSize);
+
+				overlap.hit = hit;
+
+				if(hit !== null){
+					hits.push(hit);
+
+					// We got a hit, resolve with the time inside of the hit
+					let tnearx = hit.nearTimes.x;
+					let tneary = hit.nearTimes.y;
+
+					// Allow edge clipping (edge overlaps don't count, only area overlaps)
+					// Importantly don't allow both cases to be true. Then we clip through corners. Favor x to help players land jumps
+					if(tnearx < 1.0 && (point.y === otherAABB.top - padding.y || point.y === otherAABB.bottom + padding.y) && delta.x !== 0) {
+						tnearx = 1.0;
+					} else if(tneary < 1.0 && (point.x === otherAABB.left - padding.x || point.x === otherAABB.right + padding.x) && delta.y !== 0) {
+						tneary = 1.0;
+					}
+
+
+					if(hit.nearTimes.x >= 0 && hit.nearTimes.x < 1){
+						// Any tilemap objects that made it here are collidable
+						if(overlap.type === "Tilemap" || overlap.other.isCollidable){
+							node._velocity.x = node._velocity.x * tnearx;
+							node.isColliding = true;
+						}
+					}
+
+					if(hit.nearTimes.y >= 0 && hit.nearTimes.y < 1){
+						// Any tilemap objects that made it here are collidable
+						if(overlap.type === "Tilemap" || overlap.other.isCollidable){
+							node._velocity.y = node._velocity.y * tneary;
+							node.isColliding = true;
+						}
+					}
+				}
+			}
+			
+			/*---------- INFORMATION/TRIGGER PHASE ----------*/
+			// Check if we ended up on the ground, ceiling or wall
+			// Also check for triggers
+			for(let overlap of overlaps){
+				// Check for a trigger. If we care about the trigger, react
+				if(overlap.other.isTrigger && (overlap.other.triggerMask & node.group)){
+					// Get the bit that this group is represented by
+					let index = Math.floor(Math.log2(node.group));
+
+					// Extract the triggerEnter event name
+					this.emitter.fireEvent(overlap.other.triggerEnters[index], {
+						node: (<GameNode>node).id,
+						other: (<GameNode>overlap.other).id
+					});
+				}
+
+				// Ignore collision sides for nodes we don't interact with
+				if( groupIndex !== -1 && overlap.other.group !== -1 && ((this.collisionMasks[groupIndex] & overlap.other.group) === 0)) continue;
+
+				// Only check for direction if the overlap was collidable
+				if(overlap.type === "Tilemap" || overlap.other.isCollidable){
+					let collisionSide = overlap.collider.touchesAABBWithoutCorners(node.collisionShape.getBoundingRect());
+					if(collisionSide !== null){
+						// If we touch, not including corner cases, check the collision normal
+						if(overlap.hit !== null){
+							// If we hit a tilemap, keep track of it
+							if(overlap.type == "Tilemap"){
+								node.collidedWithTilemap = true;
+							}
+
+							if(collisionSide.y === -1){
+								// Node is on top of overlap, so onGround
+								node.onGround = true;
+							} else if(collisionSide.y === 1){
+								// Node is on bottom of overlap, so onCeiling
+								node.onCeiling = true;
+							} else {
+								// Node wasn't touching on y, so it is touching on x
+								node.onWall = true;
+							}
+						}
+					}
+				}
+			}
+
+			// Resolve the collision with the node, and move it
 			node.finishMove();
-			console.log("frame end");
-			node._velocity.copy(oldVelocity);
-			// if(!node.isColliding) {
-			// 	node.onGround = false;
-			// 	node.onCeiling = false;
-			// 	node.onWall = false;
-			// 	node.finishMove();
-			// }
 		}
 	}
 
-	protected createOverlaps(node: Physical): Array<AreaCollision> {
-		/*---------- DETECTION PHASE ----------*/
-		// Gather a set of overlaps
-		let overlaps = new Array<AreaCollision>();
-
-		let groupIndex = node.group === -1 ? -1 : Math.log2(node.group);
-
-		// First, check this node against every static node (order doesn't actually matter here, since we sort anyways)
-		for (let other of this.staticNodes) {
-			// Ignore inactive nodes
-			if (!other.active) continue;
-
-			let collider = other.collisionShape.getBoundingRect();
-			let area = node.sweptRect.overlapArea(collider);
-			if (area > 0) {
-				// We had a collision
-				overlaps.push(new AreaCollision(area, collider, other, "GameNode", null));
-			}
-		}
-
-		// Then, check it against every dynamic node
-		for (let other of this.dynamicNodes) {
-			// Ignore ourselves
-			if (node === other) continue;
-
-			// Ignore inactive nodes
-			if (!other.active) continue;
-
-			let collider = other.collisionShape.getBoundingRect();
-			let area = node.sweptRect.overlapArea(collider);
-			if (area > 0) {
-				// We had a collision
-				overlaps.push(new AreaCollision(area, collider, other, "GameNode", null));
-			}
-		}
-
-		// Lastly, gather a set of AABBs from the tilemap.
-		// This step involves the most extra work, so it is abstracted into a method
-		for (let tilemap of this.tilemaps) {
-			// Ignore inactive tilemaps
-			if (!tilemap.active) continue;
-
-			if (tilemap instanceof OrthogonalTilemap) {
-				this.collideWithOrthogonalTilemap(node, tilemap, overlaps);
-			}
-		}
-
-
-		/*---------- RESOLUTION PHASE ----------*/
-		// For every overlap, determine if we need to collide with it and when
-		for (let overlap of overlaps) {
-			// Ignore nodes we don't interact with
-			if (groupIndex !== -1 && overlap.other.group !== -1 && ((this.collisionMasks[groupIndex] & overlap.other.group) === 0)) {
-				overlap.hit = null;
-				continue;
-			}
-			const otherAABB = overlap.collider;
-			const hit = otherAABB.intersectSegment(node.collisionShape.center, node._velocity, node.collisionShape.halfSize);
-
-			if (hit !== null) {
-				if (hit.nearTimes.x >= 0 && hit.nearTimes.x < 1) {
-					// Any tilemap objects that made it here are collidable
-					if (overlap.type === "Tilemap" || overlap.other.isCollidable) {
-						overlap.hit = hit;
-						continue;
-					}
-				}
-
-				if (hit.nearTimes.y >= 0 && hit.nearTimes.y < 1) {
-					// Any tilemap objects that made it here are collidable
-					if (overlap.type === "Tilemap" || overlap.other.isCollidable) {
-						overlap.hit = hit;
-						continue;
-					}
-				}
-			}
-			overlap.hit = null;
-		}
-		// remove overlaps that don't have a hit.
-		overlaps = overlaps.filter(overlap => (overlap.hit !== null));
-		if (overlaps.length > 0) {
-			// Sort the overlaps by time of collision.
-			overlaps.sort((a, b) => a.hit.time - b.hit.time);
-			//get the first one.
-			let overlap = overlaps[0];
-			let hit = overlaps[0].hit;
-			const point = node.collisionShape.center;
-			const delta = node._velocity;
-			const padding = node.collisionShape.halfSize;
-			const otherAABB = overlap.collider;
-			// We got a hit, resolve with the time inside of the hit
-			let tnearx = hit.nearTimes.x;
-			let tneary = hit.nearTimes.y;
-
-			// Allow edge clipping (edge overlaps don't count, only area overlaps)
-			// Importantly don't allow both cases to be true. Then we clip through corners. Favor x to help players land jumps
-			if (tnearx < 1.0 && (point.y === otherAABB.top - padding.y || point.y === otherAABB.bottom + padding.y) && delta.x !== 0) {
-				tnearx = 1.0;
-			}
-			if (tneary < 1.0 && (point.x === otherAABB.left - padding.x || point.x === otherAABB.right + padding.x) && delta.y !== 0) {
-				tneary = 1.0;
-			}
-			let editTime = Math.max((tnearx >= 0 && tnearx < 1) ? tnearx : -9999, (tneary >= 0 && tneary < 1) ? tneary : -9999);
-			if (editTime >= 0 && editTime < 1) {
-				// Any tilemap objects that made it here are collidable
-				if (overlap.type === "Tilemap" || overlap.other.isCollidable) {
-					let remainingTime = node._velocity.clone();
-					node._velocity.scale(editTime);
-					node.isColliding = true;
-					node.finishMove();
-					node._velocity = remainingTime.sub(node._velocity);
-					if(tnearx == editTime){
-						node._velocity.x = 0;
-					}
-					if(tneary == editTime){
-						console.log(tneary)
-						node._velocity.y = 0;
-					}
-					console.log(node._velocity.x + " " + node._velocity.y);
-				}
-			}else{
-				throw new Error("editTime is 999");
-				node._velocity = Vec2.ZERO;
-			}
-		}
-
-		/*---------- INFORMATION/TRIGGER PHASE ----------*/
-		// Check if we ended up on the ground, ceiling or wall
-		// Also check for triggers
-		for (let overlap of overlaps) {
-			// Check for a trigger. If we care about the trigger, react
-			if (overlap.other.isTrigger && (overlap.other.triggerMask & node.group)) {
-				// Get the bit that this group is represented by
-				let index = Math.floor(Math.log2(node.group));
-
-				// Extract the triggerEnter event name
-				this.emitter.fireEvent(overlap.other.triggerEnters[index], {
-					node: (<GameNode>node).id,
-					other: (<GameNode>overlap.other).id
-				});
-			}
-			// Only check for direction if the overlap was collidable
-			if (overlap.type === "Tilemap" || overlap.other.isCollidable) {
-				let collisionSide = overlap.collider.touchesAABBWithoutCorners(node.collisionShape.getBoundingRect());
-				if (collisionSide !== null) {
-					// If we touch, not including corner cases, check the collision normal
-					if (overlap.hit !== null) {
-						// If we hit a tilemap, keep track of it
-						if (overlap.type == "Tilemap") {
-							node.collidedWithTilemap = true;
-						}
-
-						if (collisionSide.y === -1) {
-							// Node is on top of overlap, so onGround
-							node.onGround = true;
-						} else if (collisionSide.y === 1) {
-							// Node is on bottom of overlap, so onCeiling
-							node.onCeiling = true;
-						} else {
-							// Node wasn't touching on y, so it is touching on x
-							node.onWall = true;
-						}
-					}
-				}
-			}
-		}
-		return overlaps;
-	}
 	/**
 	 * Handles a collision between this node and an orthogonal tilemap
 	 * @param node The node
@@ -355,18 +327,18 @@ export default class BasicPhysicsManager extends PhysicsManager {
 		let tileSize = tilemap.getTileSize();
 
 		// Loop over all possible tiles (which isn't many in the scope of the velocity per frame)
-		for (let col = minIndex.x; col <= maxIndex.x; col++) {
-			for (let row = minIndex.y; row <= maxIndex.y; row++) {
-				if (tilemap.isTileCollidable(col, row)) {
+		for(let col = minIndex.x; col <= maxIndex.x; col++){
+			for(let row = minIndex.y; row <= maxIndex.y; row++){
+				if(tilemap.isTileCollidable(col, row)){
 					// Get the position of this tile
-					let tilePos = new Vec2(col * tileSize.x + tileSize.x / 2, row * tileSize.y + tileSize.y / 2);
+					let tilePos = new Vec2(col * tileSize.x + tileSize.x/2, row * tileSize.y + tileSize.y/2);
 
 					// Create a new collider for this tile
-					let collider = new AABB(tilePos, tileSize.scaled(1 / 2));
+					let collider = new AABB(tilePos, tileSize.scaled(1/2));
 
 					// Calculate collision area between the node and the tile
 					let area = node.sweptRect.overlapArea(collider);
-					if (area > 0) {
+					if(area > 0){
 						// We had a collision
 						overlaps.push(new AreaCollision(area, collider, tilemap, "Tilemap", new Vec2(col, row)));
 					}
