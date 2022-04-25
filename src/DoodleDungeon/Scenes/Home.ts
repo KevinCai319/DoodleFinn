@@ -53,12 +53,7 @@ export default class Home extends GameLevel {
         this.load.image("ClickHere", "game_assets/spritesheets/TutorialAssets/ClickHere.png");
         this.load.image("PressE", "game_assets/spritesheets/TutorialAssets/PressE.png");
 
-<<<<<<< HEAD
-
-        
-=======
         this.load.audio("menu_music", "game_assets/music/doodlefinn_main.wav")
->>>>>>> f13e4d8109ba27fe7a6bb78702c253091a3c31ed
     }
 
     // DoodleFinn TODO
