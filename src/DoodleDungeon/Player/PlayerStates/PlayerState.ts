@@ -56,14 +56,11 @@ export default abstract class PlayerState extends State {
 			this.emitter.fireEvent(Game_Events.PLAYER_MOVE, {position: this.owner.position.clone()});
 			this.positionTimer.start();
 		}
-		if (!this.owner.frozen){
+		if (!this.owner.frozen && this.parent.health > 0){
 			if((this.parent as PlayerController).playerType == PlayerType.PLATFORMER){
 				this.parent.velocity.y += this.gravity*deltaT;
 			}
-
-			if(( this.parent.health <= 0 || this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF) && !this.parent.invicible){
-				this.owner.freeze()
-				this.owner.disablePhysics()
+			if((this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF) && !this.parent.invicible){
 				if(this.parent.health > 0){
 					this.parent.damage(this.parent.health);
 				}

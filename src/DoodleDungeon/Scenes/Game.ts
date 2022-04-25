@@ -52,7 +52,8 @@ export default class GameLevel extends Scene {
     /**
      * Variables related to cursor.
      */
-    protected placementHacks: boolean = false;
+    static MAX_BLOCKS: number = 25;
+    protected placementLeft: number = GameLevel.MAX_BLOCKS;
     protected placementRange: number = 5;
     protected cursor: AnimatedSprite;
     protected cursorVisible: boolean = true;
@@ -187,7 +188,7 @@ export default class GameLevel extends Scene {
                                 mousePosition.x <= canvasInfo.x && mousePosition.y <= canvasInfo.y);
 
         this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(0.5, 0.5)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
-        if (!this.cursorDisabled && this.cursorVisible && !this.paused) {
+        if (!this.cursorDisabled && this.cursorVisible && !this.paused &&!this.pauseButton.boundary.containsPoint(mousePosition)) {
             this.cursor.alpha = 1;
             if(Input.isMousePressed(0) != Input.isMousePressed(2)){
                 // TODO: Add limits to how far the player can click from their body.
@@ -612,8 +613,8 @@ export default class GameLevel extends Scene {
                 this.enemies[i].addAI(EnemyAI, enemyOptions);
             }
         } catch (e) {
-            console.log("No enemy data found.");
-            console.log(e)
+            console.log("No enemy data found for this level.");
+            // console.log(e)
             return;
         }
     }
@@ -924,7 +925,6 @@ export default class GameLevel extends Scene {
             Input.disableInput();
             this.player.disablePhysics();
             this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_death", loop: false, holdReference: false });
-            this.player.tweens.play("death");
         }
     }
 

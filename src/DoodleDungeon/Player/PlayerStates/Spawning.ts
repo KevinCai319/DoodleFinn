@@ -14,16 +14,18 @@ export default class Spawn extends PlayerState {
 	onEnter(options: Record<string, any>): void {
         this.timeElapsed = 0
         this.startLocation = this.owner.position.clone()
-        this.owner.tweens.play("iframe",true)
+        //set the player to default sprite.
+        this.owner.animation.playIfNotAlready("Idle Right", false);
         this.parent.setInvincible(this.RESPAWN_TIME)
 	}
 
     update(deltaT: number): void {
-		super.update(deltaT);
+        //check if an animation is already playing.{
+        super.update(deltaT);
         this.timeElapsed += deltaT
         this.owner.position.copy(Vec2.lerp(this.startLocation,(this.owner.getScene() as GameLevel).PlayerSpawn, (this.timeElapsed*1000)/this.RESPAWN_TIME));
         if(this.parent.invincibleTimer.isStopped()){
-		    this.finished(PlayerStates.IDLE);
+            this.finished(PlayerStates.IDLE);
         }
 	}
 

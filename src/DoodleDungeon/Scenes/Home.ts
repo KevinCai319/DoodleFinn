@@ -27,6 +27,11 @@ export default class Home extends GameLevel {
     static bestTimes:Array<number>;
     bestTimeLabels:Array<Label> = []
     static firstLoad: boolean = true;
+    //Cheats.
+    static invincibilityCheats:boolean = false;
+    static unlimitedPlacementCheats:boolean = false;
+    static allLevelCheats:boolean = false;
+    static flyHackCheats:boolean = false;
     loadScene(): void {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/"+this.LEVEL_NAME+"/"+this.LEVEL_NAME+".json");
@@ -46,6 +51,9 @@ export default class Home extends GameLevel {
         this.load.image("credit2","game_assets/spritesheets/TutorialAssets/credit2.png")
         this.load.image("ClickHere", "game_assets/spritesheets/TutorialAssets/ClickHere.png");
         this.load.image("PressE", "game_assets/spritesheets/TutorialAssets/PressE.png");
+
+
+        
     }
 
     // DoodleFinn TODO
