@@ -1,6 +1,7 @@
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameLevel from "./Game";
 import Home from "./Home";
+import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 
 export default class Level1 extends GameLevel {
     LEVEL_NAME: string = "Level_1"
@@ -19,6 +20,8 @@ export default class Level1 extends GameLevel {
         this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
+
+        this.load.audio("level_music", "game_assets/music/doodlefinn_level_music.wav")
     }
 
     // DoodleFinn TODO
@@ -39,6 +42,7 @@ export default class Level1 extends GameLevel {
         if (Home.LevelsUnlocked == 2) {
             Home.LevelsUnlocked += 1;
         }
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "level_music"});
     }
 
     startScene(): void {
@@ -49,6 +53,7 @@ export default class Level1 extends GameLevel {
         // Do generic setup for a GameLevel
         super.startScene();
 
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "level_music", loop: true, holdReference: true});
     }
 
     updateScene(deltaT: number): void {

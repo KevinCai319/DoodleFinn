@@ -22,6 +22,7 @@ gulp.task('copy-html', function () {
 });
 
 function bundle() {
+    console.log("Bundling...")
     return watchedBrowserify
         .bundle()
         .on('error', fancy_log)
