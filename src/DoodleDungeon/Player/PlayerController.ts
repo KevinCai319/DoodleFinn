@@ -16,6 +16,7 @@ import Dying from "./PlayerStates/Dying";
 import Run from "./PlayerStates/Run";
 import Spawn from "./PlayerStates/Spawning";
 import Walk from "./PlayerStates/Walk";
+import Home from "../Scenes/Home";
 
 export enum PlayerType {
     PLATFORMER = "platformer",
@@ -111,7 +112,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.owner.tweens.play("iframe");
     }
     damage(amount: number): void {
-        if(!this.invicible && this.health > 0){
+        if(!this.invicible && this.health > 0 && !Home.invincibilityCheats){
             this.health -= amount;
             this.emitter.fireEvent(Game_Events.PLAYER_HURT);
             if(this.health <= 0){

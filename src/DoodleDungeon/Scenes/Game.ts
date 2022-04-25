@@ -27,6 +27,7 @@ import Charge from './../Enemies/EnemyActions/Charge';
 import Layer from "../../Wolfie2D/Scene/Layer";
 import Button from "../../Wolfie2D/Nodes/UIElements/Button";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import Home from "./Home";
 
 
 
@@ -520,8 +521,11 @@ export default class GameLevel extends Scene {
         playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x /4, offset)));
         playerBox.center.y -= offset / 2;
         this.player.addPhysics(playerBox, new Vec2(0, offset));
-
-        this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
+        if(Home.flyHackCheats){
+            this.player.addAI(PlayerController, { playerType: PlayerType.TOPDOWN, tilemap: "Main" });
+        }else{
+            this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
+        }
         this.player.setGroup("player");
 
 
@@ -919,6 +923,9 @@ export default class GameLevel extends Scene {
      * @param amt The amount to add to the player life
      */
     protected incPlayerLife(amt: number): void {
+        if(Home.unlimitedLives){
+            if(amt <0)amt = 0;
+        }
         this.livesCount += amt;
         this.livesCountLabel.text = "Lives: " + this.livesCount;
         if (this.livesCount <= 0) {
