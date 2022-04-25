@@ -549,6 +549,10 @@ export default class GameLevel extends Scene {
 
                 // TODO: CHANGE THIS
                 this.enemies[i] = this.add.animatedSprite(data.type, "primary");
+
+                // TODO: INSERT HEALTH BAR HERE
+                //this.healthBars[i] = this.add.uiElement(...);
+
                 // this.enemies[i] = this.add.animatedSprite("gun_enemy", "primary");
 
                 this.enemies[i].position.set(data.position[0], data.position[1]);
