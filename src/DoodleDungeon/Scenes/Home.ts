@@ -10,6 +10,7 @@ import PlayerController from "../Player/PlayerController";
 import DemoLevel from "./DemoLevel";
 import GameLevel from "./Game";
 import Level1 from "./Level1";
+import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 
 export default class Home extends GameLevel {
     static LevelsUnlocked:number = 1;
@@ -52,8 +53,12 @@ export default class Home extends GameLevel {
         this.load.image("ClickHere", "game_assets/spritesheets/TutorialAssets/ClickHere.png");
         this.load.image("PressE", "game_assets/spritesheets/TutorialAssets/PressE.png");
 
+<<<<<<< HEAD
 
         
+=======
+        this.load.audio("menu_music", "game_assets/music/doodlefinn_main.wav")
+>>>>>>> f13e4d8109ba27fe7a6bb78702c253091a3c31ed
     }
 
     // DoodleFinn TODO
@@ -67,6 +72,8 @@ export default class Home extends GameLevel {
     unloadScene(){
         // Keep resources - this is up to you
         this.load.keepSpritesheet("player");
+        
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "menu_music"});
     }
 
     startScene(): void {
@@ -140,6 +147,8 @@ export default class Home extends GameLevel {
         this.livesCount = 1
         this.pauseButton.visible = false
         this.pauseButton.destroy()
+
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "menu_music", loop: true, holdReference: true});
     }
 
     updateScene(deltaT: number): void {

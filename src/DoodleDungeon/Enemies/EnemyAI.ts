@@ -97,7 +97,6 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
         {
             startDelay: 0,
             duration: 125,
-            onEnd: Game_Events.PLAYER_INVINCIBLE_END,
             reverseOnComplete: true,
             loop:true,
             effects:[
@@ -110,6 +109,28 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
                 }
             ]
            
+        });
+        
+        this.owner.tweens.add("death",
+        {
+            startDelay: 0,
+            duration: 1250,
+            reverseOnComplete: false,
+            loop: false,
+            effects:[
+                {
+                    property: "rotation",
+                    start: 0,
+                    end: 12*Math.PI,
+                    ease: EaseFunctionType.IN_OUT_QUAD
+                },
+                {
+                    property: "alpha",
+                    start: 1,
+                    end: 0,
+                    ease: EaseFunctionType.IN_OUT_QUAD
+                }
+            ]
         });
 
         this.owner.debugRender = ()=>{
@@ -134,19 +155,22 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
     setInvincible(duration:number=500){
         this.invincibleTimer.start(duration);
         this.invincible = true;
-        // this.emitter.fireEvent(Game_Events.PLAYER_INVINCIBLE);
-        // this.owner.tweens.play("iframe");
+        this.owner.tweens.play("iframe");
     }
 
     damage(damage: number): void {
         if(!this.invincible){
             this.health -= damage;
-            this.setInvincible(500)
             if(this.health <= 0){
                 this.owner.setAIActive(false, {});
                 this.owner.isCollidable = false;
-                this.owner.visible = false;
+                // this.owner.visible = false;
+                this.invincible = true;
+                this.owner.tweens.play("death")
             }  
+            else {
+                this.setInvincible(500)
+            }
         }
     }
 

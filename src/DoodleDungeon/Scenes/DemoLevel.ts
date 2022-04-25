@@ -4,6 +4,7 @@ import Layer from "../../Wolfie2D/Scene/Layer";
 import PlayerController, { PlayerType } from "../Player/PlayerController";
 import GameLevel from "./Game";
 import Home from "./Home";
+import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 
 export default class DemoLevel extends GameLevel {
     LEVEL_NAME:string ="DemoLevel"
@@ -35,6 +36,8 @@ export default class DemoLevel extends GameLevel {
         // Cheat info.
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/"+this.LEVEL_NAME+"/enemy.json");
+
+        this.load.audio("level_music", "game_assets/music/doodlefinn_level_music.wav")
     }
 
     // DoodleFinn TODO
@@ -57,6 +60,7 @@ export default class DemoLevel extends GameLevel {
                 Home.LevelsUnlocked+=1;
             }
         }
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "level_music"});
     }
 
     startScene(): void {
@@ -79,6 +83,8 @@ export default class DemoLevel extends GameLevel {
         })
         // Do generic setup for a GameLevel
         super.startScene();
+
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "level_music", loop: true, holdReference: true});
 
         // Cheats.
         // (<PlayerController>this.player._ai).playerType = PlayerType.TOPDOWN;
