@@ -165,6 +165,7 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
                 this.owner.setAIActive(false, {});
                 this.owner.isCollidable = false;
                 // this.owner.visible = false;
+                this.invincible = true;
                 this.owner.tweens.play("death")
             }  
             else {
