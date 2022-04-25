@@ -8,6 +8,7 @@ import Timer from "../../../Wolfie2D/Timing/Timer";
 import PlayerController, { PlayerStates, PlayerType } from "../PlayerController";
 import { Game_Events } from "../../Events";
 import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+import Home from "../../Scenes/Home";
 
 
 export default abstract class PlayerState extends State {
@@ -40,6 +41,9 @@ export default abstract class PlayerState extends State {
 		if(type == PlayerType.TOPDOWN){
 			direction.y = (Input.isPressed("down") ? 1 : 0) + (Input.isPressed("up") ? -1 : 0)
 			direction.normalize();
+			if(direction.y == 0){
+				this.parent.velocity.y = 0;
+			}
 		}else if (type == PlayerType.PLATFORMER){
 			direction.y = (Input.isPressed("jump") ? -1 : 0)
 		}else{
@@ -61,8 +65,12 @@ export default abstract class PlayerState extends State {
 				this.parent.velocity.y += this.gravity*deltaT;
 			}
 			if((this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF) && !this.parent.invicible){
-				if(this.parent.health > 0){
-					this.parent.damage(this.parent.health);
+				if(Home.invincibilityCheats){
+					this.parent.changeState(PlayerStates.SPAWN);
+				}else{
+					if(this.parent.health > 0){
+						this.parent.damage(this.parent.health);
+					}
 				}
 			}
 			

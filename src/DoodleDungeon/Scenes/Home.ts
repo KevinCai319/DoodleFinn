@@ -6,12 +6,13 @@ import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Layer from "../../Wolfie2D/Scene/Layer";
 import { Game_Events } from "../Events";
-import PlayerController from "../Player/PlayerController";
+import PlayerController, { PlayerStates, PlayerType } from "../Player/PlayerController";
 import DemoLevel from "./DemoLevel";
 import GameLevel from "./Game";
 import Level1 from "./Level1";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import PlayerState from "../Player/PlayerStates/PlayerState";
 
 export default class Home extends GameLevel {
     static LevelsUnlocked:number = 1;
@@ -32,7 +33,6 @@ export default class Home extends GameLevel {
     //Cheats.
     static invincibilityCheats:boolean = false;
     static unlimitedPlacementCheats:boolean = false;
-    static allLevelCheats:boolean = false;
     static flyHackCheats:boolean = false;
     //Toggle could be handled in own class, but not needed since it is only 
     //used in this class.
@@ -92,11 +92,7 @@ export default class Home extends GameLevel {
         }
         this.doors = [];
         for(let i = 0; i < Home.numberOfLevels; i++){
-            if(i >= Home.LevelsUnlocked){
-                this.doors.push([false, null, null]);
-            }else{
-                this.doors.push([true, null, Home.Levels[i]]);
-            }
+            this.doors.push([i < Home.LevelsUnlocked, null, Home.Levels[i]]);
         }
 
         this.playerSpawnColRow = new Vec2(77,10);
@@ -136,6 +132,9 @@ export default class Home extends GameLevel {
                                 Home.flyHackCheats,
                                 ()=>{
                                     Home.flyHackCheats = !Home.flyHackCheats;
+                                    (this.player._ai as PlayerController).playerType = (Home.flyHackCheats)?PlayerType.TOPDOWN:PlayerType.PLATFORMER
+                                    this.player._velocity = Vec2.ZERO;
+                                    (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
                                 }]);
             this.toggles.push([this.addLevelBackgroundImage("ON",layer.getName(),new Vec2(60,17.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.unlimitedPlacementCheats?0:1)),
             this.addLevelBackgroundImage("OFF",layer.getName(),new Vec2(60,17.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.unlimitedPlacementCheats?1:0)),
@@ -145,7 +144,7 @@ export default class Home extends GameLevel {
             }]);
             
             this.addLevelBackgroundImage("PressE",layer.getName(),new Vec2(94.5,14).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3));
-            //Adding doors, and their best times.d
+            //Adding doors, and their best times.
             for(let i = 0; i < this.doors.length; i++){
                 let new_door = this.addLevelAnimatedSprite("Door",layer.getName(),new Vec2(90+5*i,17).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
                 if(this.doors[i][0]){
@@ -216,13 +215,17 @@ export default class Home extends GameLevel {
         // iterate through all doors.
         for(let i = 0; i < this.doors.length; i++){
             //check if it is unlocked.
-            if(this.doors[i][0]){
-                if(this.doors[i][1].boundary.overlapArea(this.player.boundary) && Input.isKeyJustPressed("e")){
-                    this.nextLevel = this.doors[i][2];
-                    this.emitter.fireEvent(Game_Events.LEVEL_END);
+            if(this.doors[i][0] || (Home.allLevelsUnlocked && i < Home.Levels.length)){
+                this.doors[i][1].alpha = 0.8;
+                if(this.doors[i][1].boundary.overlapArea(this.player.boundary)){
+                    this.doors[i][1].alpha = 1;
+                    if(Input.isKeyJustPressed("e")){
+                        this.nextLevel = this.doors[i][2];
+                        this.emitter.fireEvent(Game_Events.LEVEL_END);
+                    }
                 }
             }else{
-                
+                this.doors[i][1].alpha = 0.2;
             }
         }
         // if(this.door.boundary.overlapArea(this.player.boundary) && Input.isKeyJustPressed("e")){
