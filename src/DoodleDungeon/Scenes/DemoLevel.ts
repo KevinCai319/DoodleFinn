@@ -33,7 +33,7 @@ export default class DemoLevel extends GameLevel {
         this.load.image("InstEnd", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-End.png");
         this.load.image("InstAttack2", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Attack2.png");
         
-        this.load.image("drawnTile", "game_assets/spritesheets/Filled_tile.png");
+        this.load.image("drawnTile", "game_assets/spritesheets/Filled_Tile.png");
         this.load.image("pencil", "game_assets/spritesheets/Pencil.png");
         // Cheat info.
         // Load in the enemy info
