@@ -269,6 +269,7 @@ export default class GameLevel extends Scene {
                         let cursorHitbox = this.cursor.boundary.clone();
                         if (this.enemies != null) {
                             this.enemies.forEach(enemy => {
+                                if((enemy._ai as EnemyAI).health  <=0) return;
                                 if (cursorHitbox.overlaps(enemy.boundary)) {
                                     // Attack the enemy
                                     // TODO: finish this method.
@@ -903,6 +904,7 @@ export default class GameLevel extends Scene {
             // Check if the block is not overalapping with the current enemies.
             if (this.enemies != null) {
                 for (let i = 0; i < this.enemies.length; i++) {
+                    if((this.enemies[i]._ai as EnemyAI).health  <=0) continue;
                     let colrow_enemy = this.dynamicMap.getColRowAt(this.enemies[i].position)
                     if (colrow_enemy.distanceTo(colrow_toAdd) < 1) return
                 }
