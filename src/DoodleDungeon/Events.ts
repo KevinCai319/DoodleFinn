@@ -24,7 +24,7 @@ export enum Game_Collectables{
     PINK_PAPER =  5
 }
 export enum Tileset_Names {
-	SOLID_INK = 51
+	SOLID_INK = 81
 }
 export enum AI_Statuses {
     IN_RANGE = "IN_RANGE",

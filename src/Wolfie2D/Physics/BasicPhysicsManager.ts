@@ -144,7 +144,6 @@ export default class BasicPhysicsManager extends PhysicsManager {
 			if(!node.active){
 				continue;
 			}
-
 			// Update the swept shapes of each node
 			if(node.moving){
 				// If moving, reflect that in the swept shape
@@ -258,7 +257,7 @@ export default class BasicPhysicsManager extends PhysicsManager {
 					}
 				}
 			}
-			
+
 			/*---------- INFORMATION/TRIGGER PHASE ----------*/
 			// Check if we ended up on the ground, ceiling or wall
 			// Also check for triggers
@@ -303,9 +302,9 @@ export default class BasicPhysicsManager extends PhysicsManager {
 					}
 				}
 			}
-
 			// Resolve the collision with the node, and move it
 			node.finishMove();
+
 		}
 	}
 

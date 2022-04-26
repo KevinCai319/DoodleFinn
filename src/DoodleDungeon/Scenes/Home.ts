@@ -196,6 +196,7 @@ export default class Home extends GameLevel {
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "menu_music", loop: true, holdReference: true});
     }
     updateScene(deltaT: number): void {
+        this.placementLeft = GameLevel.MAX_BLOCKS;
         if(!this.Controls.visible){
             this.cursorDisabled = this.cursor.boundary.containsPoint(this.Instructions.position)
         }
