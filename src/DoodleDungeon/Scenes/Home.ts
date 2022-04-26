@@ -51,10 +51,10 @@ export default class Home extends GameLevel {
         this.load.audio("menu_music", "game_assets/music/doodlefinn_main.wav")
 
         this.load.audio("player_hit_enemy", "game_assets/sounds/coin.wav")
-        this.load.audio("jump", "game_assets/sounds/coin.wav")
+        this.load.audio("jump", "game_assets/sounds/jump.wav")
 
-        this.load.audio("player_death", "game_assets/sounds/coin.wav")
-        this.load.audio("player_hurt", "game_assets/sounds/coin.wav")
+        this.load.audio("player_death", "game_assets/sounds/death.wav")
+        this.load.audio("player_hurt", "game_assets/sounds/zap.wav")
         this.load.audio("scribble", "game_assets/sounds/scribble.wav")
         this.load.audio("erase", "game_assets/sounds/erase.wav")
     }
