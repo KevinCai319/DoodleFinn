@@ -28,6 +28,8 @@ export default class Level1 extends GameLevel {
 
         this.load.audio("player_death", "game_assets/sounds/coin.wav")
         this.load.audio("player_hurt", "game_assets/sounds/coin.wav")
+        this.load.audio("scribble", "game_assets/sounds/coin.wav")
+        this.load.audio("erase", "game_assets/sounds/coin.wav")
     }
 
     // DoodleFinn TODO

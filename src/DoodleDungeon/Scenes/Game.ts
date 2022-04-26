@@ -199,6 +199,12 @@ export default class GameLevel extends Scene {
                     // Remove tile (Right Click)
                     this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
                 }
+                if (Input.isMouseJustPressed(0)) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "scribble", loop: false, holdReference: false });       
+                }
+                if (Input.isMouseJustPressed(2)) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "erase", loop: false, holdReference: false });
+                }
             }
         } else {
             this.cursor.alpha = 0;
