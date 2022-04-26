@@ -32,6 +32,8 @@ export default class DemoLevel extends GameLevel {
         this.load.image("InstEndLevel", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-NextLevel.png");
         this.load.image("InstEnd", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-End.png");
         this.load.image("InstAttack2", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Attack2.png");
+
+        // Cheat info.
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/"+this.LEVEL_NAME+"/enemy.json");
 

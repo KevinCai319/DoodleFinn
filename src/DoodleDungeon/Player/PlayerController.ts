@@ -12,9 +12,11 @@ import Fall from "./PlayerStates/Fall";
 import Idle from "./PlayerStates/Idle";
 import InAir from "./PlayerStates/InAir";
 import Jump from "./PlayerStates/Jump";
+import Dying from "./PlayerStates/Dying";
 import Run from "./PlayerStates/Run";
 import Spawn from "./PlayerStates/Spawning";
 import Walk from "./PlayerStates/Walk";
+import Home from "../Scenes/Home";
 
 export enum PlayerType {
     PLATFORMER = "platformer",
@@ -28,6 +30,7 @@ export enum PlayerStates {
 	JUMP = "jump",
     FALL = "fall",
 	PREVIOUS = "previous",
+    DYING = "dying",
     SPAWN = "spawn"
 }
 
@@ -42,6 +45,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
 	speed: number = 200;
     invincibleTimer: Timer
     attackTimer: Timer
+    deathTimer: Timer
     invicible: boolean = false;
 	MIN_SPEED: number = 200;
     MAX_SPEED: number = 300;
@@ -53,6 +57,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.playerType = options.playerType
         this.invincibleTimer = new Timer(1000);
         this.attackTimer = new Timer(100);
+        this.deathTimer = new Timer(1000);
         this.direction = 1
         this.health = this.MAX_HEALTH;
         let boundary =  (<AnimatedSprite>this.owner).boundary
@@ -81,7 +86,6 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         {
             startDelay: 0,
             duration: 1250,
-            onEnd: Game_Events.PLAYER_LOSE_LIFE,
             effects:[
                 {
                     property: "rotation",
@@ -98,6 +102,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
             ]
         });
         this.initializeStates();
+        this.receiver.subscribe(Game_Events.PLAYER_LOSE_LIFE);
         (<AnimatedSprite>this.owner).animation.playIfNotAlready("Idle Left", true);
     }
     setInvincible(duration:number=500){
@@ -107,16 +112,16 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.owner.tweens.play("iframe");
     }
     damage(amount: number): void {
-        if(!this.invicible){
+        if(!this.invicible && this.health > 0 && !Home.invincibilityCheats){
             this.health -= amount;
             this.emitter.fireEvent(Game_Events.PLAYER_HURT);
-            this.setInvincible();
             if(this.health <= 0){
-                this.health = 0
-                // this.emitter.fireEvent(Game_Events.PLAYER_LOSE_LIFE);
-                this.owner.tweens.play("death");
-                // end current state.
-                this.changeState(PlayerStates.SPAWN);
+                this.attacking = false;
+                this.owner.tweens.stopAll();
+                this.health = 0;
+                (<AnimatedSprite>this.owner).animation.stop();
+                this.deathTimer.start(1000);
+                this.changeState(PlayerStates.DYING);
             }else{
                 this.setInvincible();
             }
@@ -145,6 +150,8 @@ export default class PlayerController extends StateMachineAI implements BattlerA
 		this.addState(PlayerStates.RUN, run);
         let spawn = new Spawn(this, this.owner);
 		this.addState(PlayerStates.SPAWN, spawn);
+        let dying = new Dying(this, this.owner);
+		this.addState(PlayerStates.DYING, dying);
         if(this.playerType == PlayerType.PLATFORMER){
             let jump = new Jump(this, this.owner);
             this.addState(PlayerStates.JUMP, jump);
@@ -173,6 +180,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         if(this.attacking && this.attackTimer.isStopped()){
             this.attacking = false
         }
+        
         if(this.owner.onGround){
             // let rc =  this.tilemap.getColRowAt(this.owner.position);
             // rc.y+=1;

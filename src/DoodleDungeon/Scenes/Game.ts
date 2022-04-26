@@ -27,6 +27,7 @@ import Charge from './../Enemies/EnemyActions/Charge';
 import Layer from "../../Wolfie2D/Scene/Layer";
 import Button from "../../Wolfie2D/Nodes/UIElements/Button";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import Home from "./Home";
 
 
 
@@ -52,7 +53,8 @@ export default class GameLevel extends Scene {
     /**
      * Variables related to cursor.
      */
-    protected placementHacks: boolean = false;
+    static MAX_BLOCKS: number = 25;
+    protected placementLeft: number = GameLevel.MAX_BLOCKS;
     protected placementRange: number = 5;
     protected cursor: AnimatedSprite;
     protected cursorVisible: boolean = true;
@@ -187,7 +189,7 @@ export default class GameLevel extends Scene {
                                 mousePosition.x <= canvasInfo.x && mousePosition.y <= canvasInfo.y);
 
         this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(0.5, 0.5)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
-        if (!this.cursorDisabled && this.cursorVisible && !this.paused) {
+        if (!this.cursorDisabled && this.cursorVisible && !this.paused &&!this.pauseButton.boundary.containsPoint(mousePosition)) {
             this.cursor.alpha = 1;
             if(Input.isMousePressed(0) != Input.isMousePressed(2)){
                 // TODO: Add limits to how far the player can click from their body.
@@ -531,8 +533,11 @@ export default class GameLevel extends Scene {
         playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x /4, offset)));
         playerBox.center.y -= offset / 2;
         this.player.addPhysics(playerBox, new Vec2(0, offset));
-
-        this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
+        if(Home.flyHackCheats){
+            this.player.addAI(PlayerController, { playerType: PlayerType.TOPDOWN, tilemap: "Main" });
+        }else{
+            this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
+        }
         this.player.setGroup("player");
 
 
@@ -628,8 +633,8 @@ export default class GameLevel extends Scene {
                 this.enemies[i].addAI(EnemyAI, enemyOptions);
             }
         } catch (e) {
-            console.log("No enemy data found.");
-            console.log(e)
+            console.log("No enemy data found for this level.");
+            // console.log(e)
             return;
         }
     }
@@ -934,13 +939,14 @@ export default class GameLevel extends Scene {
      * @param amt The amount to add to the player life
      */
     protected incPlayerLife(amt: number): void {
+        if(Home.unlimitedLives){
+            if(amt <0)amt = 0;
+        }
         this.livesCount += amt;
         this.livesCountLabel.text = "Lives: " + this.livesCount;
         if (this.livesCount <= 0) {
             Input.disableInput();
             this.player.disablePhysics();
-            
-            this.player.tweens.play("death");
         }
     }
 
