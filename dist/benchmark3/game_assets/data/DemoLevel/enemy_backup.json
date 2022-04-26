@@ -1,0 +1,12 @@
+{
+  "numEnemies": 1,
+  "enemies": [
+    {
+      "position": [400,400],
+      "mode": "guard",
+      "guardPosition":[400,400],
+      "health": 5,
+      "type": "gun_enemy"
+    }
+  ]
+}

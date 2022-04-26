@@ -1,0 +1,15 @@
+{
+    "name": "splash_screen",
+    "spriteSheetImage": "splash_screen.png",
+    "spriteWidth": 1512,
+    "spriteHeight": 982,
+    "columns": 1,
+    "rows": 1,
+    "durationType": "time",
+    "animations": [
+        { 
+            "name": "idle",
+            "frames": [ {"index": 0, "duration": 500} ]
+        }
+    ]
+}
