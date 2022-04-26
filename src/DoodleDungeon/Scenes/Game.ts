@@ -86,6 +86,7 @@ export default class GameLevel extends Scene {
 
     // TODO: Move health bar to a separate class.
     protected healthBar: Array<Sprite> = [];
+    protected inkBar: Array<Sprite> = [];
     protected menuButton: Button
     protected pauseButton: Button
 
@@ -174,12 +175,26 @@ export default class GameLevel extends Scene {
 
 
         // console.log(Input.isMousePressed(0) + "|"+ Input.isMousePressed(2));
-
+        if(this.pauseButton.boundary.containsPoint(Input.getMousePosition())){
+            this.pauseButton.alpha = 1;
+        }else{
+            this.pauseButton.alpha = 0.1;
+        }
         if (this.pauseButton.visible && (Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
            this.pauseButton.onClick()
         }
         this.updateHealthBar();
+        if(this.inkBar.length  == GameLevel.MAX_BLOCKS){
+            //show the first placementLeft items in inkbar.
+            for (let i = 0; i < this.placementLeft; i++) {
 
+                this.inkBar[i].visible = true;
+            }
+            //hide the rest of the inkbar.
+            for (let i = this.placementLeft; i < GameLevel.MAX_BLOCKS; i++) {
+                this.inkBar[i].visible = false;
+            }
+        }
         /**
          * Handle Cursor Actions.
          */
@@ -352,7 +367,7 @@ export default class GameLevel extends Scene {
      * Initializes the viewport
      */
     protected initViewport(): void {
-        this.viewport.setZoomLevel(1.5);
+        this.viewport.setZoomLevel(1.2);
     }
 
     /**
@@ -367,6 +382,7 @@ export default class GameLevel extends Scene {
 
         this.setupHealthBar();
         this.updateHealthBar();
+        this.setupInkBar();
         // Prompt for paper.
         this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(90, 60), text: "Find some paper!" });
         this.papersCountLabel.textColor = Color.RED;
@@ -436,18 +452,33 @@ export default class GameLevel extends Scene {
 
         // Pause button setup.
         let halfViewport = this.viewport.getHalfSize();
-        let pauseButton = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", { position: new Vec2(halfViewport.x * 2-50, halfViewport.y*2-50), text: "Pause" });
-        pauseButton.backgroundColor = Color.BLACK;
-        pauseButton.borderColor = Color.WHITE;
+        let pauseButton = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", { position: new Vec2(halfViewport.x * 2-34, halfViewport.y*2-34), text: "Pause" });
+        pauseButton.backgroundColor = Color.RED;
+        pauseButton.borderColor = Color.BLACK;
         pauseButton.borderRadius = 10;
-        pauseButton.setPadding(new Vec2(10, 15));
-        pauseButton.scale = new Vec2(0.5, 0.5);
+        pauseButton.setPadding(new Vec2(3, 3));
+        pauseButton.scale = new Vec2(0.3, 0.3);
         pauseButton.font = "PixelSimple";
+        pauseButton.backgroundColor.a = 0.3;
+        pauseButton.borderColor.a = 0.3;
+        pauseButton.textColor.a = 0.5;
+        pauseButton.onEnter = () => {
+            pauseButton.backgroundColor.a = 1;
+            pauseButton.borderColor.a = 1;
+            pauseButton.textColor.a = 1;
+        }
+        pauseButton.onLeave = () => {
+            pauseButton.backgroundColor.a = 0.6;
+            pauseButton.borderColor.a = 0.6;
+            pauseButton.textColor.a = 0.6;
+        }
+        
         pauseButton.onClick = () => {
             this.levelTransitionScreen.alpha = 0;
             this.emitter.fireEvent(Game_Events.GAME_PAUSE);
         }
         this.pauseButton = pauseButton
+        // this.pauseButton.alpha = 0.5;
 
         // Menu button setup.
         let menuBtn = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", { position: new Vec2(halfViewport.x, halfViewport.y), text: "Menu" });
@@ -471,17 +502,33 @@ export default class GameLevel extends Scene {
      * May be removed in the future.
      */
     protected setupHealthBar(): void {
-        let location = new Vec2(50, this.viewport.getView().hh*2 - 50);
-        let scale = new Vec2(0.2, 0.2);
+        let location = new Vec2(30, this.viewport.getView().hh*2-30);
+        let scale = new Vec2(0.12, 0.12);
         // Create up to 10 hearts on the UI layer.
         try {
             for (let i = 0; i < 10; i++) {
                 this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI", location, scale));
                 this.healthBar.push(this.addLevelBackgroundImage("heart", "UI", location, scale));
-                location.x += 65;
+                location.x += 33;
             }
         } catch (e) {
 
+        }
+    }
+
+    protected setupInkBar(): void {
+        let location = new Vec2(this.viewport.getView().hw-140,45);
+        let scale = new Vec2(0.1,0.1);
+        // Create up to 10 hearts on the UI layer.
+        try {
+            //add ink bar.
+            this.addLevelBackgroundImage("pencil", "UI", new Vec2(this.viewport.getView().hw,45), new Vec2(4.4,4),0.6);
+            for (let i = 0; i < GameLevel.MAX_BLOCKS; i++) {
+                this.inkBar.push(this.addLevelBackgroundImage("drawnTile", "UI", location, scale));
+               location.x += 10;
+            }
+        } catch (e) {
+            console.log("No ink found.")
         }
     }
 
@@ -515,12 +562,14 @@ export default class GameLevel extends Scene {
         }
         this.player.position.copy(this.playerSpawn);
         let playerBox = this.player.boundary.clone();
-        //remove 1/8 of height and 1/4 width from the player box.
-        let offset = 0;
-        offset = playerBox.getHalfSize().y / 8;
-        playerBox.setHalfSize(playerBox.getHalfSize().sub(new Vec2(playerBox.getHalfSize().x /4, offset)));
-        playerBox.center.y -= offset / 2;
-        this.player.addPhysics(playerBox, new Vec2(0, offset));
+        let oldHeight = playerBox.hh;
+        //remove 1/6 of height and 1/4 width from the player box.
+        let offsetY = 0;
+        let offsetX = 0;
+        offsetY = playerBox.getHalfSize().y / 8;
+        offsetX = playerBox.getHalfSize().x / 4;
+        playerBox.setHalfSize(playerBox.getHalfSize().clone().sub(new Vec2(offsetX, offsetY)));
+        this.player.addPhysics(playerBox,new Vec2(0,offsetY));
         if(Home.flyHackCheats){
             this.player.addAI(PlayerController, { playerType: PlayerType.TOPDOWN, tilemap: "Main" });
         }else{
@@ -843,11 +892,24 @@ export default class GameLevel extends Scene {
                 }
             }
             if (collider.overlapArea(tileAABB) == 0 && !this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)) {
-                this.dynamicMap.badAddTile(position, Tileset_Names.SOLID_INK);
+                if(this.placementLeft > 0){
+                    this.dynamicMap.badAddTile(position, Tileset_Names.SOLID_INK);
+                    if(!Home.unlimitedPlacementCheats){
+                        this.placementLeft--;
+                    }
+                }
             }
         } else {
             // if(this.checkErasingPlatform(this.playerSpawnColRow,tile)) return;
-            this.dynamicMap.badRemoveTile(position);
+            let colrow_toAdd = this.dynamicMap.getColRowAt(position)
+            if(this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)){
+                this.dynamicMap.badRemoveTile(position);
+                if(!Home.unlimitedPlacementCheats){
+                    this.placementLeft += 1;
+                    if(this.placementLeft> GameLevel.MAX_BLOCKS)
+                        this.placementLeft = GameLevel.MAX_BLOCKS;
+                }
+            }
         }
         this.navManager = new NavigationManager()
         this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
