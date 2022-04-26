@@ -19,7 +19,7 @@ export default class Level1 extends GameLevel {
         this.load.image("heart", "game_assets/spritesheets/Full_Heart.png");
         this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
         this.load.image("pencil", "game_assets/spritesheets/Pencil.png");
-        this.load.image("drawnTile", "game_assets/spritesheets/Filled_tile.png");
+        this.load.image("drawnTile", "game_assets/spritesheets/Filled_Tile.png");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
 
