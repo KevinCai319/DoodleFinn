@@ -201,6 +201,12 @@ export default class GameLevel extends Scene {
                     // Remove tile (Right Click)
                     this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
                 }
+                if (Input.isMouseJustPressed(0)) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "scribble", loop: false, holdReference: false });       
+                }
+                if (Input.isMouseJustPressed(2)) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "erase", loop: false, holdReference: false });
+                }
             }
         } else {
             this.cursor.alpha = 0;
@@ -252,6 +258,10 @@ export default class GameLevel extends Scene {
                                     // Attack the enemy
                                     // TODO: finish this method.
                                     (enemy._ai as EnemyAI).damage(1);
+
+                                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
+                                        {key: "player_hit_enemy", loop: false, holdReference: false});
+
                                     // enemy.tweens.play("attack");
                                     // enemy.tweens.on("attack", () => {
                                     //     enemy.tweens.play("idle");
@@ -285,11 +295,13 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.PLAYER_HURT:
                     {
+                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_hurt", loop: false, holdReference: false });
                         this.updateHealthBar();
                     }
                     break;
                 case Game_Events.PLAYER_LOSE_LIFE:
                     {
+                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_death", loop: false, holdReference: false });
                         if (!this.gameEnd) {
                             this.incPlayerLife(-1)
                             if (this.livesCount <= 0) {
@@ -554,6 +566,10 @@ export default class GameLevel extends Scene {
 
                 // TODO: CHANGE THIS
                 this.enemies[i] = this.add.animatedSprite(data.type, "primary");
+
+                // TODO: INSERT HEALTH BAR HERE
+                //this.healthBars[i] = this.add.uiElement(...);
+
                 // this.enemies[i] = this.add.animatedSprite("gun_enemy", "primary");
 
                 this.enemies[i].position.set(data.position[0], data.position[1]);
@@ -931,7 +947,6 @@ export default class GameLevel extends Scene {
         if (this.livesCount <= 0) {
             Input.disableInput();
             this.player.disablePhysics();
-            this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_death", loop: false, holdReference: false });
         }
     }
 
