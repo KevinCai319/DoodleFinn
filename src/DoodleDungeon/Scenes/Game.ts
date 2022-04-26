@@ -111,6 +111,32 @@ export default class GameLevel extends Scene {
     protected levelEndSpots: Array<Rect> = []
     protected nextLevel: new (...args: any) => GameLevel;
     protected home: new (...args: any) => GameLevel;
+    protected compass: Sprite;
+    loadScene(loadUI?:boolean): void {
+        this.load.spritesheet("player", "game_assets/spritesheets/DoodleFinn/DoodleFinn-Sprite.json");
+        this.load.spritesheet("melee_enemy", "game_assets/spritesheets/FlyEnemy/FlyEnemy.json")
+        this.load.spritesheet("charging_enemy", "game_assets/spritesheets/ChargeEnemy/ChargeEnemy.json")
+        
+        this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
+        this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
+        this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");
+        this.load.image("drawnTile", "game_assets/spritesheets/Filled_Tile.png");
+        
+        //Stuff used when you are in a level
+        if(loadUI){
+            this.load.image("pencil", "game_assets/spritesheets/Pencil.png");
+            this.load.image("heart", "game_assets/spritesheets/Full_Heart.png");
+            this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
+            this.load.image("Compass", "game_assets/spritesheets/Compass.png");
+        }
+        this.load.audio("level_music", "game_assets/music/doodlefinn_level_music.wav")
+        this.load.audio("player_hit_enemy", "game_assets/sounds/coin.wav")
+        this.load.audio("jump", "game_assets/sounds/jump.wav")
+        this.load.audio("player_death", "game_assets/sounds/death.wav")
+        this.load.audio("player_hurt", "game_assets/sounds/zap.wav")
+        this.load.audio("scribble", "game_assets/sounds/scribble.wav")
+        this.load.audio("erase", "game_assets/sounds/erase.wav")
+    }
 
     startScene(): void {
         this.gameEnd = false;
@@ -173,7 +199,35 @@ export default class GameLevel extends Scene {
 
     updateScene(deltaT: number) {
 
+        if(this.compass !== undefined){
+           // find the nearest collectable.
+            let minCollectable: AnimatedSprite = null;
+            let minDistance: number = Number.MAX_VALUE;
+            for(let collectable of this.Collectibles){
+                    if(collectable.alpha > 0){
+                        let distance = collectable.position.distanceTo(this.player.position);
+                        
+                        if(minCollectable === null || distance < minDistance){
+                            minCollectable = collectable;
+                            minDistance = distance;
+                        }
+                    }
 
+            }
+            if(minCollectable !== null){
+                this.compass.visible = true;
+                this.compass.rotation+=1;
+                let direction =  this.player.position.dirTo(minCollectable.position);
+                let angle =Vec2.RIGHT.angleToCCW(direction)-Math.PI/2;
+                console.log(angle)
+                this.compass.rotation = angle;
+                this.compass.position = this.player.position.clone().add(direction.scale(this.compass.boundary.hh*2.05)); 
+ 
+            }else{
+                this.compass.visible = false;
+            }
+
+        }
         // console.log(Input.isMousePressed(0) + "|"+ Input.isMousePressed(2));
         if(this.pauseButton.boundary.containsPoint(Input.getMousePosition())){
             this.pauseButton.alpha = 1;
@@ -593,6 +647,13 @@ export default class GameLevel extends Scene {
 
         this.viewport.follow(this.player);
         this.livesCount = 3
+        // add a compass.
+        try{
+            this.compass = this.addLevelBackgroundImage("Compass", "primary",this.player.position.clone().add(new Vec2(0, -this.player.boundary.hh)), new Vec2(0.2, 0.2));
+    
+        }catch(e){
+            console.log("No compass found.")
+        }
     }
 
     get PlayerSpawn(): Vec2 {
@@ -985,6 +1046,7 @@ export default class GameLevel extends Scene {
         // disable the trigger.
         let object = this.sceneGraph.getNode(collectableID)
         // find the object given id.
+        object.alpha = 0;
         object.disablePhysics()
         this.remove(object)
         // Check if collectable is a paper.

@@ -42,11 +42,8 @@ export default class Home extends GameLevel {
     loadScene(): void {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/"+this.LEVEL_NAME+"/"+this.LEVEL_NAME+".json");
-        this.load.spritesheet("player", "game_assets/spritesheets/DoodleFinn/DoodleFinn-Sprite.json");
-        this.load.spritesheet("gun_enemy", "game_assets/spritesheets/gun_enemy.json");
-        this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
-        this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
-        this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");
+        super.loadScene(false);
+        
         this.load.spritesheet("InstructionsButton", "game_assets/spritesheets/TutorialAssets/InstructionsButton.json")
         this.load.spritesheet("Controls","game_assets/spritesheets/TutorialAssets/Controls.json" )
         this.load.image("Backstory", "game_assets/spritesheets/TutorialAssets/Backstory.png")
@@ -64,14 +61,6 @@ export default class Home extends GameLevel {
         this.load.image("OFF", "game_assets/spritesheets/TutorialAssets/TOGGLE_OFF.png");
 
         this.load.audio("menu_music", "game_assets/music/doodlefinn_main.wav")
-
-        this.load.audio("player_hit_enemy", "game_assets/sounds/coin.wav")
-        this.load.audio("jump", "game_assets/sounds/jump.wav")
-
-        this.load.audio("player_death", "game_assets/sounds/death.wav")
-        this.load.audio("player_hurt", "game_assets/sounds/zap.wav")
-        this.load.audio("scribble", "game_assets/sounds/scribble.wav")
-        this.load.audio("erase", "game_assets/sounds/erase.wav")
     }
 
     // DoodleFinn TODO
