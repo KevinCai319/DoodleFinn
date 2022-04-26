@@ -49,6 +49,12 @@ export default class Home extends GameLevel {
         this.load.image("PressE", "game_assets/spritesheets/TutorialAssets/PressE.png");
 
         this.load.audio("menu_music", "game_assets/music/doodlefinn_main.wav")
+
+        this.load.audio("player_hit_enemy", "game_assets/sounds/coin.wav")
+        this.load.audio("jump", "game_assets/sounds/coin.wav")
+
+        this.load.audio("player_death", "game_assets/sounds/coin.wav")
+        this.load.audio("player_hurt", "game_assets/sounds/coin.wav")
     }
 
     // DoodleFinn TODO

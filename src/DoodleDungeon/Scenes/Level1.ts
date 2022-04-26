@@ -22,6 +22,12 @@ export default class Level1 extends GameLevel {
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
 
         this.load.audio("level_music", "game_assets/music/doodlefinn_level_music.wav")
+
+        this.load.audio("player_hit_enemy", "game_assets/sounds/coin.wav")
+        this.load.audio("jump", "game_assets/sounds/coin.wav")
+
+        this.load.audio("player_death", "game_assets/sounds/coin.wav")
+        this.load.audio("player_hurt", "game_assets/sounds/coin.wav")
     }
 
     // DoodleFinn TODO

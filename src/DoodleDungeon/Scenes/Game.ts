@@ -250,6 +250,10 @@ export default class GameLevel extends Scene {
                                     // Attack the enemy
                                     // TODO: finish this method.
                                     (enemy._ai as EnemyAI).damage(1);
+
+                                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
+                                        {key: "player_hit_enemy", loop: false, holdReference: false});
+
                                     // enemy.tweens.play("attack");
                                     // enemy.tweens.on("attack", () => {
                                     //     enemy.tweens.play("idle");
@@ -283,11 +287,13 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.PLAYER_HURT:
                     {
+                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_hurt", loop: false, holdReference: false });
                         this.updateHealthBar();
                     }
                     break;
                 case Game_Events.PLAYER_LOSE_LIFE:
                     {
+                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_death", loop: false, holdReference: false });
                         if (!this.gameEnd) {
                             this.incPlayerLife(-1)
                             if (this.livesCount <= 0) {
@@ -927,7 +933,7 @@ export default class GameLevel extends Scene {
         if (this.livesCount <= 0) {
             Input.disableInput();
             this.player.disablePhysics();
-            this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_death", loop: false, holdReference: false });
+            
             this.player.tweens.play("death");
         }
     }
