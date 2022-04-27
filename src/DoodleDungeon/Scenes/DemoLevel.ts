@@ -41,7 +41,7 @@ export default class DemoLevel extends GameLevel {
      */
     unloadScene(){
         // Keep resources - this is up to you
-        this.load.keepSpritesheet("player");
+        super.unloadCommon();
         if(this.gameEnd){
             let time = this.levelTimer.getTimeElapsed()/1000;
             Home.bestTimes[0] = Math.min(Home.bestTimes[0],time);

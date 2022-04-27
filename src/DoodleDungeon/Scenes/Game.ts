@@ -138,6 +138,31 @@ export default class GameLevel extends Scene {
         this.load.audio("erase", "game_assets/sounds/erase.wav")
     }
 
+    unloadCommon(): void {
+        this.load.keepSpritesheet("player");
+        this.load.keepSpritesheet("melee_enemy")
+        this.load.keepSpritesheet("charging_enemy")
+        
+        this.load.keepSpritesheet("pink_paper");
+        this.load.keepSpritesheet("white_paper");
+        this.load.keepSpritesheet("cursor");
+        this.load.keepImage("drawnTile");
+        
+        // //Stuff used when you are in a level
+        // if(loadUI){
+        //     this.load.image("pencil", "game_assets/spritesheets/Pencil.png");
+        //     this.load.image("heart", "game_assets/spritesheets/Full_Heart.png");
+        //     this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
+        //     this.load.image("Compass", "game_assets/spritesheets/Compass.png");
+        // }
+        this.load.keepAudio("level_music")
+        this.load.keepAudio("player_hit_enemy")
+        this.load.keepAudio("jump")
+        this.load.keepAudio("player_death")
+        this.load.keepAudio("player_hurt")
+        this.load.keepAudio("scribble")
+        this.load.keepAudio("erase")
+    }
     startScene(): void {
         this.gameEnd = false;
         this.levelTimer = new Timer(1000 * 100000);

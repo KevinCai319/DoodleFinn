@@ -73,8 +73,7 @@ export default class Home extends GameLevel {
      */
     unloadScene(){
         // Keep resources - this is up to you
-        this.load.keepSpritesheet("player");
-        
+        super.unloadCommon();
         this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "menu_music"});
     }
 

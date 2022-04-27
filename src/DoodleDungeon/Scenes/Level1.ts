@@ -23,7 +23,7 @@ export default class Level1 extends GameLevel {
      */
     unloadScene() {
         // Keep resources - this is up to you
-        this.load.keepSpritesheet("player");
+        super.unloadCommon();
         if (this.gameEnd) {
             let time = this.levelTimer.getTimeElapsed() / 1000;
             Home.bestTimes[1] = Math.min(Home.bestTimes[1], time);
