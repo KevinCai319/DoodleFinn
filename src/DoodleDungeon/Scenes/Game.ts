@@ -112,16 +112,26 @@ export default class GameLevel extends Scene {
     protected nextLevel: new (...args: any) => GameLevel;
     protected home: new (...args: any) => GameLevel;
     protected compass: Sprite;
+    static firstLoad: boolean = true;
     loadScene(loadUI?:boolean): void {
-        this.load.spritesheet("player", "game_assets/spritesheets/DoodleFinn/DoodleFinn-Sprite.json");
-        this.load.spritesheet("melee_enemy", "game_assets/spritesheets/FlyEnemy/FlyEnemy.json")
-        this.load.spritesheet("charging_enemy", "game_assets/spritesheets/ChargeEnemy/ChargeEnemy.json")
-        
-        this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
-        this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
-        this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");
-        this.load.image("drawnTile", "game_assets/spritesheets/Filled_Tile.png");
-        
+        if(GameLevel.firstLoad){
+            GameLevel.firstLoad = false;
+            this.load.spritesheet("player", "game_assets/spritesheets/DoodleFinn/DoodleFinn-Sprite.json");
+            this.load.spritesheet("melee_enemy", "game_assets/spritesheets/FlyEnemy/FlyEnemy.json")
+            this.load.spritesheet("charging_enemy", "game_assets/spritesheets/ChargeEnemy/ChargeEnemy.json")
+            
+            this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
+            this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
+            this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");
+            this.load.image("drawnTile", "game_assets/spritesheets/Filled_Tile.png");
+            this.load.audio("level_music", "game_assets/music/doodlefinn_level_music.wav")
+            this.load.audio("player_hit_enemy", "game_assets/sounds/coin.wav")
+            this.load.audio("jump", "game_assets/sounds/jump.wav")
+            this.load.audio("player_death", "game_assets/sounds/death.wav")
+            this.load.audio("player_hurt", "game_assets/sounds/zap.wav")
+            this.load.audio("scribble", "game_assets/sounds/scribble.wav")
+            this.load.audio("erase", "game_assets/sounds/erase.wav")
+        }
         //Stuff used when you are in a level
         if(loadUI){
             this.load.image("pencil", "game_assets/spritesheets/Pencil.png");
@@ -129,13 +139,6 @@ export default class GameLevel extends Scene {
             this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
             this.load.image("Compass", "game_assets/spritesheets/Compass.png");
         }
-        this.load.audio("level_music", "game_assets/music/doodlefinn_level_music.wav")
-        this.load.audio("player_hit_enemy", "game_assets/sounds/coin.wav")
-        this.load.audio("jump", "game_assets/sounds/jump.wav")
-        this.load.audio("player_death", "game_assets/sounds/death.wav")
-        this.load.audio("player_hurt", "game_assets/sounds/zap.wav")
-        this.load.audio("scribble", "game_assets/sounds/scribble.wav")
-        this.load.audio("erase", "game_assets/sounds/erase.wav")
     }
 
     unloadCommon(): void {
