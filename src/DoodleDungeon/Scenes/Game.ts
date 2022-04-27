@@ -85,7 +85,7 @@ export default class GameLevel extends Scene {
     protected levelTransitionScreen: Rect;
 
     // TODO: Move health bar to a separate class.
-    protected healthBar: Array<Sprite> = [];
+    // protected healthBar: Array<Sprite> = [];
     protected inkBar: Array<Sprite> = [];
     protected menuButton: Button
     protected pauseButton: Button
@@ -237,7 +237,7 @@ export default class GameLevel extends Scene {
         if (this.pauseButton.visible && (Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
            this.pauseButton.onClick()
         }
-        this.updateHealthBar();
+        // this.updateHealthBar();
         if(this.inkBar.length  == GameLevel.MAX_BLOCKS){
             //show the first placementLeft items in inkbar.
             for (let i = 0; i < this.placementLeft; i++) {
@@ -366,7 +366,7 @@ export default class GameLevel extends Scene {
                 case Game_Events.PLAYER_HURT:
                     {
                         this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_hurt", loop: false, holdReference: false });
-                        this.updateHealthBar();
+                        // this.updateHealthBar();
                     }
                     break;
                 case Game_Events.PLAYER_LOSE_LIFE:
@@ -447,8 +447,8 @@ export default class GameLevel extends Scene {
         this.livesCountLabel.backgroundColor = new Color(32, 32, 32, 0.5);
         this.livesCountLabel.font = "PixelSimple";
 
-        this.setupHealthBar();
-        this.updateHealthBar();
+        // this.setupHealthBar();
+        // this.updateHealthBar();
         this.setupInkBar();
         // Prompt for paper.
         this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(90, 60), text: "Find some paper!" });
@@ -568,20 +568,20 @@ export default class GameLevel extends Scene {
      * Initializes the player's health bar.
      * May be removed in the future.
      */
-    protected setupHealthBar(): void {
-        let location = new Vec2(30, this.viewport.getView().hh*2-30);
-        let scale = new Vec2(0.12, 0.12);
-        // Create up to 10 hearts on the UI layer.
-        try {
-            for (let i = 0; i < 10; i++) {
-                this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI", location, scale));
-                this.healthBar.push(this.addLevelBackgroundImage("heart", "UI", location, scale));
-                location.x += 33;
-            }
-        } catch (e) {
+    // protected setupHealthBar(): void {
+    //     let location = new Vec2(30, this.viewport.getView().hh*2-30);
+    //     let scale = new Vec2(0.12, 0.12);
+    //     // Create up to 10 hearts on the UI layer.
+    //     try {
+    //         for (let i = 0; i < 10; i++) {
+    //             this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI", location, scale));
+    //             this.healthBar.push(this.addLevelBackgroundImage("heart", "UI", location, scale));
+    //             location.x += 33;
+    //         }
+    //     } catch (e) {
 
-        }
-    }
+    //     }
+    // }
 
     protected setupInkBar(): void {
         let location = new Vec2(this.viewport.getView().hw-140,45);
@@ -602,17 +602,17 @@ export default class GameLevel extends Scene {
     /**
      * Updates the player's health bar.
      * May be removed in the future to another class.
-     */
-    protected updateHealthBar(): void {
-        let playerHealth = (this.player._ai as PlayerController).health;
-        for (let i = 0; i < this.healthBar.length; i++) {
-            if (i % 2 == 1) {
-                this.healthBar[i].visible = (i + 1 <= playerHealth);
-            } else {
-                this.healthBar[i].visible = (i + 1 == playerHealth && playerHealth % 2 == 1);
-            }
-        }
-    }
+    //  */
+    // protected updateHealthBar(): void {
+    //     let playerHealth = (this.player._ai as PlayerController).health;
+    //     for (let i = 0; i < this.healthBar.length; i++) {
+    //         if (i % 2 == 1) {
+    //             this.healthBar[i].visible = (i + 1 <= playerHealth);
+    //         } else {
+    //             this.healthBar[i].visible = (i + 1 == playerHealth && playerHealth % 2 == 1);
+    //         }
+    //     }
+    // }
 
     /**
      * Initializes the player
@@ -798,7 +798,7 @@ export default class GameLevel extends Scene {
      * @param alpha The transparency of the sprite.
      * @return The sprite that was added.
      */
-    protected addLevelAnimatedSprite(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
+    addLevelAnimatedSprite(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
         let toAdd = this.add.animatedSprite(name, layer);
         toAdd.position.copy(position);
         toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size);
@@ -817,7 +817,7 @@ export default class GameLevel extends Scene {
      * @param alpha The transparency of the sprite.
      * @return The sprite that was added.
      */
-    protected addLevelBackgroundImage(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
+    addLevelBackgroundImage(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
         let toAdd = this.add.sprite(name, layer);
         toAdd.position.copy(position);
         toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size);

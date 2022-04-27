@@ -18,6 +18,7 @@ import Guard from "./EnemyStates/Guard";
 import GameLevel from "../Scenes/Game";
 import Timer from './../../Wolfie2D/Timing/Timer';
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
+import HealthBar from "../UI/HealthBar";
 
 
 export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
@@ -29,6 +30,7 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
 
     /** The current amount of health this entity has */
     health: number;
+    healthBar: HealthBar;
 
     /** The default movement speed of this AI */
     speed: number = 90;
@@ -67,7 +69,8 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
         this.maxHealth = options.health;
 
         this.health = options.health;
-
+        this.healthBar = new HealthBar(this.owner.getScene() as GameLevel, "primary", this,this.health, new Vec2(0, (this.owner as AnimatedSprite).boundary.hh*-1.2), false, 23, new Vec2(0.03, 0.03));
+  
         this.player = options.player1;
 
         this.inRange = options.inRange;
@@ -165,6 +168,7 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
                 this.owner.setAIActive(false, {});
                 this.owner.isCollidable = false;
                 // this.owner.visible = false;
+                this.healthBar.removeHealthBar();
                 this.invincible = true;
                 this.owner.tweens.play("death")
             }  
@@ -190,7 +194,7 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
     
     update(deltaT: number){
         super.update(deltaT);
-
+        this.healthBar.updateHealthBar();
         if(this.invincible && this.invincibleTimer.isStopped()){
             this.invincible = false
             this.owner.tweens.stop("iframe");
