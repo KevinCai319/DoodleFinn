@@ -298,12 +298,6 @@ export default class GameLevel extends Scene {
                     // Remove tile (Right Click)
                     this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
                 }
-                if (Input.isMouseJustPressed(0)) {
-                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "scribble", loop: false, holdReference: false });       
-                }
-                if (Input.isMouseJustPressed(2)) {
-                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "erase", loop: false, holdReference: false });
-                }
             }
         } else {
             this.cursor.alpha = 0;
@@ -1000,6 +994,9 @@ export default class GameLevel extends Scene {
             }
             if (collider.overlapArea(tileAABB) == 0 && !this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)) {
                 if(this.placementLeft > 0){
+                    if (Input.isMouseJustPressed(0)) {
+                        this.emitter.fireEvent(GameEventType.PLAY_SFX, { key: "scribble", loop: false, holdReference: false });       
+                    }
                     this.dynamicMap.badAddTile(position, Tileset_Names.SOLID_INK);
                     if(!Home.unlimitedPlacementCheats){
                         this.placementLeft--;
@@ -1010,6 +1007,9 @@ export default class GameLevel extends Scene {
             // if(this.checkErasingPlatform(this.playerSpawnColRow,tile)) return;
             let colrow_toAdd = this.dynamicMap.getColRowAt(position)
             if(this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)){
+                if (Input.isMouseJustPressed(2)) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SFX, { key: "erase", loop: false, holdReference: false });
+                }
                 this.dynamicMap.badRemoveTile(position);
                 if(!Home.unlimitedPlacementCheats){
                     this.placementLeft += 1;
