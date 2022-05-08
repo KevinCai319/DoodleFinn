@@ -159,7 +159,7 @@ export default class Level6 extends GameLevel {
                 //get angle between turret and player
                 let angle = t.dirTo(this.player.position);
                 //set magnitude to 200.
-                let spawnPoint = t.clone().add(angle.scaleTo(50));
+                let spawnPoint = t.clone().add(angle.scaleTo(20));
                 //check if point is within the viewport
                 if(this.viewport.getView().containsPoint(spawnPoint)){
                     //get a bullet from the pool
