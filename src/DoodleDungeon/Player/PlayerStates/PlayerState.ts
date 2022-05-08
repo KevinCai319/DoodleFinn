@@ -70,6 +70,11 @@ export default abstract class PlayerState extends State {
 			||this.owner.position.y <-100||this.owner.position.x < -100
 			||(this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF)) 
 			&& !this.parent.invicible){
+				// (this.owner._ai as PlayerController).balloon = null;
+                // if((this.owner._ai as PlayerController).hasBalloon){
+                //     (this.owner._ai as PlayerController).playerType = PlayerType.PLATFORMER;
+                // }
+                // (this.owner._ai as PlayerController).hasBalloon = false;
 				if(Home.invincibilityCheats){
 					this.parent.changeState(PlayerStates.SPAWN);
 				}else{

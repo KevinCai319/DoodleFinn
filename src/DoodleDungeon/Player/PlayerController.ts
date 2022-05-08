@@ -134,9 +134,6 @@ export default class PlayerController extends StateMachineAI implements BattlerA
                 this.owner.tweens.stopAll();
                 this.health = 0;
                 this.balloon = null;
-                if(this.hasBalloon){
-                    this.playerType = PlayerType.PLATFORMER;
-                }
                 this.hasBalloon = false;
                 (<AnimatedSprite>this.owner).animation.stop();
                 this.deathTimer.start(1000);

@@ -1,13 +1,12 @@
 {
-  "numEnemies": 0,
+  "numEnemies": 1,
   "enemies": [
     {
-      "position": [400,500],
+      "position": [2496,1664],
       "mode": "guard",
-      "triggerDistance": 100,
-      "health": 500000,
-      "direction": "right",
-      "type": "turret"
-    }    
+      "guardPosition":[2496,1664],
+      "health": 6,
+      "type": "melee_enemy"
+    }
   ]
 }
