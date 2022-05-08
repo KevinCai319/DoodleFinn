@@ -10,6 +10,7 @@ import PlayerController, { PlayerStates, PlayerType } from "../Player/PlayerCont
 import DemoLevel from "./DemoLevel";
 import GameLevel from "./Game";
 import Level1 from "./Level1";
+import Level4 from "./Level4";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import PlayerState from "../Player/PlayerStates/PlayerState";
@@ -19,7 +20,7 @@ export default class Home extends GameLevel {
     static numberOfLevels = 6;
 
     //Add references to other levels here.
-    static Levels = [DemoLevel,Level1];
+    static Levels = [DemoLevel,Level1, Level4];
 
     LEVEL_NAME:string ="Tutorial"
     LEVEL_TILESET:string = "Tutorial"
