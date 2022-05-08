@@ -115,6 +115,8 @@ export default class PlayerController extends StateMachineAI implements BattlerA
             });
         this.initializeStates();
         this.receiver.subscribe(Game_Events.PLAYER_LOSE_LIFE);
+        this.receiver.subscribe(Game_Events.PLAYER_BALLOON_POPPED);
+        this.receiver.subscribe(Game_Events.PLAYER_BALLOON_PICKED_UP);
         (<AnimatedSprite>this.owner).animation.playIfNotAlready("Idle Left", true);
     }
     setInvincible(duration: number = 500) {
@@ -131,6 +133,11 @@ export default class PlayerController extends StateMachineAI implements BattlerA
                 this.attacking = false;
                 this.owner.tweens.stopAll();
                 this.health = 0;
+                this.balloon = null;
+                if(this.hasBalloon){
+                    this.playerType = PlayerType.PLATFORMER;
+                }
+                this.hasBalloon = false;
                 (<AnimatedSprite>this.owner).animation.stop();
                 this.deathTimer.start(1000);
                 this.changeState(PlayerStates.DYING);
@@ -164,12 +171,12 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.addState(PlayerStates.SPAWN, spawn);
         let dying = new Dying(this, this.owner);
         this.addState(PlayerStates.DYING, dying);
-        if (this.playerType == PlayerType.PLATFORMER) {
-            let jump = new Jump(this, this.owner);
-            this.addState(PlayerStates.JUMP, jump);
-            let fall = new Fall(this, this.owner);
-            this.addState(PlayerStates.FALL, fall);
-        }
+        // if (this.playerType == PlayerType.PLATFORMER) {
+        let jump = new Jump(this, this.owner);
+        this.addState(PlayerStates.JUMP, jump);
+        let fall = new Fall(this, this.owner);
+        this.addState(PlayerStates.FALL, fall);
+        // }
         this.initialize(PlayerStates.SPAWN);
     }
 
@@ -193,7 +200,23 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         if (this.attacking && this.attackTimer.isStopped()) {
             this.attacking = false
         }
-
+        while (this.receiver.hasNextEvent()) {
+            let event = this.receiver.getNextEvent();
+            switch (event.type) {
+                case Game_Events.PLAYER_LOSE_LIFE:
+                    break;
+                case Game_Events.PLAYER_BALLOON_POPPED:
+                    this.hasBalloon = false;
+                    this.balloon.visible = false;
+                    break;
+                case Game_Events.PLAYER_BALLOON_PICKED_UP:
+                    this.hasBalloon = true;
+                    this.balloon.visible = true;    
+                    break;
+                default:
+                    break;
+            }
+        }
         if (this.owner.onGround) {
             // let rc =  this.tilemap.getColRowAt(this.owner.position);
             // rc.y+=1;

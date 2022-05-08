@@ -136,9 +136,9 @@ export default class Home extends GameLevel {
                                 Home.flyHackCheats,
                                 ()=>{
                                     Home.flyHackCheats = !Home.flyHackCheats;
+                                    (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
                                     (this.player._ai as PlayerController).playerType = (Home.flyHackCheats)?PlayerType.TOPDOWN:PlayerType.PLATFORMER
                                     this.player._velocity = Vec2.ZERO;
-                                    (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
                                     this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
                                         {key: "toggle_switch", loop: false, holdReference: false});
                                 }]);
@@ -155,17 +155,17 @@ export default class Home extends GameLevel {
             //Adding doors, and their best times.
             for(let i = 0; i < this.doors.length; i++){
                 let new_door = this.addLevelAnimatedSprite("Door",layer.getName(),new Vec2(90+5*i,17).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
+                let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,12).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: \n" });
+                if(Home.bestTimes[i] != -1){
+                    let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: ""+Home.bestTimes[i] + "s" });
+                }else{
+                    let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Not Played" });
+                }
                 if(this.doors[i][0]){
-                    let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,12).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: \n" });
-                    if(Home.bestTimes[i] != -1){
-                        let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: ""+Home.bestTimes[i] + "s" });
-                    }else{
-                        let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Not Played" });
-                    }
 
                     new_door.alpha = 1;
                 }else{
-                    new_door.alpha = 0.5;
+                    new_door.alpha = 0.2;
                 }
                 this.doors[i][1] = new_door;
             }

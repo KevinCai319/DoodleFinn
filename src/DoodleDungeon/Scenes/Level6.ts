@@ -9,7 +9,9 @@ import Layer from "../../Wolfie2D/Scene/Layer";
 import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import { Game_Events } from "../Events";
-import PlayerController from "../Player/PlayerController";
+import PlayerController, { PlayerStates, PlayerType } from "../Player/PlayerController";
+import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import Input from "../../Wolfie2D/Input/Input";
 
 export default class Level6 extends GameLevel {
     LEVEL_NAME: string = "Level_6"
@@ -17,6 +19,8 @@ export default class Level6 extends GameLevel {
     //Object pool for bullets.
     bullets:Array<AnimatedSprite> = []
     turrets:Array<Vec2> = []
+    balloon:Sprite = null;
+    balloonPosition:Vec2 = new Vec2(5,196)
     bulletSpawnTimer: Timer= new Timer(0.5)
     loadScene(): void {
         // Load resources
@@ -24,6 +28,7 @@ export default class Level6 extends GameLevel {
         super.loadScene(true);
         this.load.spritesheet("bullet","game_assets/spritesheets/bullet.json");
         this.load.image("turret","game_assets/spritesheets/turret.png");
+        this.load.image("balloon","game_assets/spritesheets/balloon2.png");
         this.load.audio("bullet_shot","game_assets/sounds/bullet.wav");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
@@ -64,12 +69,14 @@ export default class Level6 extends GameLevel {
             new Vec2(26,182),
             new Vec2(39,176),
             new Vec2(23,164),
-            // new Vec2(0,185),
-            // new Vec2(0,185),
-            // new Vec2(0,185),
-            // new Vec2(0,185),
-            // new Vec2(0,185),
-            // new Vec2(0,185),
+            new Vec2(11,152),
+            new Vec2(35,141),
+            new Vec2(13,132),
+            new Vec2(31,134),
+            new Vec2(27,70),
+            new Vec2(34,55),
+            new Vec2(15,28),
+            
         ]
         this.backgroundSetup.push((layer:Layer)=>{
             for(let t of this.turrets){
@@ -77,6 +84,9 @@ export default class Level6 extends GameLevel {
                 //add AABB to turret
                 turret.addPhysics(new AABB(Vec2.ZERO, turret.boundary.getHalfSize()));
             }
+            this.balloon = this.addLevelBackgroundImage("balloon",layer.getName(),this.balloonPosition.mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(2,2))
+            this.balloon.addPhysics(new AABB(Vec2.ZERO, new Vec2(this.balloon.boundary.hw, this.balloon.boundary.hh*0.5)),new Vec2(0,-this.balloon.boundary.hh*0.5),false,false);
+            this.balloon.moving=true;
         });
         // Do generic setup for a GameLevel
         super.startScene();
@@ -100,7 +110,39 @@ export default class Level6 extends GameLevel {
 
     updateScene(deltaT: number): void {
         super.updateScene(deltaT);
-        
+        //check if player is in balloon
+        if((this.player._ai as PlayerController).balloon == null && this.balloon.boundary.overlapArea(this.player.boundary) && Input.isJustPressed("e")){
+            // this.balloon.visible = false;
+            (this.player._ai as PlayerController).balloon = this.balloon;
+            (this.player._ai as PlayerController).hasBalloon = true;
+            (this.player._ai as PlayerController).playerType = PlayerType.TOPDOWN;
+            (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
+        }else{
+            if((this.player._ai as PlayerController).hasBalloon){
+                this.balloon.position.copy(this.player.position).add(new Vec2(0,-this.balloon.boundary.hh*1.8));
+                for(let t of this.bullets){
+                    if(t.visible){
+                        if(t.boundary.overlapArea(this.balloon.collisionShape as AABB)){
+                            t.visible = false;
+                            (this.player._ai as PlayerController).balloon = null;
+                            (this.player._ai as PlayerController).hasBalloon = false;
+                            if(!Home.flyHackCheats){
+                                (this.player._ai as PlayerController).playerType = PlayerType.PLATFORMER;
+                            }
+                            (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
+                        }
+                    }
+                }
+                // if((this.player._ai as PlayerController).hasBalloon && Input.isJustPressed("e")){
+                //     (this.player._ai as PlayerController).balloon = null;
+                //     (this.player._ai as PlayerController).hasBalloon = false;
+                //     (this.player._ai as PlayerController).playerType = PlayerType.PLATFORMER;
+                //     (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
+                // }
+            }else{
+                this.balloon.position.copy(this.balloonPosition);
+            }
+        }
         //Spawn bullets
         for(let t of this.turrets){
 

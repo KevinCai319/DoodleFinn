@@ -9,6 +9,7 @@ import PlayerController, { PlayerStates, PlayerType } from "../PlayerController"
 import { Game_Events } from "../../Events";
 import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Home from "../../Scenes/Home";
+import GameLevel from "../../Scenes/Game";
 
 
 export default abstract class PlayerState extends State {
@@ -64,7 +65,11 @@ export default abstract class PlayerState extends State {
 			if((this.parent as PlayerController).playerType == PlayerType.PLATFORMER){
 				this.parent.velocity.y += this.gravity*deltaT;
 			}
-			if((this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF) && !this.parent.invicible){
+			if(
+			( this.owner.position.x > ((this.owner.getScene() as GameLevel).dynamicMap.getDimensions().x * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x)+100
+			||this.owner.position.y <-100||this.owner.position.x < -100
+			||(this.owner.getScene().getViewport().getView().bottom < this.owner.position.y-this.LEVEL_LOWER_BOUND_CUTOFF)) 
+			&& !this.parent.invicible){
 				if(Home.invincibilityCheats){
 					this.parent.changeState(PlayerStates.SPAWN);
 				}else{

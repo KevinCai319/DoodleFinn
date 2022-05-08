@@ -630,7 +630,7 @@ export default class GameLevel extends Scene {
         if(Home.flyHackCheats){
             this.player.addAI(PlayerController, { playerType: PlayerType.TOPDOWN, tilemap: "Main" });
         }else{
-            this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
+            this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main"});
         }
         this.player.setGroup("player");
 
