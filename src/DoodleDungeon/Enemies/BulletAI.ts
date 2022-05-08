@@ -38,7 +38,7 @@ export default class BulletAI implements AI {
                 (this.player._ai as PlayerController).damage(1);
                 this.owner.visible = false;
             };
-            if(this.owner.collidedWithTilemap 
+            if(this.owner.isColliding
             ||this.owner.position.x > ((this.owner.getScene() as GameLevel).dynamicMap.getDimensions().x * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x)+100
 			||this.owner.position.y <-100
             ||this.owner.position.x < -100

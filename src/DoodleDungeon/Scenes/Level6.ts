@@ -162,10 +162,14 @@ export default class Level6 extends GameLevel {
                 let spawnPoint = t.clone().add(angle.scaleTo(20));
                 //check if point is within the viewport
                 if(this.viewport.getView().containsPoint(spawnPoint)){
-                    //get a bullet from the pool
-                    //shoot the bullet
-                    this.spawnBullet(spawnPoint.x,spawnPoint.y,angle);
-                    this.emitter.fireEvent(GameEventType.PLAY_SFX, {key: "bullet_shot"});
+                    //check if the tile on it is solid or not
+                    let tile = this.dynamicMap.getColRowAt(spawnPoint);
+                    if(!this.dynamicMap.isTileCollidable(tile.x,tile.y)){
+                        //get a bullet from the pool
+                        //shoot the bullet
+                        this.spawnBullet(spawnPoint.x,spawnPoint.y,angle);
+                        this.emitter.fireEvent(GameEventType.PLAY_SFX, {key: "bullet_shot"});
+                    }
                 }
             }
         }
