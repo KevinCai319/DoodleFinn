@@ -171,12 +171,10 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.addState(PlayerStates.SPAWN, spawn);
         let dying = new Dying(this, this.owner);
         this.addState(PlayerStates.DYING, dying);
-        // if (this.playerType == PlayerType.PLATFORMER) {
         let jump = new Jump(this, this.owner);
         this.addState(PlayerStates.JUMP, jump);
         let fall = new Fall(this, this.owner);
         this.addState(PlayerStates.FALL, fall);
-        // }
         this.initialize(PlayerStates.SPAWN);
     }
 

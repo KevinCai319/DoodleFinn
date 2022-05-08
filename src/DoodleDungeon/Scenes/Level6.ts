@@ -73,7 +73,21 @@ export default class Level6 extends GameLevel {
             new Vec2(35,141),
             new Vec2(13,132),
             new Vec2(31,134),
+            new Vec2(28,126),
+            new Vec2(20,118),
+            new Vec2(14,110),
+            new Vec2(38,110),
+            new Vec2(1,102),
+            new Vec2(26,102),
+            new Vec2(39,96),
+            new Vec2(28,98),
+            new Vec2(14,95),
+            new Vec2(22,82),
+            new Vec2(33,82),
+            new Vec2(10,75),
+            new Vec2(20,72),
             new Vec2(27,70),
+            new Vec2(20,60),
             new Vec2(34,55),
             new Vec2(15,28),
             
@@ -109,6 +123,7 @@ export default class Level6 extends GameLevel {
     }
 
     updateScene(deltaT: number): void {
+        this.viewport.disableStaticBoundary();
         super.updateScene(deltaT);
         //check if player is in balloon
         if((this.player._ai as PlayerController).balloon == null && this.balloon.boundary.overlapArea(this.player.boundary) && Input.isJustPressed("e")){
@@ -133,12 +148,6 @@ export default class Level6 extends GameLevel {
                         }
                     }
                 }
-                // if((this.player._ai as PlayerController).hasBalloon && Input.isJustPressed("e")){
-                //     (this.player._ai as PlayerController).balloon = null;
-                //     (this.player._ai as PlayerController).hasBalloon = false;
-                //     (this.player._ai as PlayerController).playerType = PlayerType.PLATFORMER;
-                //     (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
-                // }
             }else{
                 this.balloon.position.copy(this.balloonPosition);
             }
@@ -186,6 +195,5 @@ export default class Level6 extends GameLevel {
             bullet.rotation = -direction.angleToCCW(Vec2.RIGHT);
             bullet.setAIActive(true, {direction: direction});
 		}
-
     }
 }
