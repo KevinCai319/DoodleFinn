@@ -4,11 +4,10 @@
     {
       "position": [400,500],
       "mode": "guard",
-      "guardPosition":[400,500],
+      "triggerDistance": 100,
       "health": 500000,
-      "min_angle": 0,
-      "max_angle": 360,
-      "type": "charging_enemy"
+      "direction": "right",
+      "type": "turret"
     }    
   ]
 }

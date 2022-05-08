@@ -588,25 +588,6 @@ export default class GameLevel extends Scene {
         this.menuButton = menuBtn
     }
 
-    /**
-     * Initializes the player's health bar.
-     * May be removed in the future.
-     */
-    // protected setupHealthBar(): void {
-    //     let location = new Vec2(30, this.viewport.getView().hh*2-30);
-    //     let scale = new Vec2(0.12, 0.12);
-    //     // Create up to 10 hearts on the UI layer.
-    //     try {
-    //         for (let i = 0; i < 10; i++) {
-    //             this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI", location, scale));
-    //             this.healthBar.push(this.addLevelBackgroundImage("heart", "UI", location, scale));
-    //             location.x += 33;
-    //         }
-    //     } catch (e) {
-
-    //     }
-    // }
-
     protected setupInkBar(): void {
         let location = new Vec2(this.viewport.getView().hw-140,45);
         let scale = new Vec2(0.1,0.1);
@@ -622,21 +603,6 @@ export default class GameLevel extends Scene {
             console.log("No ink found.")
         }
     }
-
-    /**
-     * Updates the player's health bar.
-     * May be removed in the future to another class.
-    //  */
-    // protected updateHealthBar(): void {
-    //     let playerHealth = (this.player._ai as PlayerController).health;
-    //     for (let i = 0; i < this.healthBar.length; i++) {
-    //         if (i % 2 == 1) {
-    //             this.healthBar[i].visible = (i + 1 <= playerHealth);
-    //         } else {
-    //             this.healthBar[i].visible = (i + 1 == playerHealth && playerHealth % 2 == 1);
-    //         }
-    //     }
-    // }
 
     /**
      * Initializes the player
