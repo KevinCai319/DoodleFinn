@@ -131,6 +131,7 @@ export default class GameLevel extends Scene {
             this.load.audio("player_hurt", "game_assets/sounds/zap.wav")
             this.load.audio("scribble", "game_assets/sounds/scribble.wav")
             this.load.audio("erase", "game_assets/sounds/erase.wav")
+            this.load.audio("paper_pickup", "game_assets/sounds/paper_pickup.wav")
         }
         //Stuff used when you are in a level
         if(loadUI){
@@ -165,6 +166,7 @@ export default class GameLevel extends Scene {
         this.load.keepAudio("player_hurt")
         this.load.keepAudio("scribble")
         this.load.keepAudio("erase")
+        this.load.keepAudio("paper_pickup")
     }
     startScene(): void {
         this.gameEnd = false;
@@ -1080,6 +1082,7 @@ export default class GameLevel extends Scene {
         // Check if collectable is a paper.
         if (item_type == Game_Collectables.PINK_PAPER || item_type == Game_Collectables.WHITE_PAPER) {
             this.papersCountLabel.text = "Papers Found: " + (this.whiteFound + this.pinkFound) + "/" + (this.numberPapers);
+            this.emitter.fireEvent(GameEventType.PLAY_SFX, { key: "paper_pickup", loop: false, holdReference: false });
             // If enough papers were found, then  remove the barrier to the next page.
             if (this.whiteFound + this.pinkFound == this.numberPapers) {
                 // Do something here:
