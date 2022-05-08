@@ -1,7 +1,10 @@
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
+import GameNode from "../../Wolfie2D/Nodes/GameNode";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+import PlayerController from "../Player/PlayerController";
+import GameLevel from "../Scenes/Game";
 
 export default class BulletAI implements AI {
     // The owner of this AI
@@ -9,12 +12,13 @@ export default class BulletAI implements AI {
 
     // The direction of an rock
     public direction: Vec2;
-
+    public player:GameNode;
     // The speed all bullets move at
-    public static SPEED: number = 10;
+    public static SPEED: number = 5;
 
     initializeAI(owner: AnimatedSprite, options: Record<string, any>): void {
         this.owner = owner;
+        this.player = options.player;
     }
 
     activate(options: Record<string, any>): void {
@@ -27,8 +31,20 @@ export default class BulletAI implements AI {
     }
 
     update(deltaT: number): void {
-        if(this.owner.visible)
-            this.owner.position.add(Vec2.DOWN.scaled(BulletAI.SPEED * deltaT));
+        if(this.owner.visible){
+            this.owner._velocity = this.direction.scaleTo(BulletAI.SPEED);
+            this.owner.moving=true;
+            if(this.owner.boundary.overlaps((this.player as AnimatedSprite).boundary)){
+                (this.player._ai as PlayerController).damage(1);
+                this.owner.visible = false;
+            };
+            if(this.owner.collidedWithTilemap){
+                this.owner.visible = false;
+            }
+        }else{
+            this.owner._velocity = Vec2.ZERO;
+            this.owner.moving=false;
+        }
     }
 
     destroy(): void {

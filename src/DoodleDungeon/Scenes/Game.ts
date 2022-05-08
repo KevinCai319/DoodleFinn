@@ -249,7 +249,7 @@ export default class GameLevel extends Scene {
                 this.compass.rotation+=1;
                 let direction =  this.player.position.dirTo(minCollectable.position);
                 let angle =Vec2.RIGHT.angleToCCW(direction)-Math.PI/2;
-                console.log(angle)
+                // console.log(angle)
                 this.compass.rotation = angle;
                 this.compass.position = this.player.position.clone().add(direction.scale(this.compass.boundary.hh*2.05)); 
  

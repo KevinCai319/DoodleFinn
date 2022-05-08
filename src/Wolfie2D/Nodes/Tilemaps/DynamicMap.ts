@@ -4,6 +4,7 @@ import Vec2 from "../../DataTypes/Vec2";
 import OrthogonalTilemap from "./OrthogonalTilemap";
 import Navmesh from "../../Pathfinding/Navmesh";
 import AABB from "../../DataTypes/Shapes/AABB";
+import Physical from "../../DataTypes/Interfaces/Physical";
 
 
 /**
@@ -132,6 +133,40 @@ export default class DynamicTilemap extends OrthogonalTilemap {
         //remove the tile, update navmesh accordingly.
         this.badNavMesh()
     }
+
+    //this is because the existing physics engine does not work.
+    public collideWithOrthogonalTilemap(node: Physical):boolean {
+		// Get the min and max x and y coordinates of the moving node
+		let min = new Vec2(node.sweptRect.left, node.sweptRect.top);
+		let max = new Vec2(node.sweptRect.right, node.sweptRect.bottom);
+
+        console.log(min.x, min.y, max.x, max.y);
+		// Convert the min/max x/y to the min and max row/col in the tilemap array
+		let minIndex = this.getColRowAt(min);
+		let maxIndex = this.getColRowAt(max);
+
+		let tileSize = this.getTileSize();
+
+		// Loop over all possible tiles (which isn't many in the scope of the velocity per frame)
+		for(let col = minIndex.x; col <= maxIndex.x; col++){
+			for(let row = minIndex.y; row <= maxIndex.y; row++){
+				if(this.isTileCollidable(col, row)){
+					// Get the position of this tile
+					let tilePos = new Vec2(col * tileSize.x + tileSize.x/2, row * tileSize.y + tileSize.y/2);
+
+					// Create a new collider for this tile
+					let collider = new AABB(tilePos, tileSize.scaled(1/2));
+
+					// Calculate collision area between the node and the tile
+					let area = node.sweptRect.overlapArea(collider);
+					if(area > 0){
+						return true;
+					}
+				}
+			}
+		}
+        return false;
+	}
 
     //better implmentation not done yet.
     initializeNavMesh(): void {
