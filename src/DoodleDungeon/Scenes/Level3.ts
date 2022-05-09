@@ -32,6 +32,7 @@ export default class Level3 extends GameLevel {
         if (Home.LevelsUnlocked == 6) {
             Home.LevelsUnlocked += 1;
         }
+        GameLevel.otherWinCondition = false;
         this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "level_music"});
     }
 

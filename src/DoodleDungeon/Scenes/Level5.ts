@@ -90,7 +90,7 @@ export default class Level5 extends GameLevel {
 
         if(this.checkDrawing() == true){
             Home.unlimitedPlacementCheats = this.orig_cheat;
-
+            console.log("win")
             GameLevel.otherWinCondition = true;
         }
 
