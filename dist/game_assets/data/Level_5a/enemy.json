@@ -1,4 +1,33 @@
 {
-  "numEnemies": 0,
-  "enemies": []
+  "numEnemies": 4,
+  "enemies": [
+    {
+      "position": [416,1312],
+      "mode": "guard",
+      "guardPosition":[416,1312],
+      "health": 6,
+      "type": "melee_enemy"
+    },
+    {
+      "position": [480,800],
+      "mode": "guard",
+      "guardPosition":[480,800],
+      "health": 6,
+      "type": "charging_enemy"
+    },
+    {
+      "position": [544,320],
+      "mode": "guard",
+      "guardPosition":[544,320],
+      "health": 5,
+      "type": "charging_enemy"
+    },
+    {
+      "position": [1056,320],
+      "mode": "guard",
+      "guardPosition":[1056,320],
+      "health": 6,
+      "type": "melee_enemy"
+    }
+  ]
 }

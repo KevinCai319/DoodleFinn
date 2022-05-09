@@ -14,14 +14,14 @@ import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Input from "../../Wolfie2D/Input/Input";
 
 export default class Level5 extends GameLevel {
-    LEVEL_NAME: string = "Level_5"
-    LEVEL_TILESET: string = "Level_5"
+    LEVEL_NAME: string = "Level_5a"
+    LEVEL_TILESET: string = "Level_5a"
     //Object pool for bullets.
-    bullets:Array<AnimatedSprite> = []
-    turrets:Array<Vec2> = []
-    balloon:Sprite = null;
-    balloonPosition:Vec2 = new Vec2(5,196)
-    bulletSpawnTimer: Timer= new Timer(0.5)
+    // bullets:Array<AnimatedSprite> = []
+    // turrets:Array<Vec2> = []
+    // balloon:Sprite = null;
+    // balloonPosition:Vec2 = new Vec2(5,196)
+    // bulletSpawnTimer: Timer= new Timer(0.5)
     loadScene(): void {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/" + this.LEVEL_NAME + "/" + this.LEVEL_TILESET + ".json");
@@ -123,35 +123,35 @@ export default class Level5 extends GameLevel {
     }
 
     updateScene(deltaT: number): void {
-        this.viewport.disableStaticBoundary();
+        // this.viewport.disableStaticBoundary();
         super.updateScene(deltaT);
         //check if player is in balloon
-        if((this.player._ai as PlayerController).balloon == null && this.balloon.boundary.overlapArea(this.player.boundary) && Input.isJustPressed("e")){
-            // this.balloon.visible = false;
-            (this.player._ai as PlayerController).balloon = this.balloon;
-            (this.player._ai as PlayerController).hasBalloon = true;
-            (this.player._ai as PlayerController).playerType = PlayerType.TOPDOWN;
-            (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
-        }else{
-            if((this.player._ai as PlayerController).hasBalloon){
-                this.balloon.position.copy(this.player.position).add(new Vec2(0,-this.balloon.boundary.hh*1.8));
-                for(let t of this.bullets){
-                    if(t.visible){
-                        if(t.boundary.overlapArea(this.balloon.collisionShape as AABB)){
-                            t.visible = false;
-                            (this.player._ai as PlayerController).balloon = null;
-                            (this.player._ai as PlayerController).hasBalloon = false;
-                            if(!Home.flyHackCheats){
-                                (this.player._ai as PlayerController).playerType = PlayerType.PLATFORMER;
-                            }
-                            (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
-                        }
-                    }
-                }
-            }else{
-                this.balloon.position.copy(this.balloonPosition);
-            }
-        }
+        // if((this.player._ai as PlayerController).balloon == null && this.balloon.boundary.overlapArea(this.player.boundary) && Input.isJustPressed("e")){
+        //     // this.balloon.visible = false;
+        //     (this.player._ai as PlayerController).balloon = this.balloon;
+        //     (this.player._ai as PlayerController).hasBalloon = true;
+        //     (this.player._ai as PlayerController).playerType = PlayerType.TOPDOWN;
+        //     (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
+        // }else{
+        //     if((this.player._ai as PlayerController).hasBalloon){
+        //         this.balloon.position.copy(this.player.position).add(new Vec2(0,-this.balloon.boundary.hh*1.8));
+        //         for(let t of this.bullets){
+        //             if(t.visible){
+        //                 if(t.boundary.overlapArea(this.balloon.collisionShape as AABB)){
+        //                     t.visible = false;
+        //                     (this.player._ai as PlayerController).balloon = null;
+        //                     (this.player._ai as PlayerController).hasBalloon = false;
+        //                     if(!Home.flyHackCheats){
+        //                         (this.player._ai as PlayerController).playerType = PlayerType.PLATFORMER;
+        //                     }
+        //                     (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
+        //                 }
+        //             }
+        //         }
+        //     }else{
+        //         this.balloon.position.copy(this.balloonPosition);
+        //     }
+        // }
         //Spawn bullets
 //         for(let t of this.turrets){
 

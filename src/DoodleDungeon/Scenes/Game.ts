@@ -397,17 +397,21 @@ export default class GameLevel extends Scene {
                             this.enemies.forEach(enemy => {
                                 if((enemy._ai as EnemyAI).health  <=0) return;
                                 if (cursorHitbox.overlaps(enemy.boundary)) {
-                                    // Attack the enemy
-                                    // TODO: finish this method.
-                                    (enemy._ai as EnemyAI).damage(1);
+                                    //check if there is a line of sight between the player and the enemy.
+                                    let lineOfSight = this.dynamicMap.isVisible(this.player.position, enemy.position);
+                                    if(lineOfSight){
+                                        // Attack the enemy
+                                        // TODO: finish this method.
+                                        (enemy._ai as EnemyAI).damage(1);
 
-                                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
-                                        {key: "player_hit_enemy", loop: false, holdReference: false});
+                                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
+                                            {key: "player_hit_enemy", loop: false, holdReference: false});
 
-                                    // enemy.tweens.play("attack");
-                                    // enemy.tweens.on("attack", () => {
-                                    //     enemy.tweens.play("idle");
-                                    // });
+                                        // enemy.tweens.play("attack");
+                                        // enemy.tweens.on("attack", () => {
+                                        //     enemy.tweens.play("idle");
+                                        // });
+                                        }
                                 }
                             });
                         }
@@ -523,7 +527,7 @@ export default class GameLevel extends Scene {
         // this.updateHealthBar();
         this.setupInkBar();
         // Prompt for paper.
-        this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(90, 60), text: "Find some paper!" });
+        this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(110, 60), text: "Find some paper!" });
         this.papersCountLabel.textColor = Color.RED;
         this.papersCountLabel.backgroundColor = new Color(32, 32, 32, 0.5);
         this.papersCountLabel.font = "PixelSimple";
@@ -964,6 +968,20 @@ export default class GameLevel extends Scene {
                 this.switches.push([switches, affectedBlocks, default_value == SWITCH_ON_TILE,solidBlock]);
                 // switchTiles.visible=false;
                 // tilemapLayers[i].disable();
+            } else if (name == "Pen") {
+                let penTiles = <OrthogonalTilemap>tilemapLayers[i].getItems()[0]
+                this.processTileLayer(penTiles, (tile: number, i: number, j: number) => {
+                    if(tile !== 0){
+                        // if(this.dynamicMap.getTileAtRowCol(new Vec2(i, j)) === 0){
+                        //     this.dynamicMap.setTileAtRowCol(new Vec2(i, j), tile);
+                        // }else{
+
+                        // }
+                        this.dynamicMap.setTileAtRowCol(new Vec2(i, j), tile);
+                        this.dynamicMap.setWriteAccess(new Vec2(i,j), false);
+                        penTiles.setTileAtRowCol(new Vec2(i, j), 0);
+                    }
+                });
             }
         }
 
