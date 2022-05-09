@@ -12,6 +12,7 @@ export default class Level1 extends GameLevel {
         super.loadScene(true);
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
+        this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Level1_EndArt.png");
     }
 
     // DoodleFinn TODO
@@ -48,5 +49,8 @@ export default class Level1 extends GameLevel {
 
     updateScene(deltaT: number): void {
         super.updateScene(deltaT);
+    }
+    show_art(): void {
+        this.addLevelBackgroundImage("art","UI",this.viewport.getHalfSize(),new Vec2(1,1),1);
     }
 }

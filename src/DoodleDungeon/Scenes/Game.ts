@@ -245,115 +245,120 @@ export default class GameLevel extends Scene {
     }
 
     updateScene(deltaT: number) {
-
-        if(this.compass !== undefined){
-           // find the nearest collectable.
-            let minCollectable: AnimatedSprite = null;
-            let minDistance: number = Number.MAX_VALUE;
-            for(let collectable of this.Collectibles){
-                    if(collectable.alpha > 0){
-                        let distance = collectable.position.distanceTo(this.player.position);
-                        
-                        if(minCollectable === null || distance < minDistance){
-                            minCollectable = collectable;
-                            minDistance = distance;
+        if(!this.gameEnd) {
+            if(this.compass !== undefined){
+            // find the nearest collectable.
+                let minCollectable: AnimatedSprite = null;
+                let minDistance: number = Number.MAX_VALUE;
+                for(let collectable of this.Collectibles){
+                        if(collectable.alpha > 0){
+                            let distance = collectable.position.distanceTo(this.player.position);
+                            
+                            if(minCollectable === null || distance < minDistance){
+                                minCollectable = collectable;
+                                minDistance = distance;
+                            }
                         }
-                    }
+
+                }
+                if(minCollectable !== null){
+                    this.compass.visible = true;
+                    this.compass.rotation+=1;
+                    let direction =  this.player.position.dirTo(minCollectable.position);
+                    let angle =Vec2.RIGHT.angleToCCW(direction)-Math.PI/2;
+                    // console.log(angle)
+                    this.compass.rotation = angle;
+                    this.compass.position = this.player.position.clone().add(direction.scale(this.compass.boundary.hh*2.05)); 
+    
+                }else{
+                    this.compass.visible = false;
+                }
 
             }
-            if(minCollectable !== null){
-                this.compass.visible = true;
-                this.compass.rotation+=1;
-                let direction =  this.player.position.dirTo(minCollectable.position);
-                let angle =Vec2.RIGHT.angleToCCW(direction)-Math.PI/2;
-                // console.log(angle)
-                this.compass.rotation = angle;
-                this.compass.position = this.player.position.clone().add(direction.scale(this.compass.boundary.hh*2.05)); 
- 
+            // console.log(Input.isMousePressed(0) + "|"+ Input.isMousePressed(2));
+            if(this.pauseButton.boundary.containsPoint(Input.getMousePosition())){
+                this.pauseButton.alpha = 1;
             }else{
-                this.compass.visible = false;
+                this.pauseButton.alpha = 0.1;
+            }
+            if (this.pauseButton.visible && (Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
+            this.pauseButton.onClick()
             }
 
-        }
-        // console.log(Input.isMousePressed(0) + "|"+ Input.isMousePressed(2));
-        if(this.pauseButton.boundary.containsPoint(Input.getMousePosition())){
-            this.pauseButton.alpha = 1;
-        }else{
-            this.pauseButton.alpha = 0.1;
-        }
-        if (this.pauseButton.visible && (Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
-           this.pauseButton.onClick()
-        }
-
-        //check if the "e" key is pressed.
-        if (Input.isKeyJustPressed("e")) {
-            //check through all switches.
-            for(let i = 0; i < this.switches.length; i++){
-                let toggles = this.switches[i][0];
-                let toggled = false;
-                for(let j = 0; j < toggles.length; j++){
-                    if(this.player.boundary.overlaps(toggles[j].boundary)){
-                        this.switches[i][2] = !this.switches[i][2];
-                        toggled = true;
-                        break;
-                    }
-                }
-                if(toggled){
-                    let results = this.switches[i][1];
-                    if(this.switches[i][2]){
-                        for(let j = 0; j < results.length; j++){
-                            this.dynamicMap.badAddTileColRow(results[j],this.switches[i][3],true);
-                        }
-                    }else{
-                        for(let j = 0; j < results.length; j++){
-                            this.dynamicMap.badRemoveTileColRow(results[j],true);
-                        }
-                    }
+            //check if the "e" key is pressed.
+            if (Input.isKeyJustPressed("e")) {
+                //check through all switches.
+                for(let i = 0; i < this.switches.length; i++){
+                    let toggles = this.switches[i][0];
+                    let toggled = false;
                     for(let j = 0; j < toggles.length; j++){
-                        toggles[j].animation.playIfNotAlready(this.switches[i][2] ? "ON" : "OFF");
+                        if(this.player.boundary.overlaps(toggles[j].boundary)){
+                            this.switches[i][2] = !this.switches[i][2];
+                            toggled = true;
+                            break;
+                        }
+                    }
+                    if(toggled){
+                        let results = this.switches[i][1];
+                        if(this.switches[i][2]){
+                            for(let j = 0; j < results.length; j++){
+                                this.dynamicMap.badAddTileColRow(results[j],this.switches[i][3],true);
+                            }
+                        }else{
+                            for(let j = 0; j < results.length; j++){
+                                this.dynamicMap.badRemoveTileColRow(results[j],true);
+                            }
+                        }
+                        for(let j = 0; j < toggles.length; j++){
+                            toggles[j].animation.playIfNotAlready(this.switches[i][2] ? "ON" : "OFF");
+                        }
+                    }
+
+                }
+            }
+            // this.updateHealthBar();
+            if(this.inkBar.length  == GameLevel.MAX_BLOCKS){
+                //show the first placementLeft items in inkbar.
+                for (let i = 0; i < this.placementLeft; i++) {
+
+                    this.inkBar[i].visible = true;
+                }
+                //hide the rest of the inkbar.
+                for (let i = this.placementLeft; i < GameLevel.MAX_BLOCKS; i++) {
+                    this.inkBar[i].visible = false;
+                }
+            }
+            /**
+             * Handle Cursor Actions.
+             */
+            let mousePosition = Input.getMousePosition();
+            let canvasInfo = this.viewport.getHalfSize().clone().scale(2);
+            this.cursorVisible =  (mousePosition.x >= 0 && mousePosition.y >= 0 &&
+                                    mousePosition.x <= canvasInfo.x && mousePosition.y <= canvasInfo.y);
+
+            this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(0.5, 0.5)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
+            if (!this.cursorDisabled && this.cursorVisible && !this.paused &&!this.pauseButton.boundary.containsPoint(mousePosition)) {
+                this.cursor.alpha = 1;
+                if(Input.isMousePressed(0) != Input.isMousePressed(2)){
+                    // TODO: Add limits to how far the player can click from their body.
+                    if (Input.isMousePressed(0)) {
+                        // Add tile (Left Click)
+                        this.updateLevelGeometry(Input.getGlobalMousePosition(), 0)
+                    }
+                    if (Input.isMousePressed(2)) {
+                        // Remove tile (Right Click)
+                        this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
                     }
                 }
-
+            } else {
+                this.cursor.alpha = 0;
+            }
+        }else{
+            //check for mouse click.
+            if(Input.isMouseJustPressed()){
+                this.emitter.fireEvent(Game_Events.LEVEL_END);
             }
         }
-        // this.updateHealthBar();
-        if(this.inkBar.length  == GameLevel.MAX_BLOCKS){
-            //show the first placementLeft items in inkbar.
-            for (let i = 0; i < this.placementLeft; i++) {
-
-                this.inkBar[i].visible = true;
-            }
-            //hide the rest of the inkbar.
-            for (let i = this.placementLeft; i < GameLevel.MAX_BLOCKS; i++) {
-                this.inkBar[i].visible = false;
-            }
-        }
-        /**
-         * Handle Cursor Actions.
-         */
-        let mousePosition = Input.getMousePosition();
-        let canvasInfo = this.viewport.getHalfSize().clone().scale(2);
-        this.cursorVisible =  (mousePosition.x >= 0 && mousePosition.y >= 0 &&
-                                mousePosition.x <= canvasInfo.x && mousePosition.y <= canvasInfo.y);
-
-        this.cursor.position = this.dynamicMap.getColRowAt(Input.getGlobalMousePosition()).add(new Vec2(0.5, 0.5)).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE);
-        if (!this.cursorDisabled && this.cursorVisible && !this.paused &&!this.pauseButton.boundary.containsPoint(mousePosition)) {
-            this.cursor.alpha = 1;
-            if(Input.isMousePressed(0) != Input.isMousePressed(2)){
-                // TODO: Add limits to how far the player can click from their body.
-                if (Input.isMousePressed(0)) {
-                    // Add tile (Left Click)
-                    this.updateLevelGeometry(Input.getGlobalMousePosition(), 0)
-                }
-                if (Input.isMousePressed(2)) {
-                    // Remove tile (Right Click)
-                    this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
-                }
-            }
-        } else {
-            this.cursor.alpha = 0;
-        }
-
 
         // Handle events and update the UI if needed
         while (this.receiver.hasNextEvent()) {
@@ -474,12 +479,23 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.GAME_SHOW_IMAGE:
                     {
-                        
+                        //freeze the game.
+                        this.getLayer("primary").disable();
+
+                        this.player.freeze();
+                        //iterate through all enemies and freeze them.
+                        this.enemies.forEach(enemy => {
+                            enemy.freeze();
+                        });
+
+                        this.levelTimer.pause();
+                        this.show_art();
                     }
                     break;
                 case Game_Events.LEVEL_END:
                     {
                         this.levelTimer.pause();
+                        console.log("exit")
                         // Go to the next level
                         if (this.nextLevel) {
                             let sceneOptions = {
@@ -501,6 +517,10 @@ export default class GameLevel extends Scene {
                     break;
             }
         }
+    }
+
+    protected show_art() {
+        throw new Error("Method not implemented.");
     }
 
     /**
@@ -584,7 +604,7 @@ export default class GameLevel extends Scene {
                     ease: EaseFunctionType.IN_OUT_QUAD
                 }
             ],
-            onEnd: Game_Events.LEVEL_END
+            onEnd: Game_Events.GAME_SHOW_IMAGE
         });
 
         this.levelTransitionScreen.tweens.add("fadeOut", {
