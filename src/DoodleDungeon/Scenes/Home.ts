@@ -83,6 +83,14 @@ export default class Home extends GameLevel {
         this.load.image("T-end", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-End.png");
         this.load.image("T-sum", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Summary.png");
         this.load.image("GameEnding", "game_assets/spritesheets/End_Scene.png");
+
+        this.load.image("doodle0", "game_assets/spritesheets/LevelEnd/MenuArt/Tutorial_MenuArt.png");
+        this.load.image("doodle1", "game_assets/spritesheets/LevelEnd/MenuArt/Level1_MenuArt.png");
+        this.load.image("doodle2", "game_assets/spritesheets/LevelEnd/MenuArt/Level2_MenuArt.png");
+        this.load.image("doodle3", "game_assets/spritesheets/LevelEnd/MenuArt/Level3_MenuArt.png");
+        this.load.image("doodle4", "game_assets/spritesheets/LevelEnd/MenuArt/Level4_MenuArt.png");
+        this.load.image("doodle5", "game_assets/spritesheets/LevelEnd/MenuArt/Level5_MenuArt.png");
+        this.load.image("doodle5a", "game_assets/spritesheets/LevelEnd/MenuArt/Level5a_MenuArt.png");
         
 
         this.load.image("Cheats", "game_assets/spritesheets/TutorialAssets/Cheats.png");
@@ -186,6 +194,7 @@ export default class Home extends GameLevel {
                 let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,12).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: \n" });
                 if(Home.bestTimes[i] != -1){
                     let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: ""+Home.bestTimes[i] + "s" });
+                    this.addLevelBackgroundImage(Home.doodles[i], "primary", new Vec2(90.25+5*i,8).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), new Vec2(0.6,0.6),0.8);
                 }else{
                     let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Not Played" });
                 }

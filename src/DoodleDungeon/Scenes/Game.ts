@@ -239,7 +239,8 @@ export default class GameLevel extends Scene {
             Game_Events.PLAYER_HURT,
             Game_Events.PLAYER_ATTACK,
             Game_Events.PLAYER_ATTACK_FINISHED,
-            Game_Events.GAME_PAUSE
+            Game_Events.GAME_PAUSE,
+            Game_Events.GAME_SHOW_IMAGE
         ]);
     }
 
@@ -469,6 +470,11 @@ export default class GameLevel extends Scene {
                         Input.enableInput();
                         this.viewport.enableStaticBoundary();
                         this.viewport.setStaticBoundary(new Vec2(200,100));
+                    }
+                    break;
+                case Game_Events.GAME_SHOW_IMAGE:
+                    {
+                        
                     }
                     break;
                 case Game_Events.LEVEL_END:

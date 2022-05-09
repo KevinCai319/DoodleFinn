@@ -80,6 +80,7 @@ export default class Level5 extends GameLevel {
         this.percentFilled.backgroundColor = new Color(32, 32, 32, 0.5);
         this.percentFilled.font = "PixelSimple";
         // GameLevel.otherWinCondition = true;
+        GameLevel.otherWinCondition = false;
         // Home.unlimitedPlacementCheats = this.orig_cheat;
         let instr = this.addLevelBackgroundImage("Level5Instr","primary",new Vec2(6,27).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1))
         instr.alpha=0.5;

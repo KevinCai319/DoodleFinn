@@ -16,7 +16,8 @@ export enum Game_Events {
 	PLAYER_BALLOON_PICKED_UP = "PlayerBalloonPickedUp",
 	SPLASH_SCREEN_SHOW = "SplashShow",
 	SPLASH_SCREEN_END = "SplashDone",
-	GAME_PAUSE = "GAME_PAUSE"
+	GAME_PAUSE = "GAME_PAUSE",
+	GAME_SHOW_IMAGE = "GAME_SHOW_IMAGE"
 }
 export enum Game_Names {
     NAVMESH = "navmesh"
