@@ -46,10 +46,10 @@ export default class Level2 extends GameLevel {
         this.load.keepSpritesheet("player");
         if (this.gameEnd) {
             let time = this.levelTimer.getTimeElapsed() / 1000;
-            Home.bestTimes[1] = Math.min(Home.bestTimes[1], time);
-            if (Home.bestTimes[1] == -1) Home.bestTimes[1] = time;
+            Home.bestTimes[2] = Math.min(Home.bestTimes[2], time);
+            if (Home.bestTimes[2] == -1) Home.bestTimes[2] = time;
         }
-        if (Home.LevelsUnlocked == 2) {
+        if (Home.LevelsUnlocked == 3) {
             Home.LevelsUnlocked += 1;
         }
         this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "level_music"});
@@ -57,7 +57,7 @@ export default class Level2 extends GameLevel {
 
     startScene(): void {
         // Add the Demo Level.
-        this.nextLevel = null
+        this.nextLevel = null;
         this.home = Home
         this.playerSpawnColRow = new Vec2(7, 40)
         // Do generic setup for a GameLevel
