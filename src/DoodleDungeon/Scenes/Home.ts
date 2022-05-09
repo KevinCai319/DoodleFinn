@@ -13,17 +13,18 @@ import Level1 from "./Level1";
 import Level4 from "./Level4";
 import Level2 from "./Level2";
 import Level3 from "./Level3";
+import Level5 from "./Level5";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import PlayerState from "../Player/PlayerStates/PlayerState";
-import Level6 from "./Level6";
+
 
 export default class Home extends GameLevel {
     static LevelsUnlocked:number = 1;
     static numberOfLevels = 6;
 
     //Add references to other levels here.
-    static Levels = [DemoLevel,Level1,Level2,Level3,Level4,Level6];
+    static Levels = [DemoLevel,Level1,Level2,Level3,Level4,Level5];
 
     LEVEL_NAME:string ="Tutorial"
     LEVEL_TILESET:string = "Tutorial"
