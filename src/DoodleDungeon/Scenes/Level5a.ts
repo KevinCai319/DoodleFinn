@@ -13,7 +13,7 @@ import PlayerController, { PlayerStates, PlayerType } from "../Player/PlayerCont
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Input from "../../Wolfie2D/Input/Input";
 
-export default class Level5 extends GameLevel {
+export default class Level5a extends GameLevel {
     LEVEL_NAME: string = "Level_5a"
     LEVEL_TILESET: string = "Level_5a"
     //Object pool for bullets.
@@ -46,10 +46,10 @@ export default class Level5 extends GameLevel {
         super.unloadCommon();
         if (this.gameEnd) {
             let time = this.levelTimer.getTimeElapsed() / 1000;
-            Home.bestTimes[2] = Math.min(Home.bestTimes[2], time);
-            if (Home.bestTimes[2] == -1) Home.bestTimes[2] = time;
+            Home.bestTimes[4] = Math.min(Home.bestTimes[4], time);
+            if (Home.bestTimes[4] == -1) Home.bestTimes[4] = time;
         }
-        if (Home.LevelsUnlocked == 3) {
+        if (Home.LevelsUnlocked == 5) {
             Home.LevelsUnlocked += 1;
         }
         this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "level_music"});

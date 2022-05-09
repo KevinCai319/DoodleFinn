@@ -36,10 +36,10 @@ export default class Level5 extends GameLevel {
         super.unloadCommon();
         if (this.gameEnd) {
             let time = this.levelTimer.getTimeElapsed() / 1000;
-            Home.bestTimes[1] = Math.min(Home.bestTimes[1], time);
-            if (Home.bestTimes[1] == -1) Home.bestTimes[1] = time;
+            Home.bestTimes[6] = Math.min(Home.bestTimes[6], time);
+            if (Home.bestTimes[6] == -1) Home.bestTimes[6] = time;
         }
-        if (Home.LevelsUnlocked == 4) {
+        if (Home.LevelsUnlocked == 7) {
             Home.LevelsUnlocked += 1;
         }
         this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: "level_music" });

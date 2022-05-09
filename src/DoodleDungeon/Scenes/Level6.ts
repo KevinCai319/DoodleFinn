@@ -46,8 +46,8 @@ export default class Level6 extends GameLevel {
         super.unloadCommon();
         if (this.gameEnd) {
             let time = this.levelTimer.getTimeElapsed() / 1000;
-            Home.bestTimes[6] = Math.min(Home.bestTimes[6], time);
-            if (Home.bestTimes[6] == -1) Home.bestTimes[6] = time;
+            Home.bestTimes[7] = Math.min(Home.bestTimes[7], time);
+            if (Home.bestTimes[7] == -1) Home.bestTimes[7] = time;
         }
         this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "level_music"});
     }
