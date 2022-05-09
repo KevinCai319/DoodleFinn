@@ -433,9 +433,11 @@ export default class GameLevel extends Scene {
                     {
                         // Check if the player has collected all the collectibles.
                         // TODO: make this less rigid.
-                        if ((GameLevel.paperRequired && this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) || GameLevel.otherWinCondition) {
-                            Input.disableMouseInput();
-                            this.levelEndTimer.start();
+                        if(this.levelEndTimer.isStopped() && !this.gameEnd){
+                            if ((GameLevel.paperRequired && this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) || GameLevel.otherWinCondition) {
+                                Input.disableMouseInput();
+                                this.levelEndTimer.start();
+                            }
                         }
                     }
                     break;

@@ -7,6 +7,9 @@ import Layer from "../../Wolfie2D/Scene/Layer";
 import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import { AI_Statuses, Game_Collectables, Game_Events, Tileset_Names } from "../Events";
 import Game from "../../Wolfie2D/Loop/Game";
+import Label from "../../Wolfie2D/Nodes/UIElements/Label";
+import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
+import Color from "../../Wolfie2D/Utils/Color";
 
 export default class Level4 extends GameLevel {
     LEVEL_NAME: string = "Level_4"
@@ -16,6 +19,7 @@ export default class Level4 extends GameLevel {
     OUTLINE_LAYER: DynamicTilemap
     REQUIRED_TILES: Array<Vec2> = [];
     orig_cheat:boolean = false;
+    percentFilled:Label =null;
 
     loadScene(): void {
         this.orig_cheat = Home.unlimitedPlacementCheats;
@@ -68,6 +72,14 @@ export default class Level4 extends GameLevel {
         this.setUpTileCheck();
 
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "level_music", loop: true, holdReference: true });
+        this.papersCountLabel.visible=false;
+
+        this.percentFilled = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(120, 60), text: "Find some paper!" });
+        this.percentFilled.textColor = Color.RED;
+        this.percentFilled.backgroundColor = new Color(32, 32, 32, 0.5);
+        this.percentFilled.font = "PixelSimple";
+        // GameLevel.otherWinCondition = true;
+        // Home.unlimitedPlacementCheats = this.orig_cheat;
     }
 
     updateScene(deltaT: number): void {
@@ -114,13 +126,20 @@ export default class Level4 extends GameLevel {
     //Test if the player's drawing matches the outline
     checkDrawing() {
         // let finished = false;
+        let total = 0;
+        let count = 0;
         for (let vec of this.REQUIRED_TILES) {
+            total += 1;
             //If current tile is a outline tile, but the player has not drawn on this tile, stop checking
             let drawing_tile = this.DRAWING_LAYER.getTileAtRowCol(vec);
             // console.log(drawing_tile);
-            if (drawing_tile == 0) return false;
+            if (drawing_tile != 0){
+                count += 1;
+            }
         }
-        return true;
+        //update label.
+        this.percentFilled.text = "Image Drawn:"+ count + "/" + total;
+        return count == total;
     }
     
     protected goToMenu(): void {
