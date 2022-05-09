@@ -46,8 +46,8 @@ export default class Level6 extends GameLevel {
         super.unloadCommon();
         if (this.gameEnd) {
             let time = this.levelTimer.getTimeElapsed() / 1000;
-            Home.bestTimes[1] = Math.min(Home.bestTimes[1], time);
-            if (Home.bestTimes[1] == -1) Home.bestTimes[1] = time;
+            Home.bestTimes[2] = Math.min(Home.bestTimes[2], time);
+            if (Home.bestTimes[2] == -1) Home.bestTimes[2] = time;
         }
         if (Home.LevelsUnlocked == 3) {
             Home.LevelsUnlocked += 1;

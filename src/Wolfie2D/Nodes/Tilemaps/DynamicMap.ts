@@ -14,8 +14,15 @@ export default class DynamicTilemap extends OrthogonalTilemap {
     //TODO: make an more efficient map.
     navmesh: Navmesh;
     graph: PositionGraph;
+    /** An array of write access data */
+    protected editMap: Array<boolean>;
+
     protected parseTilemapData(tilemapData: TiledTilemapData, layer: TiledLayerData): void {
         super.parseTilemapData(tilemapData,layer);
+        //copy over the collision map size.
+        this.editMap = new Array<boolean>(this.getDimensions().x*this.getDimensions().y);
+        //fill array with true.
+        this.editMap.fill(true);
     }
     getTileBit(x: number, y:number):number{
         if(y < 0 || x < 0 || x>=this.numCols || y>= this.numRows)return 0;
@@ -120,18 +127,53 @@ export default class DynamicTilemap extends OrthogonalTilemap {
     }
 
     // Inefficient implementation of adding a tile.
-    badAddTile(location: Vec2,type:number){
+    badAddTile(location: Vec2,type:number,override:boolean = false): boolean {
         let colRow = this.getColRowAt(location);
-        this.setTileAtRowCol(colRow,type);
-        //add the tile, update navmesh accordingly.
-        this.badNavMesh()
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,type);
+            //add the tile, update navmesh accordingly.
+            this.badNavMesh()
+            return true;
+        }
+        return false;
         
     }
-    badRemoveTile(location: Vec2){
+
+    badAddTileColRow(colRow: Vec2,type:number,override:boolean = false): boolean {
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,type);
+            //add the tile, update navmesh accordingly.
+            this.badNavMesh()
+            return true;
+        }
+        return false;
+        
+    }
+
+    badRemoveTile(location: Vec2,override:boolean = false): boolean{
         let colRow = this.getColRowAt(location);
-        this.setTileAtRowCol(colRow,0);
-        //remove the tile, update navmesh accordingly.
-        this.badNavMesh()
+        
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,0);
+            //remove the tile, update navmesh accordingly.
+            this.badNavMesh()
+            return true;
+        }
+        return false;
+    }
+
+    badRemoveTileColRow(colRow: Vec2,override:boolean = false): boolean{
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,0);
+            //remove the tile, update navmesh accordingly.
+            this.badNavMesh()
+            return true;
+        }
+        return false;
+    }
+
+    setWriteAccess(colRow:Vec2, access:boolean){
+        this.editMap[this.cvtIndex(colRow.x,colRow.y)] = access;
     }
 
     //this is because the existing physics engine does not work.

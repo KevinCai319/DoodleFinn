@@ -1,0 +1,19 @@
+{
+    "name": "DEBUG_SWITCH",
+    "spriteSheetImage": "DEBUG_SWITCH.png",
+    "spriteWidth": 64,
+    "spriteHeight": 64,
+    "columns": 2,
+    "rows": 1,
+    "durationType": "time",
+    "animations": [
+        { 
+            "name": "ON",
+            "frames": [ {"index": 0, "duration": 1} ]
+        },
+        {
+            "name": "OFF",
+            "frames": [{"index": 1, "duration": 1}]
+        }
+    ]
+}
