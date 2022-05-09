@@ -92,6 +92,7 @@ export default class GameLevel extends Scene {
 
     // Collectible Info. 
     // TODO: Maybe add a class for different Collectables.
+    static paperRequired: boolean = true;
     protected Collectibles: Array<AnimatedSprite> = []
     protected pinkFound: number = 0;
     protected whiteFound: number = 0;
@@ -102,6 +103,9 @@ export default class GameLevel extends Scene {
     //Switch sprite| Blocks affected<col,row> | starting switch state | block solid ID
     //true means blocks are solid.
     protected switches:Array<[Array<AnimatedSprite>,Array<Vec2>,boolean,number]> = []
+
+    //Other levels may require a different win condition. If fufilled, that Level.ts will end the level
+    static otherWinCondition: boolean = false;
 
     //Timer used to determine time it takes to finish the level.
     protected levelTimer: Timer;
@@ -425,7 +429,7 @@ export default class GameLevel extends Scene {
                     {
                         // Check if the player has collected all the collectibles.
                         // TODO: make this less rigid.
-                        if (this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) {
+                        if ((GameLevel.paperRequired && this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) || GameLevel.otherWinCondition) {
                             Input.disableMouseInput();
                             this.levelEndTimer.start();
                         }
