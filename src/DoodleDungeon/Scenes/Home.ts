@@ -11,16 +11,19 @@ import DemoLevel from "./DemoLevel";
 import GameLevel from "./Game";
 import Level1 from "./Level1";
 import Level4 from "./Level4";
+import Level2 from "./Level2";
+import Level3 from "./Level3";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import PlayerState from "../Player/PlayerStates/PlayerState";
+import Level6 from "./Level6";
 
 export default class Home extends GameLevel {
     static LevelsUnlocked:number = 1;
     static numberOfLevels = 6;
 
     //Add references to other levels here.
-    static Levels = [DemoLevel,Level1, Level4];
+    static Levels = [DemoLevel,Level1,Level2,Level3,Level4,Level6];
 
     LEVEL_NAME:string ="Tutorial"
     LEVEL_TILESET:string = "Tutorial"
@@ -62,6 +65,7 @@ export default class Home extends GameLevel {
         this.load.image("OFF", "game_assets/spritesheets/TutorialAssets/TOGGLE_OFF.png");
 
         this.load.audio("menu_music", "game_assets/music/doodlefinn_main.wav")
+        this.load.audio("toggle_switch", "game_assets/sounds/toggle_switch.wav")
     }
 
     // DoodleFinn TODO
@@ -111,50 +115,60 @@ export default class Home extends GameLevel {
             Home.invincibilityCheats,
             ()=>{
                 Home.invincibilityCheats = !Home.invincibilityCheats;
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
+                    {key: "toggle_switch", loop: false, holdReference: false});
             }]);
             this.toggles.push([this.addLevelBackgroundImage("ON",layer.getName(),new Vec2(60,14.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.unlimitedLives?0:1)),
                                 this.addLevelBackgroundImage("OFF",layer.getName(),new Vec2(60,14.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.unlimitedLives?1:0)),
                                 Home.unlimitedLives,
                                 ()=>{
                                     Home.unlimitedLives = !Home.unlimitedLives;
+                                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
+                                        {key: "toggle_switch", loop: false, holdReference: false});
                                 }]);
             this.toggles.push([this.addLevelBackgroundImage("ON",layer.getName(),new Vec2(60,15.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.allLevelsUnlocked?0:1)),
                                 this.addLevelBackgroundImage("OFF",layer.getName(),new Vec2(60,15.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.allLevelsUnlocked?1:0)),
                                 Home.allLevelsUnlocked,
                                 ()=>{
                                     Home.allLevelsUnlocked= !Home.allLevelsUnlocked;
+                                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
+                                        {key: "toggle_switch", loop: false, holdReference: false});
                                 }]);
             this.toggles.push([this.addLevelBackgroundImage("ON",layer.getName(),new Vec2(60,16.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.flyHackCheats?0:1)),
                                 this.addLevelBackgroundImage("OFF",layer.getName(),new Vec2(60,16.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.flyHackCheats?1:0)),
                                 Home.flyHackCheats,
                                 ()=>{
                                     Home.flyHackCheats = !Home.flyHackCheats;
+                                    (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
                                     (this.player._ai as PlayerController).playerType = (Home.flyHackCheats)?PlayerType.TOPDOWN:PlayerType.PLATFORMER
                                     this.player._velocity = Vec2.ZERO;
-                                    (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
+                                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
+                                        {key: "toggle_switch", loop: false, holdReference: false});
                                 }]);
             this.toggles.push([this.addLevelBackgroundImage("ON",layer.getName(),new Vec2(60,17.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.unlimitedPlacementCheats?0:1)),
             this.addLevelBackgroundImage("OFF",layer.getName(),new Vec2(60,17.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8*(Home.unlimitedPlacementCheats?1:0)),
             Home.unlimitedPlacementCheats,
             ()=>{
                 Home.unlimitedPlacementCheats = !Home.unlimitedPlacementCheats;
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, 
+                    {key: "toggle_switch", loop: false, holdReference: false});
             }]);
             
             this.addLevelBackgroundImage("PressE",layer.getName(),new Vec2(94.5,14).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3));
             //Adding doors, and their best times.
             for(let i = 0; i < this.doors.length; i++){
                 let new_door = this.addLevelAnimatedSprite("Door",layer.getName(),new Vec2(90+5*i,17).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(0.5,0.5))
+                let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,12).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: \n" });
+                if(Home.bestTimes[i] != -1){
+                    let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: ""+Home.bestTimes[i] + "s" });
+                }else{
+                    let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Not Played" });
+                }
                 if(this.doors[i][0]){
-                    let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,12).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: \n" });
-                    if(Home.bestTimes[i] != -1){
-                        let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: ""+Home.bestTimes[i] + "s" });
-                    }else{
-                        let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Not Played" });
-                    }
 
                     new_door.alpha = 1;
                 }else{
-                    new_door.alpha = 0.5;
+                    new_door.alpha = 0.2;
                 }
                 this.doors[i][1] = new_door;
             }

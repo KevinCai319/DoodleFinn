@@ -4,6 +4,7 @@ import Vec2 from "../../DataTypes/Vec2";
 import OrthogonalTilemap from "./OrthogonalTilemap";
 import Navmesh from "../../Pathfinding/Navmesh";
 import AABB from "../../DataTypes/Shapes/AABB";
+import Physical from "../../DataTypes/Interfaces/Physical";
 
 
 /**
@@ -13,8 +14,15 @@ export default class DynamicTilemap extends OrthogonalTilemap {
     //TODO: make an more efficient map.
     navmesh: Navmesh;
     graph: PositionGraph;
+    /** An array of write access data */
+    protected editMap: Array<boolean>;
+
     protected parseTilemapData(tilemapData: TiledTilemapData, layer: TiledLayerData): void {
         super.parseTilemapData(tilemapData,layer);
+        //copy over the collision map size.
+        this.editMap = new Array<boolean>(this.getDimensions().x*this.getDimensions().y);
+        //fill array with true.
+        this.editMap.fill(true);
     }
     getTileBit(x: number, y:number):number{
         if(y < 0 || x < 0 || x>=this.numCols || y>= this.numRows)return 0;
@@ -119,19 +127,88 @@ export default class DynamicTilemap extends OrthogonalTilemap {
     }
 
     // Inefficient implementation of adding a tile.
-    badAddTile(location: Vec2,type:number){
+    badAddTile(location: Vec2,type:number,override:boolean = false): boolean {
         let colRow = this.getColRowAt(location);
-        this.setTileAtRowCol(colRow,type);
-        //add the tile, update navmesh accordingly.
-        this.badNavMesh()
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,type);
+            //add the tile, update navmesh accordingly.
+            this.badNavMesh()
+            return true;
+        }
+        return false;
         
     }
-    badRemoveTile(location: Vec2){
-        let colRow = this.getColRowAt(location);
-        this.setTileAtRowCol(colRow,0);
-        //remove the tile, update navmesh accordingly.
-        this.badNavMesh()
+
+    badAddTileColRow(colRow: Vec2,type:number,override:boolean = false): boolean {
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,type);
+            //add the tile, update navmesh accordingly.
+            this.badNavMesh()
+            return true;
+        }
+        return false;
+        
     }
+
+    badRemoveTile(location: Vec2,override:boolean = false): boolean{
+        let colRow = this.getColRowAt(location);
+        
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,0);
+            //remove the tile, update navmesh accordingly.
+            this.badNavMesh()
+            return true;
+        }
+        return false;
+    }
+
+    badRemoveTileColRow(colRow: Vec2,override:boolean = false): boolean{
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,0);
+            //remove the tile, update navmesh accordingly.
+            this.badNavMesh()
+            return true;
+        }
+        return false;
+    }
+
+    setWriteAccess(colRow:Vec2, access:boolean){
+        this.editMap[this.cvtIndex(colRow.x,colRow.y)] = access;
+    }
+
+    //this is because the existing physics engine does not work.
+    public collideWithOrthogonalTilemap(node: Physical):boolean {
+		// Get the min and max x and y coordinates of the moving node
+		let min = new Vec2(node.sweptRect.left, node.sweptRect.top);
+		let max = new Vec2(node.sweptRect.right, node.sweptRect.bottom);
+
+        console.log(min.x, min.y, max.x, max.y);
+		// Convert the min/max x/y to the min and max row/col in the tilemap array
+		let minIndex = this.getColRowAt(min);
+		let maxIndex = this.getColRowAt(max);
+
+		let tileSize = this.getTileSize();
+
+		// Loop over all possible tiles (which isn't many in the scope of the velocity per frame)
+		for(let col = minIndex.x; col <= maxIndex.x; col++){
+			for(let row = minIndex.y; row <= maxIndex.y; row++){
+				if(this.isTileCollidable(col, row)){
+					// Get the position of this tile
+					let tilePos = new Vec2(col * tileSize.x + tileSize.x/2, row * tileSize.y + tileSize.y/2);
+
+					// Create a new collider for this tile
+					let collider = new AABB(tilePos, tileSize.scaled(1/2));
+
+					// Calculate collision area between the node and the tile
+					let area = node.sweptRect.overlapArea(collider);
+					if(area > 0){
+						return true;
+					}
+				}
+			}
+		}
+        return false;
+	}
 
     //better implmentation not done yet.
     initializeNavMesh(): void {

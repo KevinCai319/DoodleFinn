@@ -41,7 +41,13 @@ export default class PlayerController extends StateMachineAI implements BattlerA
     playerType: PlayerType = PlayerType.PLATFORMER
     velocity: Vec2 = Vec2.ZERO
     direction: number = 1;
+    //Ok so this could be a state, but I'm not sure if I want to go through the effort.
     attacking: boolean = false;
+    // Same here :/
+    hasBalloon: boolean = false;
+    balloon: Sprite;
+
+
     MAX_HEALTH: number = 10;
     health: number = this.MAX_HEALTH;
     speed: number = 200;
@@ -63,6 +69,8 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.deathTimer = new Timer(1000);
         this.direction = 1
         this.health = this.MAX_HEALTH;
+        this.hasBalloon = false;
+        this.balloon = null;
         this.healthBar = new HealthBar(this.owner.getScene() as GameLevel, "UI", this, this.MAX_HEALTH, new Vec2(30, this.owner.getScene().getViewport().getHalfSize().y * 2 - 30), true, 33, new Vec2(0.1, 0.1));
         let boundary = (<AnimatedSprite>this.owner).boundary
         this.ATTACK_AREA = new Vec2(boundary.hw * 1.5, boundary.hh * 2)
@@ -107,6 +115,8 @@ export default class PlayerController extends StateMachineAI implements BattlerA
             });
         this.initializeStates();
         this.receiver.subscribe(Game_Events.PLAYER_LOSE_LIFE);
+        this.receiver.subscribe(Game_Events.PLAYER_BALLOON_POPPED);
+        this.receiver.subscribe(Game_Events.PLAYER_BALLOON_PICKED_UP);
         (<AnimatedSprite>this.owner).animation.playIfNotAlready("Idle Left", true);
     }
     setInvincible(duration: number = 500) {
@@ -123,6 +133,8 @@ export default class PlayerController extends StateMachineAI implements BattlerA
                 this.attacking = false;
                 this.owner.tweens.stopAll();
                 this.health = 0;
+                this.balloon = null;
+                this.hasBalloon = false;
                 (<AnimatedSprite>this.owner).animation.stop();
                 this.deathTimer.start(1000);
                 this.changeState(PlayerStates.DYING);
@@ -156,12 +168,10 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.addState(PlayerStates.SPAWN, spawn);
         let dying = new Dying(this, this.owner);
         this.addState(PlayerStates.DYING, dying);
-        if (this.playerType == PlayerType.PLATFORMER) {
-            let jump = new Jump(this, this.owner);
-            this.addState(PlayerStates.JUMP, jump);
-            let fall = new Fall(this, this.owner);
-            this.addState(PlayerStates.FALL, fall);
-        }
+        let jump = new Jump(this, this.owner);
+        this.addState(PlayerStates.JUMP, jump);
+        let fall = new Fall(this, this.owner);
+        this.addState(PlayerStates.FALL, fall);
         this.initialize(PlayerStates.SPAWN);
     }
 
@@ -185,7 +195,23 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         if (this.attacking && this.attackTimer.isStopped()) {
             this.attacking = false
         }
-
+        while (this.receiver.hasNextEvent()) {
+            let event = this.receiver.getNextEvent();
+            switch (event.type) {
+                case Game_Events.PLAYER_LOSE_LIFE:
+                    break;
+                case Game_Events.PLAYER_BALLOON_POPPED:
+                    this.hasBalloon = false;
+                    this.balloon.visible = false;
+                    break;
+                case Game_Events.PLAYER_BALLOON_PICKED_UP:
+                    this.hasBalloon = true;
+                    this.balloon.visible = true;    
+                    break;
+                default:
+                    break;
+            }
+        }
         if (this.owner.onGround) {
             // let rc =  this.tilemap.getColRowAt(this.owner.position);
             // rc.y+=1;

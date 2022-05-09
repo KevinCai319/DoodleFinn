@@ -99,6 +99,10 @@ export default class GameLevel extends Scene {
     protected numberPink: number = 0;
     protected numberWhite: number = 0;
     protected numberPapers: number = 0;
+    /** switches. */
+    //Switch sprite| Blocks affected<col,row> | starting switch state | block solid ID
+    //true means blocks are solid.
+    protected switches:Array<[Array<AnimatedSprite>,Array<Vec2>,boolean,number]> = []
 
     //Other levels may require a different win condition. If fufilled, that Level.ts will end the level
     static otherWinCondition: boolean = false;
@@ -108,7 +112,7 @@ export default class GameLevel extends Scene {
     //Timer that triggers when end of level is reached.
     protected levelEndTimer: Timer;
 
-    // various methods for adding UI elements to the scene.
+    // various methods for adding UI elements to the background scene.
     protected backgroundSetup: Array<Function> = [];
 
     // Stuff to end the level and go to the next level
@@ -127,7 +131,11 @@ export default class GameLevel extends Scene {
             this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
             this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
             this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");
+            this.load.spritesheet("switch", "game_assets/spritesheets/DEBUG_SWITCH.json");
+
             this.load.image("drawnTile", "game_assets/spritesheets/Filled_Tile.png");
+            this.load.image("empty_block", "game_assets/spritesheets/empty_block.png");
+            this.load.image("empty_locked_block", "game_assets/spritesheets/empty_locked_block.png");
             this.load.audio("level_music", "game_assets/music/doodlefinn_level_music.wav")
             this.load.audio("player_hit_enemy", "game_assets/sounds/coin.wav")
             this.load.audio("jump", "game_assets/sounds/jump.wav")
@@ -135,6 +143,8 @@ export default class GameLevel extends Scene {
             this.load.audio("player_hurt", "game_assets/sounds/zap.wav")
             this.load.audio("scribble", "game_assets/sounds/scribble.wav")
             this.load.audio("erase", "game_assets/sounds/erase.wav")
+            this.load.audio("paper_pickup", "game_assets/sounds/paper_pickup.wav")
+
         }
         //Stuff used when you are in a level
         if(loadUI){
@@ -153,7 +163,10 @@ export default class GameLevel extends Scene {
         this.load.keepSpritesheet("pink_paper");
         this.load.keepSpritesheet("white_paper");
         this.load.keepSpritesheet("cursor");
+        this.load.keepSpritesheet("switch");
         this.load.keepImage("drawnTile");
+        this.load.keepImage("empty_block");
+        this.load.keepImage("empty_locked_block");
         
         // //Stuff used when you are in a level
         // if(loadUI){
@@ -169,9 +182,11 @@ export default class GameLevel extends Scene {
         this.load.keepAudio("player_hurt")
         this.load.keepAudio("scribble")
         this.load.keepAudio("erase")
+        this.load.keepAudio("paper_pickup")
     }
     startScene(): void {
         this.gameEnd = false;
+        //This is not a good way to do this. TODO: Fix this.
         this.levelTimer = new Timer(1000 * 100000);
         this.levelTimer.start();
         // Do the game level standard initializations
@@ -191,7 +206,6 @@ export default class GameLevel extends Scene {
         this.addUI();
         this.initializeEnemies();
         
-        // console.log(this.player.position);
         this.cursor = this.addLevelAnimatedSprite("cursor", "primary", Input.getGlobalMousePosition())
         // Initialize the timers
         this.levelEndTimer = new Timer(10, () => {
@@ -251,7 +265,7 @@ export default class GameLevel extends Scene {
                 this.compass.rotation+=1;
                 let direction =  this.player.position.dirTo(minCollectable.position);
                 let angle =Vec2.RIGHT.angleToCCW(direction)-Math.PI/2;
-                console.log(angle)
+                // console.log(angle)
                 this.compass.rotation = angle;
                 this.compass.position = this.player.position.clone().add(direction.scale(this.compass.boundary.hh*2.05)); 
  
@@ -268,6 +282,38 @@ export default class GameLevel extends Scene {
         }
         if (this.pauseButton.visible && (Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
            this.pauseButton.onClick()
+        }
+
+        //check if the "e" key is pressed.
+        if (Input.isKeyJustPressed("e")) {
+            //check through all switches.
+            for(let i = 0; i < this.switches.length; i++){
+                let toggles = this.switches[i][0];
+                let toggled = false;
+                for(let j = 0; j < toggles.length; j++){
+                    if(this.player.boundary.overlaps(toggles[j].boundary)){
+                        this.switches[i][2] = !this.switches[i][2];
+                        toggled = true;
+                        break;
+                    }
+                }
+                if(toggled){
+                    let results = this.switches[i][1];
+                    if(this.switches[i][2]){
+                        for(let j = 0; j < results.length; j++){
+                            this.dynamicMap.badAddTileColRow(results[j],this.switches[i][3],true);
+                        }
+                    }else{
+                        for(let j = 0; j < results.length; j++){
+                            this.dynamicMap.badRemoveTileColRow(results[j],true);
+                        }
+                    }
+                    for(let j = 0; j < toggles.length; j++){
+                        toggles[j].animation.playIfNotAlready(this.switches[i][2] ? "ON" : "OFF");
+                    }
+                }
+
+            }
         }
         // this.updateHealthBar();
         if(this.inkBar.length  == GameLevel.MAX_BLOCKS){
@@ -301,12 +347,6 @@ export default class GameLevel extends Scene {
                 if (Input.isMousePressed(2)) {
                     // Remove tile (Right Click)
                     this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
-                }
-                if (Input.isMouseJustPressed(0)) {
-                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "scribble", loop: false, holdReference: false });       
-                }
-                if (Input.isMouseJustPressed(2)) {
-                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "erase", loop: false, holdReference: false });
                 }
             }
         } else {
@@ -466,7 +506,7 @@ export default class GameLevel extends Scene {
      * Initializes the viewport
      */
     protected initViewport(): void {
-        this.viewport.setZoomLevel(1.2);
+        this.viewport.setZoomLevel(1.1);
     }
 
     /**
@@ -596,25 +636,6 @@ export default class GameLevel extends Scene {
         this.menuButton = menuBtn
     }
 
-    /**
-     * Initializes the player's health bar.
-     * May be removed in the future.
-     */
-    // protected setupHealthBar(): void {
-    //     let location = new Vec2(30, this.viewport.getView().hh*2-30);
-    //     let scale = new Vec2(0.12, 0.12);
-    //     // Create up to 10 hearts on the UI layer.
-    //     try {
-    //         for (let i = 0; i < 10; i++) {
-    //             this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI", location, scale));
-    //             this.healthBar.push(this.addLevelBackgroundImage("heart", "UI", location, scale));
-    //             location.x += 33;
-    //         }
-    //     } catch (e) {
-
-    //     }
-    // }
-
     protected setupInkBar(): void {
         let location = new Vec2(this.viewport.getView().hw-140,45);
         let scale = new Vec2(0.1,0.1);
@@ -630,21 +651,6 @@ export default class GameLevel extends Scene {
             console.log("No ink found.")
         }
     }
-
-    /**
-     * Updates the player's health bar.
-     * May be removed in the future to another class.
-    //  */
-    // protected updateHealthBar(): void {
-    //     let playerHealth = (this.player._ai as PlayerController).health;
-    //     for (let i = 0; i < this.healthBar.length; i++) {
-    //         if (i % 2 == 1) {
-    //             this.healthBar[i].visible = (i + 1 <= playerHealth);
-    //         } else {
-    //             this.healthBar[i].visible = (i + 1 == playerHealth && playerHealth % 2 == 1);
-    //         }
-    //     }
-    // }
 
     /**
      * Initializes the player
@@ -672,7 +678,7 @@ export default class GameLevel extends Scene {
         if(Home.flyHackCheats){
             this.player.addAI(PlayerController, { playerType: PlayerType.TOPDOWN, tilemap: "Main" });
         }else{
-            this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
+            this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main"});
         }
         this.player.setGroup("player");
 
@@ -874,12 +880,90 @@ export default class GameLevel extends Scene {
             let name = tilemapLayers[i].getName()
             if (name == "Platforms") {
                 solidLayer = tilemapLayers[i]
+                //setup the navmesh.
+                this.dynamicMap = <DynamicTilemap>solidLayer.getItems()[0];
+                this.dynamicMap.badNavMesh();
+                this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
             } else if (name == "Collectables") {
                 collectibleLayer = tilemapLayers[i]
             } else if (name == "Animated") {
                 animatedLayer = tilemapLayers[i]
             } else if (name == "Background") {
                 backgroundLayer = tilemapLayers[i]
+            } else if (name.includes("SwitchGroup")) {
+                //process it right now.
+                let switchTiles = <OrthogonalTilemap>tilemapLayers[i].getItems()[0]
+                let switchFound = false;
+                let solidBlockFound = false;
+                let solidBlock = Tileset_Names.SOLID_INK;
+                let default_value = 1;
+                let SWITCH_ON_TILE = 5;
+                let SWITCH_OFF_TILE = 6;
+                let affectedBlocks = Array<Vec2>();
+                let switches = Array<AnimatedSprite>();
+                this.processTileLayer(switchTiles, (tile: number, i: number, j: number) => {
+                    // let startTile = new Vec2(i+0.5, j+0.5)
+                    switch (tile) {
+                        case 0:
+                            break;
+                        case SWITCH_ON_TILE:
+                            if(!switchFound){
+                                switchFound = true;
+                                default_value = SWITCH_ON_TILE;
+                            }else if(default_value != SWITCH_ON_TILE){
+                                console.log("Switch orientation in same switch layer does not match.")
+                                break;
+                            }
+                            //switch ON. Add to the array.
+                            //create a new switch object.
+                            let newSwitch_ON = this.addLevelAnimatedSprite("switch", "primary", new Vec2(i+0.5, j+0.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), new Vec2(4, 4));
+                            newSwitch_ON.animation.playIfNotAlready("ON", true);
+                            switches.push(newSwitch_ON);
+                            break;
+                        case SWITCH_OFF_TILE:
+                            if(!switchFound){
+                                switchFound = true;
+                                default_value = SWITCH_OFF_TILE;
+                            }else if(default_value != SWITCH_OFF_TILE){
+                                console.log("Switch orientation in same switch layer does not match.")
+                                break;
+                            }
+                            let newSwitch_OFF = this.addLevelAnimatedSprite("switch", "primary", new Vec2(i+0.5, j+0.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), new Vec2(4, 4));
+                            newSwitch_OFF.animation.playIfNotAlready("OFF", true);
+                            switches.push(newSwitch_OFF);
+                            //switch OFF. Add to the array.
+                            break;
+                        default:
+                            if(!solidBlockFound){
+                                solidBlockFound = true;
+                                solidBlock = tile;
+                            }else if(solidBlock != tile){
+                                console.log("Solid block in same switch layer does not match.")
+                                break;
+                            }
+                            //the blocks that the switch affect.
+                            affectedBlocks.push(new Vec2(i, j))
+                            break;
+                    }
+                });
+              
+                //set all tiles in tilemap to 0
+                this.processTileLayer(switchTiles, (tile: number, i: number, j: number) => {
+                    switchTiles.setTileAtRowCol(new Vec2(i, j), 0);
+                });
+                let switchLayerName = tilemapLayers[i].getName();
+                for(let j= 0; j < affectedBlocks.length; j += 1){
+                    let block = affectedBlocks[j];
+                    //empty block size is 64, game tile size is 32.
+                    this.addLevelBackgroundImage("empty_locked_block", switchLayerName,new Vec2(block.x+0.5, block.y+0.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), new Vec2(4, 4));
+                    this.dynamicMap.setWriteAccess(block, false);
+                    if(default_value == SWITCH_ON_TILE){
+                        this.dynamicMap.setTileAtRowCol(block, solidBlock);
+                    }
+                }
+                this.switches.push([switches, affectedBlocks, default_value == SWITCH_ON_TILE,solidBlock]);
+                // switchTiles.visible=false;
+                // tilemapLayers[i].disable();
             }
         }
 
@@ -903,11 +987,6 @@ export default class GameLevel extends Scene {
                 }
             });
         }
-
-        //setup the navmesh.
-        this.dynamicMap = <DynamicTilemap>solidLayer.getItems()[0];
-        this.dynamicMap.badNavMesh();
-        this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
 
         // NOTE: This code isn't useful if tiles constantly change.
         // Add a layer to display the graph
@@ -1004,9 +1083,13 @@ export default class GameLevel extends Scene {
             }
             if (collider.overlapArea(tileAABB) == 0 && !this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)) {
                 if(this.placementLeft > 0){
-                    this.dynamicMap.badAddTile(position, Tileset_Names.SOLID_INK);
-                    if(!Home.unlimitedPlacementCheats){
-                        this.placementLeft--;
+                    if(this.dynamicMap.badAddTile(position, Tileset_Names.SOLID_INK)){
+                        if (Input.isMouseJustPressed(0)) {
+                            this.emitter.fireEvent(GameEventType.PLAY_SFX, { key: "scribble", loop: false, holdReference: false });       
+                        }
+                        if(!Home.unlimitedPlacementCheats){
+                            this.placementLeft--;
+                        }
                     }
                 }
             }
@@ -1014,11 +1097,15 @@ export default class GameLevel extends Scene {
             // if(this.checkErasingPlatform(this.playerSpawnColRow,tile)) return;
             let colrow_toAdd = this.dynamicMap.getColRowAt(position)
             if(this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)){
-                this.dynamicMap.badRemoveTile(position);
-                if(!Home.unlimitedPlacementCheats){
-                    this.placementLeft += 1;
-                    if(this.placementLeft> GameLevel.MAX_BLOCKS)
-                        this.placementLeft = GameLevel.MAX_BLOCKS;
+                if(this.dynamicMap.badRemoveTile(position)){
+                    if (Input.isMouseJustPressed(2)) {
+                        this.emitter.fireEvent(GameEventType.PLAY_SFX, { key: "erase", loop: false, holdReference: false });
+                    }
+                    if(!Home.unlimitedPlacementCheats){
+                        this.placementLeft += 1;
+                        if(this.placementLeft> GameLevel.MAX_BLOCKS)
+                            this.placementLeft = GameLevel.MAX_BLOCKS;
+                    }
                 }
             }
         }
@@ -1084,6 +1171,7 @@ export default class GameLevel extends Scene {
         // Check if collectable is a paper.
         if (item_type == Game_Collectables.PINK_PAPER || item_type == Game_Collectables.WHITE_PAPER) {
             this.papersCountLabel.text = "Papers Found: " + (this.whiteFound + this.pinkFound) + "/" + (this.numberPapers);
+            this.emitter.fireEvent(GameEventType.PLAY_SFX, { key: "paper_pickup", loop: false, holdReference: false });
             // If enough papers were found, then  remove the barrier to the next page.
             if (this.whiteFound + this.pinkFound == this.numberPapers) {
                 // Do something here:

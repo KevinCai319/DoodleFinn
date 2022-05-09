@@ -3,7 +3,8 @@ import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Timer from "../../../Wolfie2D/Timing/Timer";
 import { Game_Events } from "../../Events";
 import GameLevel from "../../Scenes/Game";
-import { PlayerStates } from "../PlayerController";
+import Home from "../../Scenes/Home";
+import PlayerController, { PlayerStates, PlayerType } from "../PlayerController";
 import PlayerState from "./PlayerState";
 
 export default class Spawn extends PlayerState {
@@ -25,6 +26,9 @@ export default class Spawn extends PlayerState {
         this.timeElapsed += deltaT
         this.owner.position.copy(Vec2.lerp(this.startLocation,(this.owner.getScene() as GameLevel).PlayerSpawn, (this.timeElapsed*1000)/this.RESPAWN_TIME));
         if(this.parent.invincibleTimer.isStopped()){
+            if(!Home.flyHackCheats){
+                (this.owner._ai as PlayerController).playerType = PlayerType.PLATFORMER;
+            }
             this.finished(PlayerStates.IDLE);
         }
 	}
