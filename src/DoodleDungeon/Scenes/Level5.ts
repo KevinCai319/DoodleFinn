@@ -8,9 +8,9 @@ import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import { AI_Statuses, Game_Collectables, Game_Events, Tileset_Names } from "../Events";
 import Game from "../../Wolfie2D/Loop/Game";
 
-export default class Level4 extends GameLevel {
-    LEVEL_NAME: string = "Level_4"
-    LEVEL_TILESET: string = "Level_4"
+export default class Level5 extends GameLevel {
+    LEVEL_NAME: string = "Level_5"
+    LEVEL_TILESET: string = "Level_5"
 
     DRAWING_LAYER: DynamicTilemap
     OUTLINE_LAYER: DynamicTilemap
@@ -39,7 +39,7 @@ export default class Level4 extends GameLevel {
             Home.bestTimes[1] = Math.min(Home.bestTimes[1], time);
             if (Home.bestTimes[1] == -1) Home.bestTimes[1] = time;
         }
-        if (Home.LevelsUnlocked == 2) {
+        if (Home.LevelsUnlocked == 4) {
             Home.LevelsUnlocked += 1;
         }
         this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: "level_music" });
@@ -69,7 +69,7 @@ export default class Level4 extends GameLevel {
     }
 
     updateScene(deltaT: number): void {
-        super.updateScene(deltaT); 
+        super.updateScene(deltaT);
 
         if(this.checkDrawing() == true){
             Home.unlimitedPlacementCheats = false;
