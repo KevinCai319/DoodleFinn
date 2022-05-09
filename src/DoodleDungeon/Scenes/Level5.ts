@@ -25,6 +25,7 @@ export default class Level5 extends GameLevel {
         this.orig_cheat = Home.unlimitedPlacementCheats;
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/" + this.LEVEL_NAME + "/" + this.LEVEL_TILESET + ".json");
+        this.load.image("Level5Instr", "game_assets/spritesheets/Level5-Instruction.png");
         super.loadScene(true);
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
@@ -80,6 +81,8 @@ export default class Level5 extends GameLevel {
         this.percentFilled.font = "PixelSimple";
         // GameLevel.otherWinCondition = true;
         // Home.unlimitedPlacementCheats = this.orig_cheat;
+        let instr = this.addLevelBackgroundImage("Level5Instr","primary",new Vec2(6,27).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1))
+        instr.alpha=0.5;
     }
 
     updateScene(deltaT: number): void {

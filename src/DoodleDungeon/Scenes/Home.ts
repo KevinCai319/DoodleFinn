@@ -49,6 +49,13 @@ export default class Home extends GameLevel {
     static allLevelsUnlocked:boolean = false;
     static controls:Array<string> = ["T-begin","T-graphite","T-bound","T-goal","T-atk-1","T-atk-2","T-int","T-end","T-sum"];
     instr_index:number = 0;
+
+    //crunch time.
+    static endingUnlockedBefore = false;
+    ending:Sprite
+    specialEnding:boolean = false;
+    //1-7(tutorial-level5+5a), last level has no doodle since you get the letter.
+    static doodles:Array<string> = ["doodle0","doodle1","doodle2","doodle3","doodle4","doodle5","doodle5a"];
     loadScene(): void {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/"+this.LEVEL_NAME+"/"+this.LEVEL_NAME+".json");
@@ -75,6 +82,7 @@ export default class Home extends GameLevel {
         this.load.image("T-int", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Interact.png");
         this.load.image("T-end", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-End.png");
         this.load.image("T-sum", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Summary.png");
+        this.load.image("GameEnding", "game_assets/spritesheets/End_Scene.png");
         
 
         this.load.image("Cheats", "game_assets/spritesheets/TutorialAssets/Cheats.png");
@@ -182,7 +190,6 @@ export default class Home extends GameLevel {
                     let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Not Played" });
                 }
                 if(this.doors[i][0]){
-
                     new_door.alpha = 1;
                 }else{
                     new_door.alpha = 0.2;
@@ -213,6 +220,29 @@ export default class Home extends GameLevel {
         this.livesCount = 1
         this.pauseButton.visible = false
         this.pauseButton.destroy()
+
+        if(!Home.endingUnlockedBefore){
+            //go through each of best times.
+            let test = true;
+            for(let i = 0; i < Home.numberOfLevels; i++){
+                if(Home.bestTimes[i] == -1.0){
+                    test = false;
+                }
+            }
+            if(test){
+                Home.endingUnlockedBefore = true;
+                this.specialEnding = true;
+                //place it normal spot in the level.
+                this.ending = this.addLevelBackgroundImage("GameEnding","UI",Vec2.ZERO,new Vec2(1,1),1)
+                this.ending.position= this.getViewport().getHalfSize()
+                this.ending.scale = new Vec2(0.15,0.15);
+                this.player.freeze();
+                this.cursorDisabled=true;
+            }
+        
+       }else{
+            this.ending = this.addLevelBackgroundImage("GameEnding","primary",new Vec2(135,8).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8)
+        }
 
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "menu_music", loop: true, holdReference: true});
     }
@@ -262,10 +292,11 @@ export default class Home extends GameLevel {
         //     this.emitter.fireEvent(Game_Events.LEVEL_END)
         // }
         super.updateScene(deltaT);
+        
         if(!this.Controls.visible){
             if(this.Instructions.boundary.containsPoint(Input.getGlobalMousePosition())){
                 this.Instructions.animation.playIfNotAlready("highlighted")
-                if(Input.isMouseJustPressed()){
+                if(Input.isMouseJustPressed() &&!this.specialEnding){
                     this.player.freeze()
                     this.Controls.visible = true
                     this.instr_index=0;
@@ -280,7 +311,7 @@ export default class Home extends GameLevel {
             }
 
         }else{
-            if(Input.isMouseJustPressed()){
+            if(Input.isMouseJustPressed() && !this.specialEnding){
                 this.curControl.visible = false;
                 this.remove(this.curControl)
                 if(this.instr_index < Home.controls.length-1){
@@ -297,6 +328,13 @@ export default class Home extends GameLevel {
                     this.instr_index = 0;
                 }
             }
+        }
+        if(this.specialEnding && Input.isMouseJustPressed()){
+            this.ending.visible = false;
+            this.specialEnding = false;
+            this.player.unfreeze();
+            this.ending = this.addLevelBackgroundImage("GameEnding","primary",new Vec2(135,8).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1),0.8)
+            this.cursorDisabled=false;
         }
 
     }
