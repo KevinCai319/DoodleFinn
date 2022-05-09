@@ -194,7 +194,9 @@ export default class Home extends GameLevel {
                 let levelLabel =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,12).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Best Time: \n" });
                 if(Home.bestTimes[i] != -1){
                     let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: ""+Home.bestTimes[i] + "s" });
-                    this.addLevelBackgroundImage(Home.doodles[i], "primary", new Vec2(90.25+5*i,8).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), new Vec2(0.6,0.6),0.8);
+                    if(i < Home.doodles.length){
+                        this.addLevelBackgroundImage(Home.doodles[i], "primary", new Vec2(90.25+5*i,8).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), new Vec2(0.6,0.6),0.8);
+                    }
                 }else{
                     let levelTime =  <Label>this.add.uiElement(UIElementType.LABEL, layer.getName(), { position: new Vec2(90.25+5*i,13).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), text: "Not Played" });
                 }

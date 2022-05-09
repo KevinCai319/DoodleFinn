@@ -10,6 +10,7 @@ import Game from "../../Wolfie2D/Loop/Game";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Color from "../../Wolfie2D/Utils/Color";
+import Level6 from "./Level6";
 
 export default class Level5 extends GameLevel {
     LEVEL_NAME: string = "Level_5"
@@ -29,6 +30,7 @@ export default class Level5 extends GameLevel {
         super.loadScene(true);
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
+        this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Level5_EndArt.png");
     }
 
     // DoodleFinn TODO
@@ -54,7 +56,7 @@ export default class Level5 extends GameLevel {
 
     startScene(): void {
         // Add the Demo Level.
-        this.nextLevel = null
+        this.nextLevel = Level6
         this.home = Home
         this.playerSpawnColRow = new Vec2(3, 30);
 
@@ -62,7 +64,7 @@ export default class Level5 extends GameLevel {
         Home.unlimitedPlacementCheats = true;
 
         //Change win condition (will only win if all paper is collected)
-        GameLevel.paperRequired = false;
+        this.paperRequired = false;
 
         
 
@@ -80,7 +82,7 @@ export default class Level5 extends GameLevel {
         this.percentFilled.backgroundColor = new Color(32, 32, 32, 0.5);
         this.percentFilled.font = "PixelSimple";
         // GameLevel.otherWinCondition = true;
-        GameLevel.otherWinCondition = false;
+        this.otherWinCondition = false;
         // Home.unlimitedPlacementCheats = this.orig_cheat;
         let instr = this.addLevelBackgroundImage("Level5Instr","primary",new Vec2(6,27).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1))
         instr.alpha=0.5;
@@ -88,13 +90,7 @@ export default class Level5 extends GameLevel {
 
     updateScene(deltaT: number): void {
         super.updateScene(deltaT); 
-
-        if(this.checkDrawing() == true){
-            Home.unlimitedPlacementCheats = this.orig_cheat;
-            console.log("win")
-            GameLevel.otherWinCondition = true;
-        }
-
+        this.otherWinCondition = this.checkDrawing();
     }
 
     setUpTileCheck() {
@@ -149,5 +145,10 @@ export default class Level5 extends GameLevel {
     protected goToMenu(): void {
         Home.unlimitedPlacementCheats = this.orig_cheat;
         super.goToMenu();
+    }
+
+    show_art(): void {
+        Home.unlimitedPlacementCheats = this.orig_cheat;
+        this.addLevelBackgroundImage("art","UI",this.viewport.getHalfSize(),new Vec2(3,3),1);
     }
 }

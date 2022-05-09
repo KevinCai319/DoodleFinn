@@ -92,7 +92,7 @@ export default class GameLevel extends Scene {
 
     // Collectible Info. 
     // TODO: Maybe add a class for different Collectables.
-    static paperRequired: boolean = true;
+    protected paperRequired: boolean = true;
     protected Collectibles: Array<AnimatedSprite> = []
     protected pinkFound: number = 0;
     protected whiteFound: number = 0;
@@ -105,7 +105,7 @@ export default class GameLevel extends Scene {
     protected switches:Array<[Array<AnimatedSprite>,Array<Vec2>,boolean,number]> = []
 
     //Other levels may require a different win condition. If fufilled, that Level.ts will end the level
-    static otherWinCondition: boolean = false;
+    protected otherWinCondition: boolean = false;
 
     //Timer used to determine time it takes to finish the level.
     protected levelTimer: Timer;
@@ -214,7 +214,6 @@ export default class GameLevel extends Scene {
             // Clear debug log.
             Debug.clearLog();
             Debug.clearCanvas();
-            this.gameEnd = true;
         });
 
         // Have the curtains fade out.
@@ -440,7 +439,10 @@ export default class GameLevel extends Scene {
                         // Check if the player has collected all the collectibles.
                         // TODO: make this less rigid.
                         if(this.levelEndTimer.isStopped() && !this.gameEnd){
-                            if ((GameLevel.paperRequired && this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) || GameLevel.otherWinCondition) {
+                            if ((this.paperRequired && this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) || this.otherWinCondition) {
+                                this.gameEnd = true;
+                                //disable pause button.
+                                this.pauseButton.visible = false;
                                 Input.disableMouseInput();
                                 this.levelEndTimer.start();
                             }
@@ -479,6 +481,7 @@ export default class GameLevel extends Scene {
                     break;
                 case Game_Events.GAME_SHOW_IMAGE:
                     {
+                        
                         //freeze the game.
                         this.getLayer("primary").disable();
 
@@ -487,7 +490,7 @@ export default class GameLevel extends Scene {
                         this.enemies.forEach(enemy => {
                             enemy.freeze();
                         });
-
+                        Input.enableMouseInput();
                         this.levelTimer.pause();
                         this.show_art();
                     }
@@ -495,7 +498,6 @@ export default class GameLevel extends Scene {
                 case Game_Events.LEVEL_END:
                     {
                         this.levelTimer.pause();
-                        console.log("exit")
                         // Go to the next level
                         if (this.nextLevel) {
                             let sceneOptions = {
@@ -590,7 +592,7 @@ export default class GameLevel extends Scene {
         */
 
         this.levelTransitionScreen = <Rect>this.add.graphic(GraphicType.RECT, "UI", { position: new Vec2(2000, 2000), size: new Vec2(4000, 4000) });
-        this.levelTransitionScreen.color = new Color(0, 0, 0);
+        this.levelTransitionScreen.color = new Color(11, 17, 38);
         this.levelTransitionScreen.alpha = 1;
 
         this.levelTransitionScreen.tweens.add("fadeIn", {

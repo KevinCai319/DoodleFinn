@@ -12,6 +12,7 @@ import { Game_Events } from "../Events";
 import PlayerController, { PlayerStates, PlayerType } from "../Player/PlayerController";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Input from "../../Wolfie2D/Input/Input";
+import Level3 from "./Level3";
 
 export default class Level5a extends GameLevel {
     LEVEL_NAME: string = "Level_5a"
@@ -32,6 +33,7 @@ export default class Level5a extends GameLevel {
         this.load.audio("bullet_shot","game_assets/sounds/bullet.wav");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
+        this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Level5a_EndArt.png");
     }
 
     // DoodleFinn TODO
@@ -57,7 +59,7 @@ export default class Level5a extends GameLevel {
 
     startScene(): void {
         // Add the Demo Level.
-        this.nextLevel = null
+        this.nextLevel = Level3
         this.home = Home
         this.playerSpawnColRow = new Vec2(3, 45)
 
@@ -125,79 +127,9 @@ export default class Level5a extends GameLevel {
     updateScene(deltaT: number): void {
         // this.viewport.disableStaticBoundary();
         super.updateScene(deltaT);
-        //check if player is in balloon
-        // if((this.player._ai as PlayerController).balloon == null && this.balloon.boundary.overlapArea(this.player.boundary) && Input.isJustPressed("e")){
-        //     // this.balloon.visible = false;
-        //     (this.player._ai as PlayerController).balloon = this.balloon;
-        //     (this.player._ai as PlayerController).hasBalloon = true;
-        //     (this.player._ai as PlayerController).playerType = PlayerType.TOPDOWN;
-        //     (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
-        // }else{
-        //     if((this.player._ai as PlayerController).hasBalloon){
-        //         this.balloon.position.copy(this.player.position).add(new Vec2(0,-this.balloon.boundary.hh*1.8));
-        //         for(let t of this.bullets){
-        //             if(t.visible){
-        //                 if(t.boundary.overlapArea(this.balloon.collisionShape as AABB)){
-        //                     t.visible = false;
-        //                     (this.player._ai as PlayerController).balloon = null;
-        //                     (this.player._ai as PlayerController).hasBalloon = false;
-        //                     if(!Home.flyHackCheats){
-        //                         (this.player._ai as PlayerController).playerType = PlayerType.PLATFORMER;
-        //                     }
-        //                     (this.player._ai as PlayerController).changeState(PlayerStates.IDLE);
-        //                 }
-        //             }
-        //         }
-        //     }else{
-        //         this.balloon.position.copy(this.balloonPosition);
-        //     }
-        // }
-        //Spawn bullets
-//         for(let t of this.turrets){
-
-//             if(this.bulletSpawnTimer.isStopped() && Math.random()>0.99){
-//                 //get angle between turret and player
-//                 let angle = t.dirTo(this.player.position);
-//                 //set magnitude to 200.
-//                 let spawnPoint = t.clone().add(angle.scaleTo(20));
-//                 //check if point is within the viewport
-//                 if(this.viewport.getView().containsPoint(spawnPoint)){
-//                     //check if the tile on it is solid or not
-//                     let tile = this.dynamicMap.getColRowAt(spawnPoint);
-//                     if(!this.dynamicMap.isTileCollidable(tile.x,tile.y)){
-//                         //get a bullet from the pool
-//                         //shoot the bullet
-//                         this.spawnBullet(spawnPoint.x,spawnPoint.y,angle);
-//                         this.emitter.fireEvent(GameEventType.PLAY_SFX, {key: "bullet_shot"});
-//                     }
-//                 }
-//             }
-//         }
-//         if(this.bulletSpawnTimer.isStopped()){
-//             this.bulletSpawnTimer.start();
-//         }
-    
     }
 
-//     spawnBullet(x: number, y: number,direction:Vec2): void {
-//         let bullet: AnimatedSprite = null;
-
-// 		for(let b of this.bullets){
-// 			if(!b.visible){
-// 				// We found a dead rock
-// 				bullet = b;
-// 				break;
-// 			}
-// 		}
-
-// 		if(bullet !== null){
-// 			// Bring this rock to life
-// 			bullet.visible = true;
-// 			// Loop on position until we're clear of the player
-// 			bullet.position = new Vec2(x, y);
-//             //set rotation of bullet
-//             bullet.rotation = -direction.angleToCCW(Vec2.RIGHT);
-//             bullet.setAIActive(true, {direction: direction});
-// 		}
-//     }
+    show_art(): void {
+        this.addLevelBackgroundImage("art","UI",this.viewport.getHalfSize(),new Vec2(3,3),1);
+    }
 } 

@@ -2,6 +2,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameLevel from "./Game";
 import Home from "./Home";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
+import Level4 from "./Level4";
 
 export default class Level1 extends GameLevel {
     LEVEL_NAME: string = "Level_1"
@@ -38,7 +39,7 @@ export default class Level1 extends GameLevel {
 
     startScene(): void {
         // Add the Demo Level.
-        this.nextLevel = null
+        this.nextLevel = Level4;
         this.home = Home
         this.playerSpawnColRow = new Vec2(7, 40)
         // Do generic setup for a GameLevel
@@ -51,6 +52,6 @@ export default class Level1 extends GameLevel {
         super.updateScene(deltaT);
     }
     show_art(): void {
-        this.addLevelBackgroundImage("art","UI",this.viewport.getHalfSize(),new Vec2(1,1),1);
+        this.addLevelBackgroundImage("art","UI",this.viewport.getHalfSize(),new Vec2(3,3),1);
     }
 }

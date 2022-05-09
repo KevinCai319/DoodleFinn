@@ -2,6 +2,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameLevel from "./Game";
 import Home from "./Home";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
+import Level5a from "./Level5a";
 
 export default class Level2 extends GameLevel {
     LEVEL_NAME: string = "Level_2"
@@ -12,6 +13,7 @@ export default class Level2 extends GameLevel {
         super.loadScene(true);
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
+        this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Level2_EndArt.png");
     }
 
     // DoodleFinn TODO
@@ -37,7 +39,7 @@ export default class Level2 extends GameLevel {
 
     startScene(): void {
         // Add the Demo Level.
-        this.nextLevel = null;
+        this.nextLevel = Level5a;
         this.home = Home
         this.playerSpawnColRow = new Vec2(7, 40)
         // Do generic setup for a GameLevel
@@ -48,5 +50,8 @@ export default class Level2 extends GameLevel {
 
     updateScene(deltaT: number): void {
         super.updateScene(deltaT);
+    }
+    show_art(): void {
+        this.addLevelBackgroundImage("art","UI",this.viewport.getHalfSize(),new Vec2(3,3),1);
     }
 }

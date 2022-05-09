@@ -10,6 +10,7 @@ import Game from "../../Wolfie2D/Loop/Game";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Color from "../../Wolfie2D/Utils/Color";
+import Level2 from "./Level2";
 
 export default class Level4 extends GameLevel {
     LEVEL_NAME: string = "Level_4"
@@ -29,6 +30,7 @@ export default class Level4 extends GameLevel {
         super.loadScene(true);
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
+        this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Level4_EndArt.png");
     }
 
     // DoodleFinn TODO
@@ -54,7 +56,7 @@ export default class Level4 extends GameLevel {
 
     startScene(): void {
         // Add the Demo Level.
-        this.nextLevel = null
+        this.nextLevel = Level2;
         this.home = Home
         this.playerSpawnColRow = new Vec2(3, 30);
 
@@ -62,7 +64,7 @@ export default class Level4 extends GameLevel {
         Home.unlimitedPlacementCheats = true;
 
         //Change win condition (will only win if all paper is collected)
-        GameLevel.paperRequired = false;
+        this.paperRequired = false;
 
         
 
@@ -82,18 +84,13 @@ export default class Level4 extends GameLevel {
         // GameLevel.otherWinCondition = true;
         // Home.unlimitedPlacementCheats = this.orig_cheat;
         let instr = this.addLevelBackgroundImage("Level4Instr","primary",new Vec2(6,27).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1))
+        
         instr.alpha=0.5;
     }
 
     updateScene(deltaT: number): void {
         super.updateScene(deltaT); 
-
-        if(this.checkDrawing() == true){
-            Home.unlimitedPlacementCheats = this.orig_cheat;
-
-            GameLevel.otherWinCondition = true;
-        }
-
+        this.otherWinCondition = this.checkDrawing();
     }
 
     setUpTileCheck() {
@@ -150,5 +147,9 @@ export default class Level4 extends GameLevel {
         super.goToMenu();
     }
 
+    show_art(): void {
+        this.addLevelBackgroundImage("art","UI",this.viewport.getHalfSize(),new Vec2(3,3),1);
+        Home.unlimitedPlacementCheats = this.orig_cheat;
+    }
     // Make sure win doesn't occur (walk on ripped space) until all tiles are drawn
 }

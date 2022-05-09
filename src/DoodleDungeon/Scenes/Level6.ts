@@ -197,4 +197,9 @@ export default class Level6 extends GameLevel {
             bullet.setAIActive(true, {direction: direction});
 		}
     }
+    show_art(): void {
+        // this.goToMenu();
+        this.emitter.fireEvent(Game_Events.LEVEL_END);
+        // this.addLevelBackgroundImage("art","UI",this.viewport.getHalfSize(),new Vec2(3,3),1);
+    }
 }

@@ -5,6 +5,7 @@ import PlayerController, { PlayerType } from "../Player/PlayerController";
 import GameLevel from "./Game";
 import Home from "./Home";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
+import Level1 from "./Level1";
 
 export default class DemoLevel extends GameLevel {
     LEVEL_NAME:string ="DemoLevel"
@@ -25,7 +26,7 @@ export default class DemoLevel extends GameLevel {
         this.load.image("InstEndLevel", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-NextLevel.png");
         this.load.image("InstEnd", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-End.png");
         this.load.image("InstAttack2", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Attack2.png");
-        
+        this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Tutorial_EndArt.png");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/"+this.LEVEL_NAME+"/enemy.json");
     }
@@ -55,7 +56,7 @@ export default class DemoLevel extends GameLevel {
 
     startScene(): void {
         // Add the Demo Level.
-        this.nextLevel = null
+        this.nextLevel = Level1;
         this.home = Home
         this.playerSpawnColRow = new Vec2(2,47)
         // Add in special graphics.
@@ -81,7 +82,7 @@ export default class DemoLevel extends GameLevel {
         
     }
 
-    // updateScene(deltaT: number): void {
-    //     super.updateScene(deltaT);
-    // }
+    show_art(): void {
+        this.addLevelBackgroundImage("art","UI",this.viewport.getHalfSize(),new Vec2(3,3),1);
+    }
 }
