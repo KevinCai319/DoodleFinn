@@ -32,6 +32,7 @@ export default class Home extends GameLevel {
     LEVEL_TILESET:string = "Tutorial"
     Instructions:AnimatedSprite = null
     Controls:AnimatedSprite = null
+    curControl:Sprite = null;
     //           [unlocked, door sprite, level]
     doors:Array<[boolean, AnimatedSprite, new (...args: any) => GameLevel]>;
     static bestTimes:Array<number>;
@@ -46,6 +47,8 @@ export default class Home extends GameLevel {
     toggles: Array<[Sprite,Sprite,boolean,Function]> = [];
     static unlimitedLives:boolean = false;
     static allLevelsUnlocked:boolean = false;
+    static controls:Array<string> = ["T-begin","T-graphite","T-bound","T-goal","T-atk-1","T-atk-2","T-int","T-end","T-sum"];
+    instr_index:number = 0;
     loadScene(): void {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/"+this.LEVEL_NAME+"/"+this.LEVEL_NAME+".json");
@@ -62,6 +65,17 @@ export default class Home extends GameLevel {
         this.load.image("credit2","game_assets/spritesheets/TutorialAssets/credit2.png")
         this.load.image("ClickHere", "game_assets/spritesheets/TutorialAssets/ClickHere.png");
         this.load.image("PressE", "game_assets/spritesheets/TutorialAssets/PressE.png");
+
+        this.load.image("T-begin", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Beginning.png");
+        this.load.image("T-graphite", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Graphite.png");
+        this.load.image("T-bound", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Level-Boundary.png");
+        this.load.image("T-goal", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Goals.png");
+        this.load.image("T-atk-1", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Attack.png");
+        this.load.image("T-atk-2", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Attack-Sight.png");
+        this.load.image("T-int", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Interact.png");
+        this.load.image("T-end", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-End.png");
+        this.load.image("T-sum", "game_assets/spritesheets/TutorialAssets/Final_Tutorial/Tutorial-Summary.png");
+        
 
         this.load.image("Cheats", "game_assets/spritesheets/TutorialAssets/Cheats.png");
         this.load.image("ON", "game_assets/spritesheets/TutorialAssets/TOGGLE_ON.png");
@@ -188,6 +202,7 @@ export default class Home extends GameLevel {
         this.Controls.position= this.getViewport().getHalfSize()
         this.Controls.scale = this.Controls.position.scaled(2).div(this.Controls.size)
         this.Controls.visible = false
+        this.Controls.alpha=1;
         this.viewport.setZoomLevel(1.1);
         this.viewport.setBounds(0, 0, this.dynamicMap.getDimensions().x*GameLevel.DEFAULT_LEVEL_TILE_SIZE.x, this.dynamicMap.getDimensions().y*GameLevel.DEFAULT_LEVEL_TILE_SIZE.y)
         // this.viewport.update(0);
@@ -253,6 +268,12 @@ export default class Home extends GameLevel {
                 if(Input.isMouseJustPressed()){
                     this.player.freeze()
                     this.Controls.visible = true
+                    this.instr_index=0;
+                    let tmp = this.add.sprite(Home.controls[this.instr_index],"UI")
+                    tmp.position= this.getViewport().getHalfSize()
+                    tmp.scale = tmp.position.scaled(2).div(tmp.size)
+                    tmp.visible = true;
+                    this.curControl = tmp;
                 }
             }else{
                 this.Instructions.animation.playIfNotAlready("idle")
@@ -260,8 +281,21 @@ export default class Home extends GameLevel {
 
         }else{
             if(Input.isMouseJustPressed()){
-                this.player.unfreeze()
-                this.Controls.visible = false
+                this.curControl.visible = false;
+                this.remove(this.curControl)
+                if(this.instr_index < Home.controls.length-1){
+                    this.instr_index++
+                    //show the image for the proper index.
+                    let tmp = this.add.sprite(Home.controls[this.instr_index],"UI")
+                    tmp.position= this.getViewport().getHalfSize()
+                    tmp .scale = tmp.position.scaled(2).div(tmp.size)
+                    tmp.visible = true;
+                    this.curControl = tmp;
+                }else{
+                    this.player.unfreeze()
+                    this.Controls.visible = false
+                    this.instr_index = 0;
+                }
             }
         }
 

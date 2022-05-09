@@ -15,8 +15,10 @@ export default class Level5 extends GameLevel {
     DRAWING_LAYER: DynamicTilemap
     OUTLINE_LAYER: DynamicTilemap
     REQUIRED_TILES: Array<Vec2> = [];
+    orig_cheat:boolean = false;
 
     loadScene(): void {
+        this.orig_cheat = Home.unlimitedPlacementCheats;
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/" + this.LEVEL_NAME + "/" + this.LEVEL_TILESET + ".json");
         super.loadScene(true);
@@ -72,7 +74,7 @@ export default class Level5 extends GameLevel {
         super.updateScene(deltaT);
 
         if(this.checkDrawing() == true){
-            Home.unlimitedPlacementCheats = false;
+            Home.unlimitedPlacementCheats = this.orig_cheat;
 
             GameLevel.otherWinCondition = true;
         }
@@ -121,5 +123,8 @@ export default class Level5 extends GameLevel {
         return true;
     }
 
-    // Make sure win doesn't occur (walk on ripped space) until all tiles are drawn
+    protected goToMenu(): void {
+        Home.unlimitedPlacementCheats = this.orig_cheat;
+        super.goToMenu();
+    }
 }

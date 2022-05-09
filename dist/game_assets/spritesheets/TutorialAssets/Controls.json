@@ -1,8 +1,8 @@
 {
     "name": "Controls",
-    "spriteSheetImage": "Controls.png",
-    "spriteWidth": 2224,
-    "spriteHeight": 2000,
+    "spriteSheetImage": "Background.png",
+    "spriteWidth": 1920,
+    "spriteHeight": 1080,
     "columns": 1,
     "rows": 1,
     "durationType": "time",
