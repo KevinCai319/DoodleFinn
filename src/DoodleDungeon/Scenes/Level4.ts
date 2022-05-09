@@ -6,10 +6,16 @@ import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import Layer from "../../Wolfie2D/Scene/Layer";
 import DynamicTilemap from "../../Wolfie2D/Nodes/Tilemaps/DynamicMap";
 import { AI_Statuses, Game_Collectables, Game_Events, Tileset_Names } from "../Events";
+import Game from "../../Wolfie2D/Loop/Game";
 
 export default class Level4 extends GameLevel {
     LEVEL_NAME: string = "Level_4"
     LEVEL_TILESET: string = "Level_4"
+
+    DRAWING_LAYER: DynamicTilemap
+    OUTLINE_LAYER: DynamicTilemap
+    REQUIRED_TILES: Array<Vec2> = [];
+
     loadScene(): void {
         // Load resources
         this.load.tilemap(this.LEVEL_NAME, "game_assets/tilemaps/" + this.LEVEL_NAME + "/" + this.LEVEL_TILESET + ".json");
@@ -36,85 +42,84 @@ export default class Level4 extends GameLevel {
         if (Home.LevelsUnlocked == 2) {
             Home.LevelsUnlocked += 1;
         }
-        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "level_music"});
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: "level_music" });
     }
 
     startScene(): void {
         // Add the Demo Level.
         this.nextLevel = null
         this.home = Home
-        this.playerSpawnColRow = new Vec2(3, 30)
+        this.playerSpawnColRow = new Vec2(3, 30);
+
+        //Unlimited drawing
+        Home.unlimitedPlacementCheats = true;
+
+        //Change win condition (will only win if all paper is collected)
+        GameLevel.paperRequired = false;
+
+        
+
         // Do generic setup for a GameLevel
         super.startScene();
-        //this.processLevelData(this.LEVEL_NAME);
 
-        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "level_music", loop: true, holdReference: true});
+        //Get tilelayers for checking the drawing
+        this.setUpTileCheck();
+
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "level_music", loop: true, holdReference: true });
     }
 
     updateScene(deltaT: number): void {
         super.updateScene(deltaT);
-        // if(this.tilemaps.foreground == drawnTiles){
-        //     this.emitter.fireEvent(Game_Events.LEVEL_END);
-        // }
+
+        if(this.checkDrawing() == true){
+            Home.unlimitedPlacementCheats = false;
+
+            GameLevel.otherWinCondition = true;
+        }
+
     }
 
-    // protected processLevelData(level_id: string): void {
-    //     super.processLevelData(level_id);
+    setUpTileCheck() {
+        //Get layers for checking the drawing
+        let tilemapLayers = this.tilemaps;
+        console.log(tilemapLayers);
 
-    //     let tilemapLayers = this.add.tilemap(level_id, GameLevel.LEVEL_SCALING);
-    //     let penLayer = null;
-    //     let foregroundLayer = null;
-    //     for (let i = 0; i < tilemapLayers.length; i += 1) {
-    //         let name = tilemapLayers[i].getName()
-    //         if (name == "Pen") {
-    //             penLayer = tilemapLayers[i]
-    //         } else if (name == "Foreground") {
-    //             foregroundLayer = tilemapLayers[i]
-    //         }
-    //     }
+        for (let i = 0; i < tilemapLayers.length; i += 1) {
+            let name = tilemapLayers[i].name;
+            if (name == "Foreground") {
+                this.OUTLINE_LAYER = <DynamicTilemap>tilemapLayers[i]
+            } else if (name == "Platforms") {
+                this.DRAWING_LAYER = <DynamicTilemap>tilemapLayers[i]
+            }
+        }
+        console.log(this.OUTLINE_LAYER);
+        console.log(this.DRAWING_LAYER);
 
-    //     let outline = <OrthogonalTilemap>foregroundLayer.getItems()[0];
-    //     this.processTileLayer(outline, (tile: number, i: number, j: number) => {
+        let dimensions = this.OUTLINE_LAYER.getDimensions();
 
-    //     });
+        for (var x = 0; x < dimensions.x; x++) {
+            for (var y = 0; y < dimensions.y; y++) {
+                //Check if the current tile is an outline tile
+                let outline_tile = this.OUTLINE_LAYER.getTileAtRowCol(new Vec2(x, y));
+                if (outline_tile == 0) continue; //Skip if not
+                this.REQUIRED_TILES.push(new Vec2(x, y));
+            }
+        }
+        console.log(dimensions.x * dimensions.y);
+        console.log(this.REQUIRED_TILES.length);
+    }
 
-    //     if(foregroundLayer != null){
+    //Test if the player's drawing matches the outline
+    checkDrawing() {
+        // let finished = false;
+        for (let vec of this.REQUIRED_TILES) {
+            //If current tile is a outline tile, but the player has not drawn on this tile, stop checking
+            let drawing_tile = this.DRAWING_LAYER.getTileAtRowCol(vec);
+            // console.log(drawing_tile);
+            if (drawing_tile == 0) return false;
+        }
+        return true;
+    }
 
-    //     }
-    //     // Parse all collectables.
-    //     if (collectibleLayer !== null) {
-    //         let collectibles = <OrthogonalTilemap>collectibleLayer.getItems()[0]
-    //         this.processTileLayer(collectibles, (tile: number, i: number, j: number) => {
-    //             let startTile = new Vec2(i + 0.5, j + 0.5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE)
-    //             let toAdd = null
-    //             let trigger = null
-    //             tile = this.tileToGroup(tile)
-    //             switch (tile) {
-    //                 // TODO: Make a proper enum to handle this instead of hardcoding.
-    //                 case Game_Collectables.WHITE_PAPER:
-    //                     trigger = Game_Events.WHITE_PAPER_FOUND
-    //                     toAdd = this.addLevelAnimatedSprite("white_paper", "primary", startTile)
-    //                     this.numberWhite += 1
-    //                     this.numberPapers += 1
-    //                     break;
-    //                 case Game_Collectables.PINK_PAPER:
-    //                     trigger = Game_Events.PINK_PAPER_FOUND
-    //                     toAdd = this.addLevelAnimatedSprite("pink_paper", "primary", startTile)
-    //                     this.numberPink += 1
-    //                     this.numberPapers += 1
-    //                     break;
-    //                 default:
-    //                     break;
-    //             }
-    //             if (tile != 0) {
-    //                 toAdd.addPhysics(toAdd.boundary, undefined, false, true);
-    //                 toAdd.setTrigger("player", trigger, null);
-    //                 this.Collectibles.push(toAdd)
-    //                 // remove the tile from the map, we parsed it.
-    //                 collectibles.setTileAtRowCol(new Vec2(i, j), 0)
-    //             }
-    //         })
-    //     }
-    // }
-    
+    // Make sure win doesn't occur (walk on ripped space) until all tiles are drawn
 }
