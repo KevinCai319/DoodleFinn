@@ -7,17 +7,16 @@ import GameLevel from "./DoodleDungeon/Scenes/Game";
 (function main(){
     // Run any tests
     runTests();
-    // Find resolution of the window.
-    const resolution = new Vec2(window.screen.width * window.devicePixelRatio , window.screen.height * window.devicePixelRatio);
-    const CANVAS_SCALE = 0.65;
-    // console.log(resolution.x*CANVAS_SCALE*9/16);
-    // console.log(GameLevel.DEFAULT_LEVEL_TILE_SIZE.y*20);
+    // Fixed resolution of the window.
+    const GameSize = 1240;
+    const resolution = new Vec2(GameSize,GameSize* 9/16);
+    const CANVAS_SCALE = 1;
     // const tile_height = (resolution.x*CANVAS_SCALE*9/16)/(GameLevel.DEFAULT_LEVEL_TILE_SIZE.y*20);
     // GameLevel.DEFAULT_LEVEL_TILE_SIZE.scale(tile_height);
 
     // Set up options for our game
     let options = {
-        canvasSize: {x: resolution.x*CANVAS_SCALE, y: resolution.x*CANVAS_SCALE*9/16},          // The size of the game
+        canvasSize: {x: resolution.x * CANVAS_SCALE, y: resolution.y * CANVAS_SCALE},          // The size of the game
         clearColor: {r: 34, g: 32, b: 52},   // The color the game clears to
         inputs: [
             {name: "left", keys: ["a"]},

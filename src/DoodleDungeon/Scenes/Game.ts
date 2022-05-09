@@ -85,7 +85,7 @@ export default class GameLevel extends Scene {
     protected levelTransitionScreen: Rect;
 
     // TODO: Move health bar to a separate class.
-    protected healthBar: Array<Sprite> = [];
+    // protected healthBar: Array<Sprite> = [];
     protected inkBar: Array<Sprite> = [];
     protected menuButton: Button
     protected pauseButton: Button
@@ -111,7 +111,63 @@ export default class GameLevel extends Scene {
     protected levelEndSpots: Array<Rect> = []
     protected nextLevel: new (...args: any) => GameLevel;
     protected home: new (...args: any) => GameLevel;
+    protected compass: Sprite;
+    static firstLoad: boolean = true;
+    loadScene(loadUI?:boolean): void {
+        if(GameLevel.firstLoad){
+            GameLevel.firstLoad = false;
+            this.load.spritesheet("player", "game_assets/spritesheets/DoodleFinn/DoodleFinn-Sprite.json");
+            this.load.spritesheet("melee_enemy", "game_assets/spritesheets/FlyEnemy/FlyEnemy.json")
+            this.load.spritesheet("charging_enemy", "game_assets/spritesheets/ChargeEnemy/ChargeEnemy.json")
+            
+            this.load.spritesheet("pink_paper", "game_assets/spritesheets/pink_paper.json");
+            this.load.spritesheet("white_paper", "game_assets/spritesheets/white_paper.json");
+            this.load.spritesheet("cursor", "game_assets/spritesheets/cursor.json");
+            this.load.image("drawnTile", "game_assets/spritesheets/Filled_Tile.png");
+            this.load.audio("level_music", "game_assets/music/doodlefinn_level_music.wav")
+            this.load.audio("player_hit_enemy", "game_assets/sounds/coin.wav")
+            this.load.audio("jump", "game_assets/sounds/jump.wav")
+            this.load.audio("player_death", "game_assets/sounds/death.wav")
+            this.load.audio("player_hurt", "game_assets/sounds/zap.wav")
+            this.load.audio("scribble", "game_assets/sounds/scribble.wav")
+            this.load.audio("erase", "game_assets/sounds/erase.wav")
+            this.load.audio("paper_pickup", "game_assets/sounds/paper_pickup.wav")
+        }
+        //Stuff used when you are in a level
+        if(loadUI){
+            this.load.image("pencil", "game_assets/spritesheets/Pencil.png");
+            this.load.image("heart", "game_assets/spritesheets/Full_Heart.png");
+            this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
+            this.load.image("Compass", "game_assets/spritesheets/Compass.png");
+        }
+    }
 
+    unloadCommon(): void {
+        this.load.keepSpritesheet("player");
+        this.load.keepSpritesheet("melee_enemy")
+        this.load.keepSpritesheet("charging_enemy")
+        
+        this.load.keepSpritesheet("pink_paper");
+        this.load.keepSpritesheet("white_paper");
+        this.load.keepSpritesheet("cursor");
+        this.load.keepImage("drawnTile");
+        
+        // //Stuff used when you are in a level
+        // if(loadUI){
+        //     this.load.image("pencil", "game_assets/spritesheets/Pencil.png");
+        //     this.load.image("heart", "game_assets/spritesheets/Full_Heart.png");
+        //     this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
+        //     this.load.image("Compass", "game_assets/spritesheets/Compass.png");
+        // }
+        this.load.keepAudio("level_music")
+        this.load.keepAudio("player_hit_enemy")
+        this.load.keepAudio("jump")
+        this.load.keepAudio("player_death")
+        this.load.keepAudio("player_hurt")
+        this.load.keepAudio("scribble")
+        this.load.keepAudio("erase")
+        this.load.keepAudio("paper_pickup")
+    }
     startScene(): void {
         this.gameEnd = false;
         this.levelTimer = new Timer(1000 * 100000);
@@ -173,7 +229,35 @@ export default class GameLevel extends Scene {
 
     updateScene(deltaT: number) {
 
+        if(this.compass !== undefined){
+           // find the nearest collectable.
+            let minCollectable: AnimatedSprite = null;
+            let minDistance: number = Number.MAX_VALUE;
+            for(let collectable of this.Collectibles){
+                    if(collectable.alpha > 0){
+                        let distance = collectable.position.distanceTo(this.player.position);
+                        
+                        if(minCollectable === null || distance < minDistance){
+                            minCollectable = collectable;
+                            minDistance = distance;
+                        }
+                    }
 
+            }
+            if(minCollectable !== null){
+                this.compass.visible = true;
+                this.compass.rotation+=1;
+                let direction =  this.player.position.dirTo(minCollectable.position);
+                let angle =Vec2.RIGHT.angleToCCW(direction)-Math.PI/2;
+                // console.log(angle)
+                this.compass.rotation = angle;
+                this.compass.position = this.player.position.clone().add(direction.scale(this.compass.boundary.hh*2.05)); 
+ 
+            }else{
+                this.compass.visible = false;
+            }
+
+        }
         // console.log(Input.isMousePressed(0) + "|"+ Input.isMousePressed(2));
         if(this.pauseButton.boundary.containsPoint(Input.getMousePosition())){
             this.pauseButton.alpha = 1;
@@ -183,7 +267,7 @@ export default class GameLevel extends Scene {
         if (this.pauseButton.visible && (Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
            this.pauseButton.onClick()
         }
-        this.updateHealthBar();
+        // this.updateHealthBar();
         if(this.inkBar.length  == GameLevel.MAX_BLOCKS){
             //show the first placementLeft items in inkbar.
             for (let i = 0; i < this.placementLeft; i++) {
@@ -215,12 +299,6 @@ export default class GameLevel extends Scene {
                 if (Input.isMousePressed(2)) {
                     // Remove tile (Right Click)
                     this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
-                }
-                if (Input.isMouseJustPressed(0)) {
-                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "scribble", loop: false, holdReference: false });       
-                }
-                if (Input.isMouseJustPressed(2)) {
-                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "erase", loop: false, holdReference: false });
                 }
             }
         } else {
@@ -312,7 +390,7 @@ export default class GameLevel extends Scene {
                 case Game_Events.PLAYER_HURT:
                     {
                         this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_hurt", loop: false, holdReference: false });
-                        this.updateHealthBar();
+                        // this.updateHealthBar();
                     }
                     break;
                 case Game_Events.PLAYER_LOSE_LIFE:
@@ -380,7 +458,7 @@ export default class GameLevel extends Scene {
      * Initializes the viewport
      */
     protected initViewport(): void {
-        this.viewport.setZoomLevel(1.2);
+        this.viewport.setZoomLevel(1.1);
     }
 
     /**
@@ -393,8 +471,8 @@ export default class GameLevel extends Scene {
         this.livesCountLabel.backgroundColor = new Color(32, 32, 32, 0.5);
         this.livesCountLabel.font = "PixelSimple";
 
-        this.setupHealthBar();
-        this.updateHealthBar();
+        // this.setupHealthBar();
+        // this.updateHealthBar();
         this.setupInkBar();
         // Prompt for paper.
         this.papersCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(90, 60), text: "Find some paper!" });
@@ -510,25 +588,6 @@ export default class GameLevel extends Scene {
         this.menuButton = menuBtn
     }
 
-    /**
-     * Initializes the player's health bar.
-     * May be removed in the future.
-     */
-    protected setupHealthBar(): void {
-        let location = new Vec2(30, this.viewport.getView().hh*2-30);
-        let scale = new Vec2(0.12, 0.12);
-        // Create up to 10 hearts on the UI layer.
-        try {
-            for (let i = 0; i < 10; i++) {
-                this.healthBar.push(this.addLevelBackgroundImage("half_heart", "UI", location, scale));
-                this.healthBar.push(this.addLevelBackgroundImage("heart", "UI", location, scale));
-                location.x += 33;
-            }
-        } catch (e) {
-
-        }
-    }
-
     protected setupInkBar(): void {
         let location = new Vec2(this.viewport.getView().hw-140,45);
         let scale = new Vec2(0.1,0.1);
@@ -542,21 +601,6 @@ export default class GameLevel extends Scene {
             }
         } catch (e) {
             console.log("No ink found.")
-        }
-    }
-
-    /**
-     * Updates the player's health bar.
-     * May be removed in the future to another class.
-     */
-    protected updateHealthBar(): void {
-        let playerHealth = (this.player._ai as PlayerController).health;
-        for (let i = 0; i < this.healthBar.length; i++) {
-            if (i % 2 == 1) {
-                this.healthBar[i].visible = (i + 1 <= playerHealth);
-            } else {
-                this.healthBar[i].visible = (i + 1 == playerHealth && playerHealth % 2 == 1);
-            }
         }
     }
 
@@ -586,13 +630,20 @@ export default class GameLevel extends Scene {
         if(Home.flyHackCheats){
             this.player.addAI(PlayerController, { playerType: PlayerType.TOPDOWN, tilemap: "Main" });
         }else{
-            this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main" });
+            this.player.addAI(PlayerController, { playerType: PlayerType.PLATFORMER, tilemap: "Main"});
         }
         this.player.setGroup("player");
 
 
         this.viewport.follow(this.player);
         this.livesCount = 3
+        // add a compass.
+        try{
+            this.compass = this.addLevelBackgroundImage("Compass", "primary",this.player.position.clone().add(new Vec2(0, -this.player.boundary.hh)), new Vec2(0.2, 0.2));
+    
+        }catch(e){
+            console.log("No compass found.")
+        }
     }
 
     get PlayerSpawn(): Vec2 {
@@ -737,7 +788,7 @@ export default class GameLevel extends Scene {
      * @param alpha The transparency of the sprite.
      * @return The sprite that was added.
      */
-    protected addLevelAnimatedSprite(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
+    addLevelAnimatedSprite(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
         let toAdd = this.add.animatedSprite(name, layer);
         toAdd.position.copy(position);
         toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size);
@@ -756,7 +807,7 @@ export default class GameLevel extends Scene {
      * @param alpha The transparency of the sprite.
      * @return The sprite that was added.
      */
-    protected addLevelBackgroundImage(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
+    addLevelBackgroundImage(name: string, layer: string = "primary", position: Vec2, size: Vec2 = new Vec2(1, 1), alpha: number = 1) {
         let toAdd = this.add.sprite(name, layer);
         toAdd.position.copy(position);
         toAdd.scale = GameLevel.LEVEL_SCALING.clone().mult(size);
@@ -911,6 +962,9 @@ export default class GameLevel extends Scene {
             }
             if (collider.overlapArea(tileAABB) == 0 && !this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)) {
                 if(this.placementLeft > 0){
+                    if (Input.isMouseJustPressed(0)) {
+                        this.emitter.fireEvent(GameEventType.PLAY_SFX, { key: "scribble", loop: false, holdReference: false });       
+                    }
                     this.dynamicMap.badAddTile(position, Tileset_Names.SOLID_INK);
                     if(!Home.unlimitedPlacementCheats){
                         this.placementLeft--;
@@ -921,6 +975,9 @@ export default class GameLevel extends Scene {
             // if(this.checkErasingPlatform(this.playerSpawnColRow,tile)) return;
             let colrow_toAdd = this.dynamicMap.getColRowAt(position)
             if(this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)){
+                if (Input.isMouseJustPressed(2)) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SFX, { key: "erase", loop: false, holdReference: false });
+                }
                 this.dynamicMap.badRemoveTile(position);
                 if(!Home.unlimitedPlacementCheats){
                     this.placementLeft += 1;
@@ -985,11 +1042,13 @@ export default class GameLevel extends Scene {
         // disable the trigger.
         let object = this.sceneGraph.getNode(collectableID)
         // find the object given id.
+        object.alpha = 0;
         object.disablePhysics()
         this.remove(object)
         // Check if collectable is a paper.
         if (item_type == Game_Collectables.PINK_PAPER || item_type == Game_Collectables.WHITE_PAPER) {
             this.papersCountLabel.text = "Papers Found: " + (this.whiteFound + this.pinkFound) + "/" + (this.numberPapers);
+            this.emitter.fireEvent(GameEventType.PLAY_SFX, { key: "paper_pickup", loop: false, holdReference: false });
             // If enough papers were found, then  remove the barrier to the next page.
             if (this.whiteFound + this.pinkFound == this.numberPapers) {
                 // Do something here:
