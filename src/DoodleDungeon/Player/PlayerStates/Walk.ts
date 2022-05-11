@@ -15,9 +15,9 @@ export default class Walk extends OnGround {
 		if(dir.isZero()){
 			this.finished(PlayerStates.IDLE);
 		} else {
-			if(Input.isPressed("run")){
-				this.finished(PlayerStates.RUN);
-			}
+			// if(Input.isPressed("run")){
+			// 	this.finished(PlayerStates.RUN);
+			// }
 		}
 		if(this.parent.playerType == PlayerType.TOPDOWN){
 			this.parent.velocity = dir.scale(this.parent.speed);

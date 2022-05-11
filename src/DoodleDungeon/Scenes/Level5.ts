@@ -90,7 +90,10 @@ export default class Level5 extends GameLevel {
 
     updateScene(deltaT: number): void {
         super.updateScene(deltaT); 
-        this.otherWinCondition = this.checkDrawing();
+        if(!this.gameEnd){
+            this.otherWinCondition = this.checkDrawing();
+        }
+        this.percentFilled.visible = !(this.paused || this.gameEnd);
     }
 
     setUpTileCheck() {

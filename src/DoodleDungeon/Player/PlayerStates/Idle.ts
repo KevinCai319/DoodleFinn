@@ -18,11 +18,11 @@ export default class Idle extends OnGround {
 		let dir = this.getInputDirection();
 
 		if(!dir.isZero()){
-			if(Input.isPressed("run")){
-				this.finished(PlayerStates.RUN);
-			} else {
-				this.finished(PlayerStates.WALK);
-			}
+			// if(Input.isPressed("run")){
+				// this.finished(PlayerStates.RUN);
+			// } else {
+			this.finished(PlayerStates.WALK);
+			// }
 		}
 		if(!this.parent.attacking){
 			if(this.parent.direction == -1){
