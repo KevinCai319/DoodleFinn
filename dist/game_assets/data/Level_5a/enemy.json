@@ -1,5 +1,5 @@
 {
-  "numEnemies": 4,
+  "numEnemies": 13,
   "enemies": [
     {
       "position": [416,1312],
@@ -28,6 +28,72 @@
       "guardPosition":[1056,320],
       "health": 6,
       "type": "melee_enemy"
+    },
+
+
+    {
+      "position": [1728,736],
+      "mode": "guard",
+      "guardPosition":[1728,736],
+      "health": 8,
+      "type": "charging_enemy"
+    },
+    {
+      "position": [2144,608],
+      "mode": "guard",
+      "guardPosition":[2144,608],
+      "health": 8,
+      "type": "charging_enemy"
+    },
+    {
+      "position": [1632,608],
+      "mode": "guard",
+      "guardPosition":[1632,608],
+      "health": 4,
+      "type": "melee_enemy"
+    },
+    {
+      "position": [768,992],
+      "mode": "guard",
+      "guardPosition":[768,992],
+      "health": 4,
+      "type": "melee_enemy"
+    },
+    {
+      "position": [1056,800],
+      "mode": "guard",
+      "guardPosition":[1056,800],
+      "health": 4,
+      "type": "melee_enemy"
+    },
+    {
+      "position": [96,512],
+      "mode": "guard",
+      "guardPosition":[96,512],
+      "health": 10,
+      "type": "melee_enemy"
+    },
+    {
+      "position": [1056,320],
+      "mode": "guard",
+      "guardPosition":[1056,320],
+      "health": 4,
+      "type": "charging_enemy"
+    },
+    {
+      "position": [1792,992],
+      "mode": "guard",
+      "guardPosition":[1792,992],
+      "health": 4,
+      "type": "charging_enemy"
+    },
+    {
+      "position": [1792,1056],
+      "mode": "guard",
+      "guardPosition":[1792,1056],
+      "health": 4,
+      "type": "melee_enemy"
     }
+
   ]
 }
