@@ -19,6 +19,7 @@ import GameLevel from "../Scenes/Game";
 import Timer from './../../Wolfie2D/Timing/Timer';
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import HealthBar from "../UI/HealthBar";
+import PlayerController from "../Player/PlayerController";
 
 
 export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {

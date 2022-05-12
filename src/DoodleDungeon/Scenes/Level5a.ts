@@ -30,6 +30,7 @@ export default class Level5a extends GameLevel {
         this.load.spritesheet("bullet","game_assets/spritesheets/bullet.json");
         this.load.image("turret","game_assets/spritesheets/turret.png");
         this.load.image("balloon","game_assets/spritesheets/balloon2.png");
+        this.load.image("PressE", "game_assets/spritesheets/TutorialAssets/PressE.png");
         this.load.audio("bullet_shot","game_assets/sounds/bullet.wav");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
@@ -62,9 +63,9 @@ export default class Level5a extends GameLevel {
         this.nextLevel = Level3
         this.home = Home
         this.playerSpawnColRow = new Vec2(3, 45)
-
-
-
+        this.backgroundSetup.push((layer:Layer)=>{
+            this.addLevelBackgroundImage("PressE",layer.getName(),new Vec2(28,16).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3,3));
+        })
 
         // this.turrets = [
         //     new Vec2(1,185),

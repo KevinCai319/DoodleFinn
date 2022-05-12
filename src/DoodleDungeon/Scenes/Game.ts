@@ -155,6 +155,11 @@ export default class GameLevel extends Scene {
         }
     }
 
+
+    gameEnded(): boolean {
+        return this.gameEnd;
+    }
+
     unloadCommon(): void {
         this.load.keepSpritesheet("player");
         this.load.keepSpritesheet("melee_enemy")
@@ -776,7 +781,7 @@ export default class GameLevel extends Scene {
                 if (data.type === "melee_enemy") {
                     let actionMelee = [
                         new AttackAction(3, [AI_Statuses.IN_RANGE], [AI_Statuses.REACHED_GOAL]),
-                        new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 30 })
+                        new Move(2, [], [AI_Statuses.IN_RANGE], { inRange: 32 })
                     ];
                     actions = actionMelee;
                     range = 40;

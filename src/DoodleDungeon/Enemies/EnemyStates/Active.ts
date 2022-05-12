@@ -59,7 +59,7 @@ export default class Active extends EnemyState {
 
 
         // We haven't seen the player in a while, go check out where we last saw them, if possible
-        if (this.owner.position.distanceTo(this.parent.lastPlayerPos) > this.triggerDistance* 1.5) {
+        if (this.owner.position.distanceTo(this.parent.lastPlayerPos) > this.triggerDistance* 1.5 || (this.owner.getScene() as GameLevel).gameEnded()) {
             this.finished(EnemyStates.DEFAULT);
         }
 

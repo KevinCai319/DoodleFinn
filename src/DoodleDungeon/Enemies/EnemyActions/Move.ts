@@ -36,7 +36,7 @@ export default class Move extends GoapAction {
             //If close enough, we've moved far enough and this loop action is done
             let playerBorder = (<AnimatedSprite>enemy.player).boundary
             if ((distance <= this.inRange) || playerBorder.overlaps(enemy.owner.boundary)){
-                if (!this.untilVisible || isPlayerVisible) {
+                if (!this.untilVisible || (enemy.owner.getScene() as GameLevel).dynamicMap.isVisible(enemy.owner.position, enemy.playerPos)) {
                     return this.effects;
                 }
             }
