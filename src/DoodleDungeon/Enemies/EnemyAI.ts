@@ -174,7 +174,7 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
                 this.owner.tweens.play("death")
             }  
             else {
-                this.setInvincible(250)
+                this.setInvincible(350)
             }
         }
     }

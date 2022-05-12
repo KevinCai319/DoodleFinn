@@ -1019,7 +1019,11 @@ export default class GameLevel extends Scene {
                 });
             }
         }
-
+        //process navmesh again.
+        this.dynamicMap = <DynamicTilemap>solidLayer.getItems()[0];
+        this.dynamicMap.badNavMesh();
+        this.navManager = new NavigationManager()
+        this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
         // Go through all background setup functions.
         this.backgroundSetup.forEach((func) => {
             func(backgroundLayer)
