@@ -998,6 +998,8 @@ export default class GameLevel extends Scene {
             toggles[j].animation.playIfNotAlready(this.switches[switch_id][2] ? "ON" : "OFF");
         }
         this.dynamicMap.badNavMesh();
+        this.navManager = new NavigationManager()
+        this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
     }
 
 

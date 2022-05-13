@@ -30,7 +30,6 @@ export default class Move extends GoapAction {
             let enemy = <EnemyAI>actor;
             let playerPos = enemy.lastPlayerPos;
             let distance = enemy.owner.position.distanceTo(playerPos);
-
             let isPlayerVisible = (enemy.owner.getScene() as GameLevel).dynamicMap.canAABBgoToPoint(enemy.owner.boundary,enemy.playerPos)
 
             //If close enough, we've moved far enough and this loop action is done

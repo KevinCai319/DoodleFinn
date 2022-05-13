@@ -5,6 +5,7 @@ import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Level5a from "./Level5a";
 import { Tileset_Names } from "../Events";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
+import Layer from "../../Wolfie2D/Scene/Layer";
 
 export default class Level2 extends GameLevel {
     LEVEL_NAME: string = "Level_2"
@@ -18,6 +19,10 @@ export default class Level2 extends GameLevel {
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
         this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Level2_EndArt.png");
+        this.load.image("tictac","game_assets/spritesheets/Level2-TicTac.png");
+        this.load.image("test","game_assets/spritesheets/Level2-Scantron.png");
+        this.load.image("hangman","game_assets/spritesheets/Level2-Hangman.png");
+
     }
 
     // DoodleFinn TODO
@@ -46,6 +51,12 @@ export default class Level2 extends GameLevel {
         this.nextLevel = Level5a;
         this.home = Home
         this.playerSpawnColRow = new Vec2(7, 40)
+        this.backgroundSetup.push((layer:Layer)=>{
+            this.addLevelBackgroundImage("tictac",layer.getName(),new Vec2(22.5,28).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(4,4))
+            this.addLevelBackgroundImage("test",layer.getName(),new Vec2(49.5,24).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3.1,3.1))
+            this.addLevelBackgroundImage("hangman",layer.getName(),new Vec2(22.5,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(4,4))
+
+        })
         // Do generic setup for a GameLevel
         super.startScene();
         //read in foreground layer.
@@ -79,15 +90,6 @@ export default class Level2 extends GameLevel {
             }
             i++;
         })
-        // if(result){
-        //     //Go through the make_sure empty array.
-        //     for(let i = 0; i < this.MAKE_SURE_EMPTY.length; i++){
-        //         if(this.dynamicMap.isTileCollidable(this.MAKE_SURE_EMPTY[i].x,this.MAKE_SURE_EMPTY[i].y)){
-        //             this.otherWinCondition = false;
-        //             return false;
-        //         }
-        //     }
-        // }
         this.otherWinCondition = true;
         return true;
     }

@@ -106,7 +106,7 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
             effects:[
                 {
                     property: "alpha",
-                    start: 1,
+                    start: 0.7,
                     end: 0,
                     ease: EaseFunctionType.IN_SINE
 
@@ -199,6 +199,7 @@ export default class EnemyAI extends StateMachineGoapAI implements BattlerAI {
         if(this.invincible && this.invincibleTimer.isStopped()){
             this.invincible = false
             this.owner.tweens.stop("iframe");
+            this.owner.alpha = 1;
         }
         if(this.attacking && this.attackTimer.isStopped()){
             this.attacking = false
