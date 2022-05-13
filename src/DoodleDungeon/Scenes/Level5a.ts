@@ -35,6 +35,7 @@ export default class Level5a extends GameLevel {
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
         this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Level5a_EndArt.png");
+        this.load.image("pauseArt", "game_assets/spritesheets/Level_Layout/Level_5a.png")
     }
 
     // DoodleFinn TODO

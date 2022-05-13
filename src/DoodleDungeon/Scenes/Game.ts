@@ -47,6 +47,7 @@ export default class GameLevel extends Scene {
     // Dynamic maps are used for handling pathfinding and collision.
     dynamicMap: DynamicMap;
     protected paused: boolean = false;
+    protected pauseArt: Sprite = null;
     protected gameEnd: boolean = false;
 
 
@@ -121,6 +122,8 @@ export default class GameLevel extends Scene {
     protected home: new (...args: any) => GameLevel;
     protected compass: Sprite;
     static firstLoad: boolean = true;
+
+
     protected tile_drawn_count: number = 0;
     protected tile_total_count: number = 0;
     protected REQUIRED_TILES: Array<{"tiles": Array<Vec2>,"count":number, "antiTiles": Array<Vec2>,"completed":boolean}> = [];
@@ -383,6 +386,9 @@ export default class GameLevel extends Scene {
                             this.enemies.forEach(enemy => {
                                 enemy.freeze();
                             });
+                            if(this.pauseArt != null){
+                                this.pauseArt.visible = true;
+                            }
 
                         }else{
                             //unfreeze the game.
@@ -394,6 +400,9 @@ export default class GameLevel extends Scene {
                             this.enemies.forEach(enemy => {
                                 enemy.unfreeze();
                             });
+                            if(this.pauseArt != null){
+                                this.pauseArt.visible = false;
+                            }
                         }
                     }
                     break;
@@ -647,6 +656,13 @@ export default class GameLevel extends Scene {
         });
 
 
+        try{
+            this.pauseArt = this.add.sprite("pauseArt","UI");
+            this.pauseArt.position = this.pauseArt.boundary.getHalfSize().clone();
+            this.pauseArt.visible = false;
+        }catch{
+            
+        }
         // Pause button setup.
         let halfViewport = this.viewport.getHalfSize();
         let pauseButton = <Button>this.add.uiElement(UIElementType.BUTTON, "UI", { position: new Vec2(halfViewport.x * 2-34, halfViewport.y*2-34), text: "Pause" });

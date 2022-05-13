@@ -32,6 +32,7 @@ export default class Level6 extends GameLevel {
         this.load.audio("bullet_shot","game_assets/sounds/bullet.wav");
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
+        this.load.image("pauseArt", "game_assets/spritesheets/Level_Layout/Level_6.png")
     }
 
     // DoodleFinn TODO
@@ -57,8 +58,6 @@ export default class Level6 extends GameLevel {
         this.nextLevel = null
         this.home = Home
         this.playerSpawnColRow = new Vec2(1, 197)
-
-
 
 
         this.turrets = [
@@ -101,6 +100,8 @@ export default class Level6 extends GameLevel {
         });
         // Do generic setup for a GameLevel
         super.startScene();
+        this.pauseArt.scale=new Vec2(0.7,0.7);
+        this.pauseArt.position = this.pauseArt.boundary.getHalfSize().clone();
         //Create object pool for bullets.
         this.bullets = []
         for (let i = 0; i < 100; i++) {

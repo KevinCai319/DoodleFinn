@@ -27,6 +27,7 @@ export default class DemoLevel extends GameLevel {
         this.load.image("InstEnd", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-End.png");
         this.load.image("InstAttack2", "game_assets/spritesheets/TutorialAssets/Instruction/Instruction-Attack2.png");
         this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Tutorial_EndArt.png");
+        this.load.image("pauseArt", "game_assets/spritesheets/Level_Layout/Level_0.png")
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/"+this.LEVEL_NAME+"/enemy.json");
     }
@@ -74,7 +75,7 @@ export default class DemoLevel extends GameLevel {
         })
         // Do generic setup for a GameLevel
         super.startScene();
-
+        this.pauseArt.visible = false;
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "level_music", loop: true, holdReference: true});
 
         // Cheats.

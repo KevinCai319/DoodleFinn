@@ -22,6 +22,7 @@ export default class Level2 extends GameLevel {
         this.load.image("tictac","game_assets/spritesheets/Level2-TicTac.png");
         this.load.image("test","game_assets/spritesheets/Level2-Scantron.png");
         this.load.image("hangman","game_assets/spritesheets/Level2-Hangman.png");
+        this.load.image("pauseArt", "game_assets/spritesheets/Level_Layout/Level_2.png")
 
     }
 
@@ -50,11 +51,12 @@ export default class Level2 extends GameLevel {
         // Add the Demo Level.
         this.nextLevel = Level5a;
         this.home = Home
-        this.playerSpawnColRow = new Vec2(7, 40)
+        this.playerSpawnColRow = new Vec2(5, 40)
         this.backgroundSetup.push((layer:Layer)=>{
-            this.addLevelBackgroundImage("tictac",layer.getName(),new Vec2(22.5,28).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(4,4))
+            let tictac =this.addLevelBackgroundImage("tictac",layer.getName(),new Vec2(22.5,28).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(4,4))
+            tictac.rotation += -1+(2*Math.random())
             this.addLevelBackgroundImage("test",layer.getName(),new Vec2(49.5,24).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(3.1,3.1))
-            this.addLevelBackgroundImage("hangman",layer.getName(),new Vec2(22.5,5).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(4,4))
+            this.addLevelBackgroundImage("hangman",layer.getName(),new Vec2(22.5,6).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(4,4))
 
         })
         // Do generic setup for a GameLevel

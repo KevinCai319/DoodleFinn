@@ -11,6 +11,7 @@ import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Color from "../../Wolfie2D/Utils/Color";
 import Level2 from "./Level2";
+import PlayerController from "../Player/PlayerController";
 
 export default class Level4 extends GameLevel {
     LEVEL_NAME: string = "Level_4"
@@ -27,6 +28,7 @@ export default class Level4 extends GameLevel {
         // Load in the enemy info
         this.load.object("enemyData", "game_assets/data/" + this.LEVEL_NAME + "/enemy.json");
         this.load.image("art", "game_assets/spritesheets/LevelEnd/Congratulations/Level4_EndArt.png");
+        this.load.image("pauseArt", "game_assets/spritesheets/Level_Layout/Level_4.png")
     }
 
     // DoodleFinn TODO
@@ -64,7 +66,6 @@ export default class Level4 extends GameLevel {
 
         // Do generic setup for a GameLevel
         super.startScene();
-
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "level_music", loop: true, holdReference: true });
         this.papersCountLabel.visible=false;
 
