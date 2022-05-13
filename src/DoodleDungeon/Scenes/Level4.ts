@@ -15,10 +15,6 @@ import Level2 from "./Level2";
 export default class Level4 extends GameLevel {
     LEVEL_NAME: string = "Level_4"
     LEVEL_TILESET: string = "Level_4"
-
-    DRAWING_LAYER: DynamicTilemap
-    OUTLINE_LAYER: DynamicTilemap
-    REQUIRED_TILES: Array<Vec2> = [];
     orig_cheat:boolean = false;
     percentFilled:Label =null;
 
@@ -66,13 +62,8 @@ export default class Level4 extends GameLevel {
         //Change win condition (will only win if all paper is collected)
         this.paperRequired = false;
 
-        
-
         // Do generic setup for a GameLevel
         super.startScene();
-
-        //Get tilelayers for checking the drawing
-        this.setUpTileCheck();
 
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "level_music", loop: true, holdReference: true });
         this.papersCountLabel.visible=false;
@@ -81,6 +72,7 @@ export default class Level4 extends GameLevel {
         this.percentFilled.textColor = Color.RED;
         this.percentFilled.backgroundColor = new Color(32, 32, 32, 0.5);
         this.percentFilled.font = "PixelSimple";
+        this.checkDrawing();
         // GameLevel.otherWinCondition = true;
         // Home.unlimitedPlacementCheats = this.orig_cheat;
         let instr = this.addLevelBackgroundImage("Level4Instr","primary",new Vec2(6,27).mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE),new Vec2(1,1))
@@ -90,59 +82,15 @@ export default class Level4 extends GameLevel {
 
     updateScene(deltaT: number): void {
         super.updateScene(deltaT); 
-        if(!this.gameEnd){
-            this.otherWinCondition = this.checkDrawing();
-        }
         this.percentFilled.visible = !(this.paused || this.gameEnd);
     }
-
-    setUpTileCheck() {
-        //Get layers for checking the drawing
-        let tilemapLayers = this.tilemaps;
-        console.log(tilemapLayers);
-
-        for (let i = 0; i < tilemapLayers.length; i += 1) {
-            let name = tilemapLayers[i].name;
-            if (name == "Foreground") {
-                this.OUTLINE_LAYER = <DynamicTilemap>tilemapLayers[i]
-            } else if (name == "Platforms") {
-                this.DRAWING_LAYER = <DynamicTilemap>tilemapLayers[i]
-            }
-        }
-        console.log(this.OUTLINE_LAYER);
-        console.log(this.DRAWING_LAYER);
-
-        let dimensions = this.OUTLINE_LAYER.getDimensions();
-
-        for (var x = 0; x < dimensions.x; x++) {
-            for (var y = 0; y < dimensions.y; y++) {
-                //Check if the current tile is an outline tile
-                let outline_tile = this.OUTLINE_LAYER.getTileAtRowCol(new Vec2(x, y));
-                if (outline_tile == 0) continue; //Skip if not
-                this.REQUIRED_TILES.push(new Vec2(x, y));
-            }
-        }
-        console.log(dimensions.x * dimensions.y);
-        console.log(this.REQUIRED_TILES.length);
-    }
-
+    
     //Test if the player's drawing matches the outline
-    checkDrawing() {
-        // let finished = false;
-        let total = 0;
-        let count = 0;
-        for (let vec of this.REQUIRED_TILES) {
-            total += 1;
-            //If current tile is a outline tile, but the player has not drawn on this tile, stop checking
-            let drawing_tile = this.DRAWING_LAYER.getTileAtRowCol(vec);
-            // console.log(drawing_tile);
-            if (drawing_tile != 0){
-                count += 1;
-            }
-        }
+    checkDrawing():boolean{
+        let result = super.checkDrawing();
         //update label.
-        this.percentFilled.text = "Image Drawn:"+ count + "/" + total;
-        return count == total;
+        this.percentFilled.text = "Image Drawn:"+ this.tile_drawn_count + "/" + this.tile_total_count;
+        return result;
     }
     
     protected goToMenu(): void {

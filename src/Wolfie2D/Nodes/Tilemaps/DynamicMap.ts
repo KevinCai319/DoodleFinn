@@ -149,6 +149,13 @@ export default class DynamicTilemap extends OrthogonalTilemap {
         return false;
         
     }
+    fastAddTileColRow(colRow: Vec2,type:number,override:boolean = false): boolean {
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,type);
+            return true;
+        }
+        return false;
+    }
 
     badRemoveTile(location: Vec2,override:boolean = false): boolean{
         let colRow = this.getColRowAt(location);
@@ -167,6 +174,14 @@ export default class DynamicTilemap extends OrthogonalTilemap {
             this.setTileAtRowCol(colRow,0);
             //remove the tile, update navmesh accordingly.
             this.badNavMesh()
+            return true;
+        }
+        return false;
+    }
+
+    fastRemoveTileColRow(colRow: Vec2,override:boolean = false): boolean{
+        if(this.editMap[colRow.x+colRow.y*this.numCols] || override){
+            this.setTileAtRowCol(colRow,0);
             return true;
         }
         return false;

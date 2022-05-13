@@ -105,7 +105,7 @@ export default class GameLevel extends Scene {
     protected switches:Array<[Array<AnimatedSprite>,Array<Vec2>,boolean,number]> = []
 
     //Other levels may require a different win condition. If fufilled, that Level.ts will end the level
-    protected otherWinCondition: boolean = false;
+    protected otherWinCondition: boolean = true;
 
     //Timer used to determine time it takes to finish the level.
     protected levelTimer: Timer;
@@ -121,6 +121,9 @@ export default class GameLevel extends Scene {
     protected home: new (...args: any) => GameLevel;
     protected compass: Sprite;
     static firstLoad: boolean = true;
+    protected tile_drawn_count: number = 0;
+    protected tile_total_count: number = 0;
+    protected REQUIRED_TILES: Array<{"tiles": Array<Vec2>,"count":number, "antiTiles": Array<Vec2>,"completed":boolean}> = [];
     loadScene(loadUI?:boolean): void {
         if(GameLevel.firstLoad){
             GameLevel.firstLoad = false;
@@ -144,6 +147,8 @@ export default class GameLevel extends Scene {
             this.load.audio("scribble", "game_assets/sounds/scribble.wav")
             this.load.audio("erase", "game_assets/sounds/erase.wav")
             this.load.audio("paper_pickup", "game_assets/sounds/paper_pickup.wav")
+            this.load.audio("toggle_switch", "game_assets/sounds/toggle_switch.wav")
+            this.load.audio("puzzle-unlocked", "game_assets/sounds/puzzle-unlocked.wav")  
 
         }
         //Stuff used when you are in a level
@@ -151,6 +156,7 @@ export default class GameLevel extends Scene {
             this.load.image("pencil", "game_assets/spritesheets/Pencil.png");
             this.load.image("heart", "game_assets/spritesheets/Full_Heart.png");
             this.load.image("half_heart", "game_assets/spritesheets/Half_Heart.png");
+            this.load.image("background_health_bar", "game_assets/spritesheets/HP_Background.png");
             this.load.image("Compass", "game_assets/spritesheets/Compass.png");
         }
     }
@@ -188,6 +194,8 @@ export default class GameLevel extends Scene {
         this.load.keepAudio("scribble")
         this.load.keepAudio("erase")
         this.load.keepAudio("paper_pickup")
+        this.load.keepAudio("toggle_switch")
+        this.load.keepAudio("puzzle-unlocked")  
     }
     startScene(): void {
         this.gameEnd = false;
@@ -207,8 +215,9 @@ export default class GameLevel extends Scene {
             this.playerSpawnColRow.x * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x,
             this.playerSpawnColRow.y * GameLevel.DEFAULT_LEVEL_TILE_SIZE.y);
         this.initPlayer(this.playerScale);
-        this.subscribeToEvents();
         this.addUI();
+        this.subscribeToEvents();
+        
         this.initializeEnemies();
         
         this.cursor = this.addLevelAnimatedSprite("cursor", "primary", Input.getGlobalMousePosition())
@@ -286,9 +295,9 @@ export default class GameLevel extends Scene {
                 this.pauseButton.alpha = 0.1;
             }
             if (this.pauseButton.visible && (Input.isKeyJustPressed("p") || Input.isKeyJustPressed("escape"))) {
-            this.pauseButton.onClick()
+                this.pauseButton.onClick()
             }
-
+            let modified = false;
             //check if the "e" key is pressed.
             if (Input.isKeyJustPressed("e")) {
                 //check through all switches.
@@ -297,27 +306,15 @@ export default class GameLevel extends Scene {
                     let toggled = false;
                     for(let j = 0; j < toggles.length; j++){
                         if(this.player.boundary.overlaps(toggles[j].boundary)){
-                            this.switches[i][2] = !this.switches[i][2];
                             toggled = true;
                             break;
                         }
                     }
                     if(toggled){
-                        let results = this.switches[i][1];
-                        if(this.switches[i][2]){
-                            for(let j = 0; j < results.length; j++){
-                                this.dynamicMap.badAddTileColRow(results[j],this.switches[i][3],true);
-                            }
-                        }else{
-                            for(let j = 0; j < results.length; j++){
-                                this.dynamicMap.badRemoveTileColRow(results[j],true);
-                            }
-                        }
-                        for(let j = 0; j < toggles.length; j++){
-                            toggles[j].animation.playIfNotAlready(this.switches[i][2] ? "ON" : "OFF");
-                        }
+                        //play the sound.
+                        this.emitter.fireEvent(GameEventType.PLAY_SFX,{key: "toggle_switch", loop: false, holdReference: false});
+                        this.toggleSwitch(i);
                     }
-
                 }
             }
             // this.updateHealthBar();
@@ -347,15 +344,18 @@ export default class GameLevel extends Scene {
                     // TODO: Add limits to how far the player can click from their body.
                     if (Input.isMousePressed(0)) {
                         // Add tile (Left Click)
-                        this.updateLevelGeometry(Input.getGlobalMousePosition(), 0)
+                        modified = modified || this.updateLevelGeometry(Input.getGlobalMousePosition(), 0)
                     }
                     if (Input.isMousePressed(2)) {
                         // Remove tile (Right Click)
-                        this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
+                        modified = modified || this.updateLevelGeometry(Input.getGlobalMousePosition(), 2)
                     }
                 }
             } else {
                 this.cursor.alpha = 0;
+            }
+            if(modified){
+                this.otherWinCondition = this.checkDrawing();
             }
         }else{
             //check for mouse click.
@@ -444,7 +444,7 @@ export default class GameLevel extends Scene {
                         // Check if the player has collected all the collectibles.
                         // TODO: make this less rigid.
                         if(this.levelEndTimer.isStopped() && !this.gameEnd){
-                            if ((this.paperRequired && this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite && !this.gameEnd) || this.otherWinCondition) {
+                            if ((!this.paperRequired || this.pinkFound == this.numberPink && this.whiteFound == this.numberWhite) && this.otherWinCondition) {
                                 this.gameEnd = true;
                                 //disable pause button.
                                 this.pauseButton.visible = false;
@@ -552,11 +552,29 @@ export default class GameLevel extends Scene {
      * Adds in any necessary UI to the game
      */
     protected addUI() {
+        // Add in 
+        try{
+            let HP_FRACTION_SCALING = new Vec2(0.18,0.16);
+            //Add in background health.
+            let backgroundSprite = this.add.sprite("background_health_bar","UI");
+            // backgroundSprite.rotation = -Math.PI/2;
+            //rescale the sprite to HP_FRACTION_SCALING of the viewport's dimensions, and put it in the top left corner.
+
+            let new_dimensions = this.viewport.getHalfSize().clone().mult(HP_FRACTION_SCALING)
+            let scale_factor = new_dimensions.clone().div(backgroundSprite.boundary.getHalfSize().clone());
+            backgroundSprite.scale = scale_factor;
+            backgroundSprite.position = new_dimensions.clone();
+            backgroundSprite.positionY = this.viewport.getHalfSize().y*2- backgroundSprite.boundary.getHalfSize().y;
+            // backgroundSprite.
+        }catch{
+            console.log("No background health bar");
+        }
         // Lives Count Label. TODO: Make this using sprites.)
-        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(50, 30), text: "Lives: " + this.livesCount });
+        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(60, this.viewport.getHalfSize().y*2 - 65), text: "Lives: " + ((Home.unlimitedLives)?"∞":this.livesCount.toString()) });
         this.livesCountLabel.textColor = Color.RED;
-        this.livesCountLabel.backgroundColor = new Color(32, 32, 32, 0.5);
+        this.livesCountLabel.backgroundColor = new Color(32, 32, 32, 0);
         this.livesCountLabel.font = "PixelSimple";
+        (this.player._ai as PlayerController).initializeHealthBar();
 
         // this.setupHealthBar();
         // this.updateHealthBar();
@@ -627,6 +645,7 @@ export default class GameLevel extends Scene {
             ],
             onEnd: Game_Events.LEVEL_START
         });
+
 
         // Pause button setup.
         let halfViewport = this.viewport.getHalfSize();
@@ -902,6 +921,87 @@ export default class GameLevel extends Scene {
         return toAdd;
     }
 
+
+    setUpTileCheck(map: OrthogonalTilemap) {
+        //Get layers for checking the drawing
+        let drawLayer = map
+        let arr:Array<Vec2> = [];
+        let fakeArr:Array<Vec2> = [];
+        if(drawLayer != null){
+            //there is another win condition, so therefore, it is not fulfilled.
+            this.otherWinCondition = false;
+            this.processTileLayer(drawLayer, (tile: number, i: number, j: number) => {
+                switch (tile) {
+                    case 0:
+                        break;
+                    case Tileset_Names.FAKE_OUTLINE_INK:
+                        drawLayer.setTileAtRowCol(new Vec2(i, j), 115);
+                        fakeArr.push(new Vec2(i, j));
+                        break;
+                    default:
+                        arr.push(new Vec2(i, j));
+                        break;
+                }
+            })
+        }
+        this.REQUIRED_TILES.push({"tiles":arr,"count":0,"antiTiles":fakeArr,"completed": false});
+    }
+
+    checkDrawing():boolean{
+        if(this.REQUIRED_TILES == null || this.REQUIRED_TILES.length == 0) return true;
+        let count = 0;
+        let total = 0;
+        for(let group of this.REQUIRED_TILES){
+            let groupCount = 0;
+            for (let vec of group.tiles) {
+                total++;
+                //If current tile is a outline tile, but the player has not drawn on this tile, stop checking
+                let drawing_tile = this.dynamicMap.getTileAtRowCol(vec);
+                // console.log(drawing_tile);
+                if (drawing_tile != 0){
+                    count += 1;
+                    groupCount += 1;
+                }
+            }
+            group.completed = groupCount == group.tiles.length;
+            group.count = groupCount;
+            if(group.antiTiles != null && group.antiTiles.length > 0 && group.completed){
+                for (let vec of group.antiTiles) {
+                    let drawing_tile = this.dynamicMap.getTileAtRowCol(vec);
+                    if (drawing_tile != 0){
+                        group.completed = false;
+                        break;
+                    }
+                }
+            }
+        }
+        this.tile_drawn_count = count;
+        this.tile_total_count = total;
+        return count == total;
+    }
+
+    toggleSwitch(switch_id: number) :boolean{
+        if(this.switches == null || this.switches[switch_id] == null) return false;
+        this.switches[switch_id][2] = !this.switches[switch_id][2];
+        let results = this.switches[switch_id][1];
+        if(this.switches[switch_id][2]){
+            for(let j = 0; j < results.length; j++){
+                this.dynamicMap.fastAddTileColRow(results[j],this.switches[switch_id][3],true);
+            }
+        }else{
+            for(let j = 0; j < results.length; j++){
+                this.dynamicMap.fastRemoveTileColRow(results[j],true);
+            }
+        }
+        let toggles = this.switches[switch_id][0];
+        for(let j = 0; j < toggles.length; j++){
+            toggles[j].animation.playIfNotAlready(this.switches[switch_id][2] ? "ON" : "OFF");
+        }
+        this.dynamicMap.badNavMesh();
+    }
+
+
+    
     /**
      * Processes level data given reference to tilemap.
      * @param level_id The tilemap to process.
@@ -929,6 +1029,9 @@ export default class GameLevel extends Scene {
                 animatedLayer = tilemapLayers[i]
             } else if (name == "Background") {
                 backgroundLayer = tilemapLayers[i]
+            } else if (name.includes("ToDraw")){
+                let drawTiles = <OrthogonalTilemap>tilemapLayers[i].getItems()[0]
+                this.setUpTileCheck(drawTiles);
             } else if (name.includes("SwitchGroup")) {
                 //process it right now.
                 let switchTiles = <OrthogonalTilemap>tilemapLayers[i].getItems()[0]
@@ -1028,7 +1131,6 @@ export default class GameLevel extends Scene {
         this.backgroundSetup.forEach((func) => {
             func(backgroundLayer)
         })
-
         // add physics to end level blocks.
         if (animatedLayer !== null) {
             let animatedTiles = <OrthogonalTilemap>animatedLayer.getItems()[0]
@@ -1111,10 +1213,10 @@ export default class GameLevel extends Scene {
      *              0: add tile
      *              1: delete tile
      **/
-    protected updateLevelGeometry(position: Vec2, mode: number = 0): void {
+    protected updateLevelGeometry(position: Vec2, mode: number = 0): boolean {
         // Check if the click position if out of bounds of the level.
         if (this.dynamicMap.getTileAtWorldPosition(position) == -1) {
-            return;
+            return false;
         }
 
         //find the tile coordinates closest to the cursor.
@@ -1123,7 +1225,7 @@ export default class GameLevel extends Scene {
 
         //prevent edits to spawn.(blocked area is a circle of radius 2)
         if (tileAABB.center.distanceTo(this.playerSpawnColRow.clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE)) < 2 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x) {
-            return;
+            return false;
         }
 
         if (mode == 0) {
@@ -1135,7 +1237,7 @@ export default class GameLevel extends Scene {
                 for (let i = 0; i < this.enemies.length; i++) {
                     if((this.enemies[i]._ai as EnemyAI).health  <=0) continue;
                     let colrow_enemy = this.dynamicMap.getColRowAt(this.enemies[i].position)
-                    if (colrow_enemy.distanceTo(colrow_toAdd) < 1) return
+                    if (colrow_enemy.distanceTo(colrow_toAdd) < 1) return false
                 }
             }
             if (collider.overlapArea(tileAABB) == 0 && !this.dynamicMap.isTileCollidable(colrow_toAdd.x, colrow_toAdd.y)) {
@@ -1147,8 +1249,14 @@ export default class GameLevel extends Scene {
                         if(!Home.unlimitedPlacementCheats){
                             this.placementLeft--;
                         }
+                    }else{
+                        return false;
                     }
+                }else{
+                    return false;
                 }
+            }else{
+                return false;
             }
         } else {
             // if(this.checkErasingPlatform(this.playerSpawnColRow,tile)) return;
@@ -1163,11 +1271,16 @@ export default class GameLevel extends Scene {
                         if(this.placementLeft> GameLevel.MAX_BLOCKS)
                             this.placementLeft = GameLevel.MAX_BLOCKS;
                     }
+                }else{
+                    return false;
                 }
+            }else{
+                return false;
             }
         }
         this.navManager = new NavigationManager()
         this.navManager.addNavigableEntity("navmesh", this.dynamicMap.navmesh);
+        return true;
     }
 
     /**
@@ -1246,7 +1359,7 @@ export default class GameLevel extends Scene {
             if(amt <0)amt = 0;
         }
         this.livesCount += amt;
-        this.livesCountLabel.text = "Lives: " + this.livesCount;
+        this.livesCountLabel.text = "Lives: " + ((Home.unlimitedLives)?"∞":this.livesCount.toString())  ;
         if (this.livesCount <= 0) {
             Input.disableInput();
             this.player.disablePhysics();

@@ -71,7 +71,7 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.health = this.MAX_HEALTH;
         this.hasBalloon = false;
         this.balloon = null;
-        this.healthBar = new HealthBar(this.owner.getScene() as GameLevel, "UI", this, this.MAX_HEALTH, new Vec2(30, this.owner.getScene().getViewport().getHalfSize().y * 2 - 30), true, 33, new Vec2(0.1, 0.1));
+        // this.healthBar = new HealthBar(this.owner.getScene() as GameLevel, "UI", this, this.MAX_HEALTH, new Vec2(30, this.owner.getScene().getViewport().getHalfSize().y * 2 - 30), true, 33, new Vec2(0.1, 0.1));
         let boundary = (<AnimatedSprite>this.owner).boundary
         this.ATTACK_AREA = new Vec2(boundary.hw * 1.5, boundary.hh * 2)
         this.setInvincible();
@@ -118,6 +118,10 @@ export default class PlayerController extends StateMachineAI implements BattlerA
         this.receiver.subscribe(Game_Events.PLAYER_BALLOON_POPPED);
         this.receiver.subscribe(Game_Events.PLAYER_BALLOON_PICKED_UP);
         (<AnimatedSprite>this.owner).animation.playIfNotAlready("Idle Left", true);
+    }
+    
+    initializeHealthBar(){
+        this.healthBar = new HealthBar(this.owner.getScene() as GameLevel, "UI", this, this.MAX_HEALTH, new Vec2(30, this.owner.getScene().getViewport().getHalfSize().y * 2 - 30), true, 33, new Vec2(0.1, 0.1));  
     }
     setInvincible(duration: number = 500) {
         this.invincibleTimer.start(duration);
