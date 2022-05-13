@@ -312,7 +312,7 @@ export default class GameLevel extends Scene {
                     }
                     if(toggled){
                         //play the sound.
-                        this.emitter.fireEvent(GameEventType.PLAY_SFX,{key: "toggle_switch", loop: false, holdReference: false});
+                        this.emitter.fireEvent(GameEventType.PLAY_SOUND,{key: "toggle_switch", loop: false, holdReference: false});
                         this.toggleSwitch(i);
                     }
                 }

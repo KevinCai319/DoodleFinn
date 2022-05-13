@@ -98,7 +98,6 @@ export default class Home extends GameLevel {
         this.load.image("OFF", "game_assets/spritesheets/TutorialAssets/TOGGLE_OFF.png");
 
         this.load.audio("menu_music", "game_assets/music/doodlefinn_main.wav")
-        this.load.audio("toggle_switch", "game_assets/sounds/toggle_switch.wav")
     }
 
     // DoodleFinn TODO
