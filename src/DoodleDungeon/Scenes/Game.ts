@@ -1242,9 +1242,9 @@ export default class GameLevel extends Scene {
         let tileAABB = new AABB(tile.clone().add(new Vec2(0.5, 0.5)).clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE), GameLevel.DEFAULT_LEVEL_TILE_SIZE.clone().scale(0.5));
 
         //prevent edits to spawn.(blocked area is a circle of radius 2)
-        if (tileAABB.center.distanceTo(this.playerSpawnColRow.clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE)) < 2 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x) {
-            return false;
-        }
+        // if (tileAABB.center.distanceTo(this.playerSpawnColRow.clone().mult(GameLevel.DEFAULT_LEVEL_TILE_SIZE)) < 2 * GameLevel.DEFAULT_LEVEL_TILE_SIZE.x) {
+        //     return false;
+        // }
 
         if (mode == 0) {
             //get the collider of the player in the level.
